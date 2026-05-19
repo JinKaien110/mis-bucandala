@@ -1,0 +1,44 @@
+@import "tailwindcss/utilities";
+
+
+/* ✅ Disable Tailwind reset that breaks Bootstrap */
+@layer base {
+  * { all: revert-layer; }
+}
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+
+/* === PROPOSED GLOBAL BACKGROUND (OPTION 1) === */
+body {
+  background: linear-gradient(135deg, #f4fbf6 0%, #e9f5ee 100%);
+  min-height: 100vh;
+}
+
+/* subtle texture overlay (very light) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(#dfeee5 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* make sure app content stays above background */
+#app,
+.container,
+.container-fluid {
+  position: relative;
+  z-index: 1;
+}

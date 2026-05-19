@@ -1,0 +1,481 @@
+    :root{
+      --mis-blue: #1055C9;
+      --mis-blue-2: #0d47a1;
+      --mis-yellow: #FEEE91;
+      --mis-black: #111;
+      --mis-white: #fff;
+    }
+
+    /* Round icon button centering */
+    .btn.rounded-circle {
+      padding: 0 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .btn.rounded-circle i {
+      line-height: 1 !important;
+    }
+    /* ===========================
+   Fancy app background (SAFE)
+   =========================== */
+
+/* Body background layer */
+.admin-body{
+  min-height: 100vh; 
+  background:
+    radial-gradient(900px 420px at 18% 8%, rgba(16,85,201,.16), transparent 60%),
+    radial-gradient(700px 380px at 92% 18%, rgba(254,238,145,.22), transparent 55%),
+    linear-gradient(135deg, rgb(239, 246, 255) 0%, rgb(224, 231, 255) 100%);
+}
+
+/* Ensure sidebar remains solid and readable */
+.sidebar{
+  position: sticky;
+  z-index: 10;
+}
+
+/* Main content area */
+.content{
+  position: relative;
+  flex: 1;
+  padding: 18px;
+  background: transparent; /* IMPORTANT: let body bg show */
+ 
+   z-index: 1;
+}
+
+/* Extra subtle texture on content */
+.content::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none; /* ✅ won't block clicks */
+  opacity:.40;
+  background-image: radial-gradient(rgba(16,85,201,.14) 1px, transparent 1px);
+  background-size: 26px 26px;
+   z-index: 1;
+}
+
+/* Soft blobs on content with animation */
+.content::after{
+  content:"";
+  position:absolute;
+  inset:-120px;
+  z-index: 1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(16,85,201,.18), transparent 55%),
+    radial-gradient(circle at 85% 15%, rgba(254,238,145,.2), transparent 55%);
+  filter: blur(14px);
+  animation: pulseAdmin 8s ease-in-out infinite;
+}
+
+@keyframes pulseAdmin {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+
+
+/* Optional: if your pages already use container, this makes it feel premium */
+/* ✅ One clean page wrapper only */
+.content .page-surface{
+  background: rgba(255,255,255,.62);
+  border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 18px 40px rgba(0,0,0,.06);
+  border-radius: 18px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 16px;
+}
+
+
+
+    .app{ min-height:100vh; display:flex; }
+
+    /* Sidebar */
+    .sidebar{
+      width: 295px;
+      background: linear-gradient(180deg, var(--mis-blue), var(--mis-blue-2));
+      color: var(--mis-white);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 16px 14px;
+      overflow-y:auto;
+    }
+
+    /* ===============================
+   Fancy Sidebar Scrollbar
+   =============================== */
+
+/* Chrome, Edge, Safari */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(254, 238, 145, 0.9); /* yellow accent */
+}
+
+/* Firefox */
+.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.35) transparent;
+}
+
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.14);
+      margin-bottom: 14px;
+    }
+    .brand-badge{
+      width:40px; height:40px; border-radius: 12px;
+      background: var(--mis-yellow);
+      color: var(--mis-black);
+      display:grid; place-items:center;
+      font-weight:900;
+      box-shadow: 0 8px 20px rgba(0,0,0,.18);
+    }
+    .brand-title{ line-height:1.1; }
+    .brand-title .name{ font-weight:900; letter-spacing:.3px; }
+    .brand-title .sub{ font-size:.85rem; opacity:.85; }
+
+    /* Section button */
+    .section-btn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.92);
+      font-weight:800;
+      text-decoration:none;
+      transition: .15s ease;
+    }
+    .section-btn:hover{
+      background: rgba(255,255,255,.12);
+      color: #fff;
+    }
+    .chev{
+      transition: transform .15s ease;
+      opacity:.9;
+    }
+    .section-btn[aria-expanded="true"] .chev{
+      transform: rotate(180deg);
+    }
+
+    .section-label{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      opacity:.85;
+      padding: 12px 10px 6px;
+    }
+
+    /* Links */
+    .side-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: rgba(255,255,255,.92);
+      text-decoration:none;
+      transition: .15s ease;
+      font-weight:650;
+    }
+    .side-link:hover{
+      background: rgba(255,255,255,.12);
+      color: #fff;
+    }
+    .side-link.active{
+      background: var(--mis-yellow);
+      color: var(--mis-black);
+      box-shadow: 0 10px 20px rgba(0,0,0,.12);
+    }
+    .side-link .meta{
+      font-size:.78rem;
+      opacity:.85;
+      font-weight:800;
+    }
+
+    /* Content */
+    .content{ flex:1; padding: 18px; }
+
+    .topbar{
+      background:#fff;
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.04);
+      margin-bottom: 14px;
+    }
+    .page-title{ font-weight:900; margin:0; font-size: 1.05rem; }
+    .crumb{ font-size:.85rem; color:#6c757d; }
+
+    /* Mobile */
+    @media (max-width: 991px){
+      .sidebar{
+        position: fixed;
+        left: 0; top: 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        z-index: 1050;
+        width: 295px;
+      }
+      .sidebar.show{ transform: translateX(0); }
+      .sidebar-backdrop{
+        display:none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.35);
+        z-index: 1040;
+      }
+      .sidebar-backdrop.show{ display:block; }
+    }
+
+    /* ===============================
+    Enhanced Button Styles - Override Bootstrap
+    =============================== */
+    
+    /* Base button enhancements */
+    .btn {
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
+    }
+    
+    /* Primary Button - New Blue #1055C9 */
+    .btn-primary {
+      background: linear-gradient(135deg, #1055C9 0%, #0d47a1 100%);
+      border-color: #1055C9;
+      box-shadow: 0 4px 15px rgba(16, 85, 201, 0.3);
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0d47a1 0%, #0a3d8f 100%);
+      border-color: #0d47a1;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(16, 85, 201, 0.4);
+    }
+    
+    .btn-primary:focus {
+      box-shadow: 0 0 0 4px rgba(16, 85, 201, 0.25);
+    }
+
+    /* Secondary Button - Yellow #FEEE91 */
+    .btn-secondary {
+      background: linear-gradient(135deg, #FEEE91 0%, #f5d85c 100%);
+      border-color: #f5d85c;
+      color: #1a1a1a;
+      box-shadow: 0 4px 15px rgba(254, 238, 145, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #f5d85c 0%, #ebc830 100%);
+      border-color: #ebc830;
+      color: #1a1a1a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(254, 238, 145, 0.5);
+    }
+
+    /* Outline buttons enhanced */
+    .btn-outline-primary {
+      color: #1055C9;
+      border-color: #1055C9;
+      border-width: 2px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+      background: #1055C9;
+      border-color: #1055C9;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16, 85, 201, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .btn-outline-secondary {
+      color: #6c757d;
+      border-color: #d4a520;
+      border-width: 2px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+      background: #FEEE91;
+      border-color: #FEEE91;
+      color: #1a1a1a;
+      transform: translateY(-2px);
+    }
+    
+    .btn-outline-danger {
+      border-width: 2px;
+    }
+    
+    .btn-outline-success {
+      border-width: 2px;
+    }
+    
+    .btn-outline-warning {
+      border-width: 2px;
+    }
+    
+    .btn-outline-info {
+      border-width: 2px;
+    }
+
+    /* Success Button Enhanced */
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #10b981;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      border-color: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Danger Button Enhanced */
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border-color: #ef4444;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      border-color: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Warning Button Enhanced */
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border-color: #f59e0b;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+      border-color: #d97706;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Info Button Enhanced */
+    .btn-info {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      border-color: #06b6d4;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-info:hover {
+      background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+      border-color: #0891b2;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+    }
+
+    /* Dark Button Enhanced */
+    .btn-dark {
+      background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+      border-color: #374151;
+      box-shadow: 0 4px 15px rgba(55, 65, 81, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-dark:hover {
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      border-color: #1f2937;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(55, 65, 81, 0.4);
+    }
+
+    /* Light Button Enhanced */
+    .btn-light {
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+      border-color: #e5e7eb;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-light:hover {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      border-color: #d1d5db;
+      transform: translateY(-2px);
+    }
+
+    /* Small button adjustments */
+    .btn-sm {
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+    }
+
+    /* Large button adjustments */
+    .btn-lg {
+      border-radius: 14px;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+    }
+
+    /* Button icon spacing */
+    .btn i, .btn [class^="bi-"] {
+      margin-right: 4px;
+    }
+    
+    .btn i, .btn [class*="bi-"] {
+      margin-right: 4px;
+    }
