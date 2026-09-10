@@ -1643,7 +1643,7 @@
   <!-- Hero Section -->
   <section id="home" class="hero-section">
     <div class="container">
-      <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Barangay Logo" class="hero-logo" onerror="this.src='https://via.placeholder.com/120?text=BRGY'">
+      <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Barangay Logo" class="hero-logo" onerror="this.src='https://via./120?text=BRGY'">
       
       <h1 class="hero-title fade-up">Barangay Bucandala 1</h1>
       <p class="hero-subtitle fade-up delay-1">Your Trusted Local Government Unit in City of Imus, Cavite</p>
@@ -2761,7 +2761,7 @@
       <div class="row g-4">
         <div class="col-lg-4">
           <div class="d-flex align-items-center gap-3 mb-3">
-            <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Logo" width="50" height="50" class="rounded-circle" onerror="this.src='https://via.placeholder.com/50?text=BRGY'">
+            <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Logo" width="50" height="50" class="rounded-circle" onerror="this.src='https://via./50?text=BRGY'">
             <div>
               <h5 class="mb-0">Barangay Bucandala 1</h5>
               <small class="text-white-50">City of Imus, Cavite</small>

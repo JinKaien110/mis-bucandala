@@ -3,7 +3,7 @@
     <div class="row g-4">
       <div class="col-lg-4">
         <div class="d-flex align-items-center gap-3 mb-3">
-          <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Logo" width="50" height="50" class="rounded-circle" onerror="this.src='https://via.placeholder.com/40?text=BRGY'">
+          <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Logo" width="50" height="50" class="rounded-circle" onerror="this.src='https://via./40?text=BRGY'">
           <div>
             <h5 class="mb-0" style="color: #ffffff;">Barangay Bucandala 1</h5>
             <small style="color: rgba(255,255,255,0.7);">City of Imus, Cavite</small>

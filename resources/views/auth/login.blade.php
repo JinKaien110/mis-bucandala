@@ -466,7 +466,7 @@
   <div class="login-container" style="margin-top: 100px;">
     <div class="login-card">
       <div class="login-header">
-        <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Barangay Logo" onerror="this.src='https://via.placeholder.com/80?text=BRGY'">
+        <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Barangay Logo">
         <h1>Barangay Bucandala 1</h1>
         <p>Management Information System</p>
       </div>

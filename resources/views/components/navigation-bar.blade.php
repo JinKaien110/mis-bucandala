@@ -8,7 +8,7 @@ $isResident = $isAuthenticated && ($user->role === 'resident');
 <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-      <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Logo" width="40" height="40" class="rounded-circle" onerror="this.src='https://via.placeholder.com/40?text=BRGY'">
+      <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Logo" width="40" height="40" class="rounded-circle" onerror="this.src='https://via./40?text=BRGY'">
       <span class="fw-bold" style="color: #ffffff;">Barangay Bucandala 1</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="background: rgba(255,255,255,0.15);">

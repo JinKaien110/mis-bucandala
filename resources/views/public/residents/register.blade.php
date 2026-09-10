@@ -566,7 +566,7 @@
       src="{{ asset('storage/branding/barangay-logo.jpg') }}" 
       alt="Barangay Logo" 
       class="brand-logo"
-      onerror="this.src='https://via.placeholder.com/80?text=BRGY'"
+      onerror="this.src='https://via./80?text=BRGY'"
     >
     <h1 class="brand-title">Barangay Bucandala 1</h1>
     <p class="brand-subtitle">Resident Registration Portal</p>
