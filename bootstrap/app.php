@@ -15,7 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\AddCsrfTokenHeader::class,
         ]);
-    
+
+        $middleware->trustProxies(at: '*');
 
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
