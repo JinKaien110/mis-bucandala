@@ -21,7 +21,10 @@ class ResidentController extends Controller
         $minAge = $request->query('min_age');
         $maxAge = $request->query('max_age');
 
-        $residents = Resident::query()
+        $limit = (int) $request->query('limit', 10);
+        $limit = max(1, min(100, $limit));
+
+        $residentsQuery = Resident::query()
             ->notArchived()
             // Search query
             ->when($q, function ($query) use ($q) {
@@ -63,11 +66,41 @@ class ResidentController extends Controller
                 $minBirthDate = now()->subYears($maxAge + 1)->format('Y-m-d');
                 $query->whereDate('birth_date', '>', $minBirthDate);
             })
-            ->orderBy('id', 'desc')
-            ->get(['id','first_name','middle_name','last_name','sex','birth_date','address_line','contact_no','photo_path', 'selfie_image_path', 'verification_status','status','archived_at','created_at']);
+            ->orderBy('id', 'desc');
 
+        $page = (int) $request->query('page', 1);
+        $page = max(1, $page);
 
-        return response()->json(['residents' => $residents]);
+        $paginator = $residentsQuery->paginate($limit, ['*'], 'page', $page);
+
+        $residents = collect($paginator->items())->map(function ($r) {
+            return [
+                'id' => $r->id ?? null,
+                'first_name' => $r->first_name ?? null,
+                'middle_name' => $r->middle_name ?? null,
+                'last_name' => $r->last_name ?? null,
+                'sex' => $r->sex ?? null,
+                'birth_date' => $r->birth_date ?? null,
+                'address_line' => $r->address_line ?? null,
+                'contact_no' => $r->contact_no ?? null,
+                'photo_path' => $r->photo_path ?? null,
+                'selfie_image_path' => $r->selfie_image_path ?? null,
+                'verification_status' => $r->verification_status ?? null,
+                'status' => $r->status ?? null,
+                'archived_at' => $r->archived_at ?? null,
+                'created_at' => $r->created_at ?? null,
+            ];
+        });
+
+        return response()->json([
+            'residents' => $residents,
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]
+        ]);
     }
 
     public function store(Request $request)

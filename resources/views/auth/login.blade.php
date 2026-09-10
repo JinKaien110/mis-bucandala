@@ -271,6 +271,21 @@
       color: #6b7280;
       padding: 12px 16px;
     }
+
+    .password-toggle {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-left: none;
+      border-radius: 0 12px 12px 0;
+      color: #6b7280;
+      padding: 0 14px;
+    }
+
+    .password-toggle:hover,
+    .password-toggle:focus {
+      background: #f9fafb;
+      color: #374151;
+    }
     
     .form-control {
       border: 2px solid #e5e7eb;
@@ -473,6 +488,9 @@
             <div class="input-group">
               <span class="input-group-text"><i class="bi bi-lock"></i></span>
               <input type="password" class="form-control" id="password" value="password123" required placeholder="Enter your password">
+              <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password" title="Show password">
+                <i class="bi bi-eye" aria-hidden="true"></i>
+              </button>
             </div>
           </div>
           
@@ -494,6 +512,18 @@
     const btnLogin = document.getElementById('btnLogin');
     const alertBox = document.getElementById('alertBox');
     const btnText = document.getElementById('btnText');
+    const togglePassword = document.getElementById('togglePassword');
+
+    togglePassword.addEventListener('click', () => {
+      const isHidden = password.type === 'password';
+      const icon = togglePassword.querySelector('i');
+
+      password.type = isHidden ? 'text' : 'password';
+      icon.classList.toggle('bi-eye', !isHidden);
+      icon.classList.toggle('bi-eye-slash', isHidden);
+      togglePassword.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+      togglePassword.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
+    });
     
     function showAlert(message, type = 'danger') {
       alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
@@ -545,10 +575,10 @@
           const userRole = data.user?.role || data.role;
           if (userRole === 'admin' || userRole === 'staff') {
             showAlert('Login successful! Redirecting to admin...', 'success');
-            setTimeout(() => window.location.href = '/admin/analytics', 1000);
+            setTimeout(() => window.location.reload(), 1000);
           } else {
             showAlert('Login successful! Redirecting...', 'success');
-            setTimeout(() => window.location.href = '/resident/dashboard', 1000);
+            setTimeout(() => window.location.reload(), 1000);
           }
 } else {
             showAlert(data.message || 'Login failed. Please check your credentials.', 'danger');

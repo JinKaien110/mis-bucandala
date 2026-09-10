@@ -33,10 +33,100 @@
 
   <!-- Household Details View -->
   @if($household)
+
+  <!-- Household Members -->
+  <div class="glass-card mb-4">
+    <div class="glass-card-header d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-people-fill me-2"></i>Household Members</h6>
+      @php
+        $isHead = false;
+        try {
+          $isHead = $household && $resident
+            ? $household->members()
+                ->where('resident_id', $resident->id)
+                ->where('relationship', 'Head')
+                ->exists()
+            : false;
+        } catch (\Throwable $e) {
+          $isHead = false;
+        }
+      @endphp
+      @if($isHead)
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-glass btn-sm" id="addMemberBtnModal">
+            <i class="bi bi-plus-lg me-1"></i> Add Member
+          </button>
+          <button type="button" class="btn btn-glass-primary btn-sm" onclick="openBulkEditModal()">
+            <i class="bi bi-pencil-square me-1"></i> Edit Members
+          </button>
+        </div>
+      @endif
+    </div>
+    <div class="glass-card-body">
+      <div class="table-responsive">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Member Name</th>
+              <th style="width: 15%;">Account No.</th>
+              <th style="width: 15%;">Relationship</th>
+              <th style="width: 20%;">Contact & Email</th>
+              <th style="width: 10%;">Monthly Income</th>
+              <th style="width: 20%; text-align: center;">Resident Indicators</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse($household->members as $member)
+            <tr>
+              <td class="fw-bold align-middle">{{ $member->first_name }} {{ $member->last_name }}</td>
+              <td class="align-middle">
+                <code class="text-info">{{ $member->resident->account_no ?? 'N/A' }}</code>
+              </td>
+              <td>
+                <span class="badge {{ $member->relationship === 'Head' ? 'bg-primary' : 'badge-glass-secondary' }} px-3 py-2">
+                  {{ $member->relationship }}
+                </span>
+              </td>
+              <td class="align-middle">
+                <div class="small fw-medium">{{ $member->resident->user->email ?? $member->email ?? '-' }}</div>
+                <small class="opacity-75"><i class="bi bi-telephone me-1"></i>+63 {{ $member->resident->contact_no ?? '-' }}</small>
+              </td>
+              <td class="align-middle">
+                {{ is_numeric($member->resident->monthly_income ?? null) ? '₱' . number_format($member->resident->monthly_income, 2) : ($member->resident->monthly_income ?? '-') }}
+              </td>
+              <td class="text-center align-middle">
+                <div class="d-flex flex-wrap justify-content-center gap-1">
+                  @if($member->resident && $member->resident->solo_parent)
+                    <span class="badge badge-glass-info" style="font-size:0.65rem; padding:3px 8px;">Solo Parent</span>
+                  @endif
+                  @if($member->resident && $member->resident->pwd)
+                    <span class="badge badge-glass-warning" style="font-size:0.65rem; padding:3px 8px;">PWD</span>
+                  @endif
+                  @if(!($member->resident && ($member->resident->solo_parent || $member->resident->pwd)))
+                    <span class="text-muted opacity-50" style="font-size:0.85rem;">None</span>
+                  @endif
+                </div>
+              </td>
+            </tr>
+            @empty
+            <tr>
+              <td colspan="6" class="text-center py-4">
+                <i class="bi bi-people fs-1 opacity-50 mb-2"></i>
+                <p class="opacity-75">No household members yet.</p>
+              </td>
+            </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <div class="row g-4" id="householdView">
-    <!-- Household Basic Info -->
-    <div class="col-md-6">
-      <div class="glass-card h-100">
+    <!-- Left Bento Column -->
+    <div class="col-lg-7 d-flex flex-column gap-4">
+      <!-- Household Basic Info -->
+      <div class="glass-card">
         <div class="glass-card-header">
           <h6 class="mb-0 fw-bold"><i class="bi bi-house-fill me-2"></i>Basic Household Information</h6>
         </div>
@@ -47,17 +137,11 @@
               {{ $household->address_line ?? 'Not set' }}
             </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label-glass">Street</label>
-            <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
-              {{ $household->street ?? 'Not set' }}
-            </div>
-          </div>
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label-glass">Phase</label>
               <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
-                {{ $household->phase ?? 'Not set' }}
+                {{ !empty($household->phase) ? $household->phase : 'None' }}
               </div>
             </div>
             <div class="col-md-6">
@@ -68,13 +152,7 @@
             </div>
           </div>
           <div class="row g-3 mt-2">
-            <div class="col-md-6">
-              <label class="form-label-glass">Household Type</label>
-              <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
-                {{ $household->household_type ?? 'Not set' }}
-              </div>
-            </div>
-            <div class="col-md-6">
+            <div class="col-md-12">
               <label class="form-label-glass">Homeownership Type</label>
               <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
                 {{ $household->homeownership_type ?? 'Not set' }}
@@ -85,83 +163,30 @@
              <div class="col-md-6">
                <label class="form-label-glass">Total Members</label>
                <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
-                 {{ $household->total_members ?? 0 }}
+                 {{ $household->members()->count() }}
                </div>
              </div>
              <div class="col-md-6">
-               <label class="form-label-glass">Registered Pets</label>
+               <label class="form-label-glass">Homeownership Type</label>
                <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
-                 {{ $household->registered_pets_count ?? 0 }}
+                 {{ $household->homeownership_type ?? 'Not set' }}
                </div>
              </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Housing & Utilities -->
-    <div class="col-md-6">
-      <div class="glass-card h-100">
-        <div class="glass-card-header">
-          <h6 class="mb-0 fw-bold"><i class="bi bi-building me-2"></i>Housing & Utilities</h6>
-        </div>
-        <div class="glass-card-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label-glass">House Type</label>
-              <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
-                {{ $household->house_type ?? 'Not set' }}
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">Facilities Available</label>
-              <div class="d-flex flex-wrap gap-2">
-                 @if($household->has_toilet ?? false)
-                 <span class="badge badge-glass-info">Toilet</span>
-                 @endif
-                 @if($household->has_bathroom ?? false)
-                 <span class="badge badge-glass-info">Bathroom</span>
-                 @endif
-                 @if($household->has_kitchen ?? false)
-                 <span class="badge badge-glass-info">Kitchen</span>
-                 @endif
-                 @if($household->has_garage ?? false)
-                 <span class="badge badge-glass-info">Garage</span>
-                 @endif
-                 @if($household->has_electricity ?? false)
-                 <span class="badge badge-glass-success">Has Electricity</span>
-                 @endif
-              </div>
-            </div>
-          </div>
-          <div class="mt-3">
-            <label class="form-label-glass">Disaster Risk Level</label>
-            <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
-              {{ $household->disaster_risk_level ?? 'Not set' }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Socio-Economic -->
-    <div class="col-md-6">
+      <!-- Socio-Economic -->
       <div class="glass-card">
         <div class="glass-card-header">
           <h6 class="mb-0 fw-bold"><i class="bi bi-currency-dollar me-2"></i>Socio-Economic Information</h6>
         </div>
         <div class="glass-card-body">
           <div class="row g-3">
-            <div class="col-md-6">
+            <div class="col-md-12">
               <label class="form-label-glass">Monthly Income Range</label>
               <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
                 {{ $household->monthly_income_range ?? 'Not set' }}
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">Employment Status</label>
-              <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
-                {{ $household->employment_status ?? 'Not set' }}
               </div>
             </div>
           </div>
@@ -174,16 +199,16 @@
           <div class="row g-3 mt-2">
              <div class="col-md-6">
                @if($household->is_4ps_beneficiary ?? false)
-               <span class="badge badge-glass-success">4PS Beneficiary</span>
+               <span class="badge badge-glass-success w-100 text-center">4PS Beneficiary</span>
                @else
-               <span class="badge badge-glass-secondary">Not 4PS</span>
+               <span class="badge badge-glass-secondary w-100 text-center">Not 4PS</span>
                @endif
              </div>
              <div class="col-md-6">
                @if($household->is_indigent ?? false)
-               <span class="badge badge-glass-success">Indigent</span>
+               <span class="badge badge-glass-success w-100 text-center">Indigent</span>
                @else
-               <span class="badge badge-glass-secondary">Not Indigent</span>
+               <span class="badge badge-glass-secondary w-100 text-center">Not Indigent</span>
                @endif
              </div>
           </div>
@@ -191,166 +216,131 @@
       </div>
     </div>
 
-    <!-- Health & Community -->
-    <div class="col-md-6">
+    <!-- Right Bento Column -->
+    <div class="col-lg-5 d-flex flex-column gap-4">
+      <!-- Housing & Utilities -->
+      <div class="glass-card">
+        <div class="glass-card-header">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-building me-2"></i>Housing & Utilities</h6>
+        </div>
+        <div class="glass-card-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label-glass">Facilities Available</label>
+              <div class="d-flex flex-wrap gap-2">
+                 @if($household->has_toilet ?? false)
+                 <span class="badge badge-glass-success">Toilet</span>
+                 @endif
+                 @if($household->has_bathroom ?? false)
+                 <span class="badge badge-glass-success">Bathroom</span>
+                 @endif
+                 @if($household->has_kitchen ?? false)
+                 <span class="badge badge-glass-success">Kitchen</span>
+                 @endif
+                 @if($household->has_garage ?? false)
+                 <span class="badge badge-glass-success">Garage</span>
+                 @endif
+                 @if($household->has_electricity ?? false)
+                 <span class="badge badge-glass-success">Electricity</span>
+                 @endif
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health & Community -->
       <div class="glass-card">
         <div class="glass-card-header">
           <h6 class="mb-0 fw-bold"><i class="bi bi-heart-pulse me-2"></i>Health & Community Indicators</h6>
         </div>
         <div class="glass-card-body">
-          <div class="row g-3">
-             <div class="col-md-6">
+          <div class="row g-2">
+             <div class="col-12">
                @if($household->has_pregnant_member ?? false)
-               <span class="badge badge-glass-success">Has Pregnant Member</span>
-               @else
-               <span class="badge badge-glass-secondary">No Pregnant Member</span>
+               <span class="badge badge-glass-success w-100 mb-1">Has Pregnant Member</span>
                @endif
-             </div>
-             <div class="col-md-6">
                @if($household->has_senior_citizen ?? false)
-               <span class="badge badge-glass-success">Has Senior Citizen</span>
-               @else
-               <span class="badge badge-glass-secondary">No Senior Citizen</span>
+               <span class="badge badge-glass-success w-100 mb-1">Has Senior Citizen</span>
                @endif
-             </div>
-             <div class="col-md-6">
                @if($household->has_pwd ?? false)
-               <span class="badge badge-glass-success">Has PWD Member</span>
-               @else
-               <span class="badge badge-glass-secondary">No PWD Member</span>
+               <span class="badge badge-glass-success w-100 mb-1">Has PWD Member</span>
                @endif
-             </div>
-             <div class="col-md-6">
                @if($household->has_chronic_illness ?? false)
-               <span class="badge badge-glass-warning">Has Chronic Illness</span>
-               @else
-               <span class="badge badge-glass-secondary">No Chronic Illness</span>
+               <span class="badge badge-glass-warning w-100 mb-1">Has Chronic Illness</span>
+               @endif
+
+               @if(!($household->has_pregnant_member || $household->has_senior_citizen || $household->has_pwd || $household->has_chronic_illness))
+               <span class="badge badge-glass-secondary w-100">No Special Indicators</span>
                @endif
              </div>
           </div>
           <hr style="border-color: rgba(255, 215, 0, 0.2);">
           <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label-glass">Barangay Program Participation</label>
+            <div class="col-12">
+              <label class="form-label-glass">Program Participation</label>
               <div class="p-2 rounded" style="background: color-mix(in srgb, var(--mis-blue-dark) 5%, transparent 95%); border: 1px dashed rgba(255,215,0,0.3);">
                 {{ $household->barangay_program_participation ?? 'None' }}
               </div>
             </div>
-            
           </div>
-          
         </div>
-
-        
       </div>
+    </div>
+  </div>
 
-     
-</div>
- <!-- Household Members -->
-       
-      <div class="glass-card mt-4">
-        <div class="glass-card-header d-flex justify-content-between align-items-center">
-          <h6 class="mb-0 fw-bold"><i class="bi bi-people-fill me-2"></i>Household Members</h6>
-          <button type="button" class="btn btn-glass btn-sm" id="addMemberBtnModal">
-            <i class="bi bi-plus-lg me-1"></i> Add Member
-          </button>
-        </div>
-        <div class="glass-card-body">
-          <div class="table-responsive">
-            <table class="glass-table">
-              <thead>
-                <tr>
-                  <th style="width: 25%;">Name</th>
-                  <th style="width: 18%;">Relationship</th>
-                  <th style="width: 25%;">Email</th>
-                  <th style="width: 17%;">Birth Date</th>
-                  <th style="width: 15%; text-align: center;">PWD</th>
-                </tr>
-              </thead>
-              <tbody>
-                @forelse($household->members as $member)
-                <tr>
-                  <td class="fw-bold">{{ $member->first_name }} {{ $member->last_name }}</td>
-                  <td>
-                    <span class="badge {{ $member->relationship === 'Head' ? 'bg-primary' : 'badge-glass-secondary' }} px-3 py-2">
-                      {{ $member->relationship }}
-                    </span>
-                  </td>
-                  <td class="align-middle">{{ $member->email ?? '-' }}</td>
-                  <td class="align-middle">{{ $member->birth_date ? \Carbon\Carbon::parse($member->birth_date)->format('M d, Y') : '-' }}</td>
-                  <td class="text-center align-middle">
-                    @if($member->is_pwd)
-                      <span class="text-warning fs-5" title="Person with Disability"><i class="bi bi-check-circle-fill"></i></span>
-                    @else
-                      <span class="text-muted opacity-25 fs-5"><i class="bi bi-circle"></i></span>
-                    @endif
-                  </td>
-                </tr>
-                @empty
-                <tr>
-                  <td colspan="5" class="text-center py-4">
-                    <i class="bi bi-people fs-1 opacity-50 mb-2"></i>
-                    <p class="opacity-75">No household members yet.</p>
-                  </td>
-                </tr>
-                @endforelse
-              </tbody>
-            </table>
-           </div>
+    @if(count($joinRequests) > 0)
+    <div class="row g-4 mt-4">
+      <div class="col-12">
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus me-2"></i>Pending Join Requests</h6>
           </div>
-       </div>
-        @if(count($joinRequests) > 0)
-      <div class="row g-4 mt-4">
-        <div class="col-12">
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus me-2"></i>Pending Join Requests</h6>
-            </div>
-            <div class="glass-card-body">
-              <div class="table-responsive">
-                <table class="glass-table">
-                  <thead>
-                    <tr>
-                      <th style="width: 25%;">Name</th>
-                      <th style="width: 45%;">Message</th>
-                      <th style="width: 30%; text-align: right;">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @forelse($joinRequests as $request)
-                    <tr>
-                      <td>
-                        <div class="fw-bold">{{ $request->resident->first_name ?? 'Unknown' }} {{ $request->resident->last_name ?? '' }}</div>
-                        <small class="opacity-50 d-block">{{ $request->resident->email ?? 'No email' }}</small>
-                      </td>
-                      <td class="small text-wrap" style="max-width: 300px;"><em class="text-muted">"{{ $request->message ?? 'No message' }}"</em></td>
-                      <td class="text-end">
-                        <button type="button" class="btn btn-glass-success btn-sm me-2" onclick="approveJoinRequest({{ $request->id }})">
-                          <i class="bi bi-check-lg"></i> Approve
-                        </button>
-                        <button type="button" class="btn btn-glass-danger btn-sm" onclick="rejectJoinRequest({{ $request->id }})">
-                          <i class="bi bi-x-lg"></i> Reject
-                        </button>
-                      </td>
-                    </tr>
-                    @empty
-                    <tr>
-                      <td colspan="3" class="text-center py-4">
-                        <i class="bi bi-inbox fs-1 opacity-50 mb-2"></i>
-                        <p class="opacity-75">No pending join requests.</p>
-                      </td>
-                    </tr>
-                    @endforelse
-                  </tbody>
-                </table>
-              </div>
+          <div class="glass-card-body">
+            <div class="table-responsive">
+              <table class="glass-table">
+                <thead>
+                  <tr>
+                    <th style="width: 25%;">Name</th>
+                    <th style="width: 45%;">Message</th>
+                    <th style="width: 30%; text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @forelse($joinRequests as $request)
+                  <tr>
+                    <td>
+                      <div class="fw-bold">{{ $request->resident->first_name ?? 'Unknown' }} {{ $request->resident->last_name ?? '' }}</div>
+                      <small class="opacity-50 d-block">{{ $request->resident->email ?? 'No email' }}</small>
+                    </td>
+                    <td class="small text-wrap" style="max-width: 300px;"><em class="text-muted">"{{ $request->message ?? 'No message' }}"</em></td>
+                    <td class="text-end">
+                      <button type="button" class="btn btn-glass-success btn-sm me-2" onclick="approveJoinRequest({{ $request->id }})">
+                        <i class="bi bi-check-lg"></i> Approve
+                      </button>
+                      <button type="button" class="btn btn-glass-danger btn-sm" onclick="rejectJoinRequest({{ $request->id }})">
+                        <i class="bi bi-x-lg"></i> Reject
+                      </button>
+                    </td>
+                  </tr>
+                  @empty
+                  <tr>
+                    <td colspan="3" class="text-center py-4">
+                      <i class="bi bi-inbox fs-1 opacity-50 mb-2"></i>
+                      <p class="opacity-75">No pending join requests.</p>
+                    </td>
+                  </tr>
+                  @endforelse
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
-        @endif
-     </div>
-   @else
+    </div>
+    @endif
+  </div>
+  @else
    <div class="glass p-5 text-center">
      <i class="bi bi-house fs-1 text-muted mb-3"></i>
      <h4 class="mt-3">No Household Registered</h4>
@@ -385,12 +375,13 @@
               <input type="text" name="address_line" class="glass-input form-control" value="{{ $household->address_line ?? '' }}" placeholder="e.g., Blk 1 Lot 2" required>
             </div>
             <div class="col-md-6">
-              <label class="form-label-glass">Street</label>
-              <input type="text" name="street" class="glass-input form-control" value="{{ $household->street ?? '' }}" placeholder="e.g., Sampaguita St.">
-            </div>
-            <div class="col-md-6">
               <label class="form-label-glass">Phase</label>
-              <input type="number" name="phase" class="glass-input form-control" value="{{ $household->phase ?? '' }}" placeholder="1" min="1">
+              <select name="phase" class="glass-select form-select">
+                <option value="" {{ empty($household->phase) ? 'selected' : '' }}>None</option>
+                <option value="A" {{ ($household->phase ?? '') === 'A' ? 'selected' : '' }}>A</option>
+                <option value="B" {{ ($household->phase ?? '') === 'B' ? 'selected' : '' }}>B</option>
+                <option value="C" {{ ($household->phase ?? '') === 'C' ? 'selected' : '' }}>C</option>
+              </select>
             </div>
             <div class="col-md-6">
               <label class="form-label-glass">Contact No.</label>
@@ -398,15 +389,6 @@
                 <span class="input-group-text">+63</span>
                 <input type="text" name="contact_no" class="glass-input form-control" value="{{ $household->contact_no ?? '' }}" placeholder="917 123 4567" maxlength="12">
               </div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">Household Type</label>
-              <select name="household_type" class="glass-select form-select">
-                <option value="">-- Select --</option>
-                <option value="Family" {{ ($household->household_type ?? '') === 'Family' ? 'selected' : '' }}>Family</option>
-                <option value="Extended Family" {{ ($household->household_type ?? '') === 'Extended Family' ? 'selected' : '' }}>Extended Family</option>
-                <option value="Boarding / Rental" {{ ($household->household_type ?? '') === 'Boarding / Rental' ? 'selected' : '' }}>Boarding / Rental</option>
-              </select>
             </div>
             <div class="col-md-6">
               <label class="form-label-glass">Homeownership Type</label>
@@ -418,47 +400,7 @@
               </select>
             </div>
             <div class="col-12">
-              <h6 class="mb-3 mt-4 fs-6"><i class="bi bi-people me-2"></i>Member Statistics</h6>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">Total Members</label>
-              <input type="number" name="total_members" class="glass-input form-control" value="{{ $household->total_members ?? 0 }}" min="0">
-            </div>
-            <div class="col-md-6">
-              <div class="row g-2">
-                <div class="col-6">
-                  <label class="form-label-glass">Adults</label>
-                  <input type="number" name="total_adults" class="glass-input form-control" value="{{ $household->total_adults ?? 0 }}" min="0">
-                </div>
-                <div class="col-6">
-                  <label class="form-label-glass">Minors</label>
-                  <input type="number" name="total_minors" class="glass-input form-control" value="{{ $household->total_minors ?? 0 }}" min="0">
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label-glass">Senior Citizens</label>
-              <input type="number" name="total_senior_citizens" class="glass-input form-control" value="{{ $household->total_senior_citizens ?? 0 }}" min="0">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label-glass">Total PWD</label>
-              <input type="number" name="total_pwd" class="glass-input form-control" value="{{ $household->total_pwd ?? 0 }}" min="0">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label-glass">Registered Pets</label>
-              <input type="number" name="registered_pets_count" class="glass-input form-control" value="{{ $household->registered_pets_count ?? 0 }}" min="0">
-            </div>
-            <div class="col-12">
               <h6 class="mb-3 mt-4 fs-6"><i class="bi bi-building me-2"></i>Housing Details</h6>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">House Type</label>
-              <select name="house_type" class="glass-select form-select">
-                <option value="">-- Select --</option>
-                <option value="Concrete" {{ ($household->house_type ?? '') === 'Concrete' ? 'selected' : '' }}>Concrete</option>
-                <option value="Semi-concrete" {{ ($household->house_type ?? '') === 'Semi-concrete' ? 'selected' : '' }}>Semi-concrete</option>
-                <option value="Light materials" {{ ($household->house_type ?? '') === 'Light materials' ? 'selected' : '' }}>Light materials</option>
-              </select>
             </div>
             <div class="col-md-12">
               <label class="form-label-glass">Facilities Available</label>
@@ -495,15 +437,6 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">Disaster Risk Level</label>
-              <select name="disaster_risk_level" class="glass-select form-select">
-                <option value="">-- Select --</option>
-                <option value="Low" {{ ($household->disaster_risk_level ?? '') === 'Low' ? 'selected' : '' }}>Low</option>
-                <option value="Medium" {{ ($household->disaster_risk_level ?? '') === 'Medium' ? 'selected' : '' }}>Medium</option>
-                <option value="High" {{ ($household->disaster_risk_level ?? '') === 'High' ? 'selected' : '' }}>High</option>
-              </select>
-            </div>
             <div class="col-12">
               <h6 class="mb-3 mt-4 fs-6"><i class="bi bi-currency-dollar me-2"></i>Socio-Economic Information</h6>
             </div>
@@ -517,66 +450,48 @@
                 <option value="Above 50,000" {{ ($household->monthly_income_range ?? '') === 'Above 50,000' ? 'selected' : '' }}>Above ₱50,000</option>
               </select>
             </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">Employment Status</label>
-              <select name="employment_status" class="glass-select form-select">
-                <option value="">-- Select --</option>
-                <option value="Employed" {{ ($household->employment_status ?? '') === 'Employed' ? 'selected' : '' }}>Employed</option>
-                <option value="Self-employed" {{ ($household->employment_status ?? '') === 'Self-employed' ? 'selected' : '' }}>Self-employed</option>
-                <option value="Unemployed" {{ ($household->employment_status ?? '') === 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
-                <option value="Student" {{ ($household->employment_status ?? '') === 'Student' ? 'selected' : '' }}>Student</option>
-                <option value="Retired" {{ ($household->employment_status ?? '') === 'Retired' ? 'selected' : '' }}>Retired</option>
-              </select>
-            </div>
+
             <div class="col-md-12">
               <label class="form-label-glass">Primary Income Source</label>
+
               <input type="text" name="primary_income_source" class="glass-input form-control" value="{{ $household->primary_income_source ?? '' }}" placeholder="e.g., Salary, Business, Remittance">
             </div>
-            <div class="col-md-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="is_4ps_beneficiary" value="1" id="is_4ps_beneficiary" {{ ($household->is_4ps_beneficiary ?? false) ? 'checked' : '' }}>
-                <label class="form-check-label" for="is_4ps_beneficiary">4PS Beneficiary</label>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="is_indigent" value="1" id="is_indigent" {{ ($household->is_indigent ?? false) ? 'checked' : '' }}>
-                <label class="form-check-label" for="is_indigent">Indigent</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <h6 class="mb-3 mt-4 fs-6"><i class="bi bi-heart-pulse me-2"></i>Health & Community Indicators</h6>
-            </div>
-            <div class="col-md-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="has_pregnant_member" value="1" id="has_pregnant_member" {{ ($household->has_pregnant_member ?? false) ? 'checked' : '' }}>
-                <label class="form-check-label" for="has_pregnant_member">Pregnant Member</label>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="has_senior_citizen" value="1" id="has_senior_citizen" {{ ($household->has_senior_citizen ?? false) ? 'checked' : '' }}>
-                <label class="form-check-label" for="has_senior_citizen">Senior Citizen</label>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="has_pwd" value="1" id="has_pwd" {{ ($household->has_pwd ?? false) ? 'checked' : '' }}>
-                <label class="form-check-label" for="has_pwd">PWD Member</label>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="has_chronic_illness" value="1" id="has_chronic_illness" {{ ($household->has_chronic_illness ?? false) ? 'checked' : '' }}>
-                <label class="form-check-label" for="has_chronic_illness">Chronic Illness</label>
-              </div>
-            </div>
+
             <div class="col-12">
               <h6 class="mb-3 mt-4 fs-6"><i class="bi bi-people me-2"></i>Community Participation</h6>
             </div>
             <div class="col-md-12">
               <label class="form-label-glass">Barangay Program Participation</label>
-              <textarea name="barangay_program_participation" class="glass-input form-control" rows="3" placeholder="e.g., Clean-up drives, Health programs">{{ $household->barangay_program_participation ?? '' }}</textarea>
+
+              @php
+                $existingProgramsRaw = $household->barangay_program_participation ?? '';
+                $existingPrograms = [];
+                if (is_array($existingProgramsRaw)) {
+                  $existingPrograms = $existingProgramsRaw;
+                } elseif (is_string($existingProgramsRaw)) {
+                  // Support stored comma-separated or JSON string
+                  $trim = trim($existingProgramsRaw);
+                  $existingPrograms = str_starts_with($trim, '[') ? (json_decode($trim, true) ?: []) : array_filter(array_map('trim', explode(',', $existingProgramsRaw)));
+                }
+              @endphp
+
+              <div class="mb-2 d-flex flex-wrap gap-2">
+                @php
+                  $suggestedPrograms = ['Clean-up drives', 'Health programs', 'Livelihood training', 'Scholarship assistance', 'Disaster preparedness'];
+                  $selectedMap = array_flip($existingPrograms);
+                @endphp
+
+                @foreach($suggestedPrograms as $program)
+                  <label class="btn btn-glass btn-sm" style="cursor:pointer; user-select:none;">
+                    <input type="checkbox" class="form-check-input" name="barangay_program_participation[]" value="{{ $program }}" {{ isset($selectedMap[$program]) ? 'checked' : '' }} style="margin-right:6px;">
+                    {{ $program }}
+                  </label>
+                @endforeach
+
+                <div class="d-flex align-items-center gap-2" style="min-width: 260px; flex: 1;">
+                  <input type="text" name="barangay_program_participation_other" class="glass-input form-control" value="{{ $household->barangay_program_participation_other ?? '' }}" placeholder="Other program (type here)..." oninput="this.dataset.value = this.value;">
+                </div>
+              </div>
             </div>
           </div>
         </form>
@@ -604,11 +519,11 @@
             <input type="text" class="glass-input form-control" id="accountNo" name="account_no" placeholder="Enter resident account number" required>
             <small class="opacity-75">Enter the resident's account number to add them to your household.</small>
           </div>
+
           <div class="mb-3">
             <label class="form-label-glass">Relationship <span class="text-danger">*</span></label>
             <select class="glass-select form-select" id="relationship" name="relationship" required>
               <option value="">Select relationship</option>
-              <option value="Head">Head of Family</option>
               <option value="Spouse">Spouse</option>
               <option value="Child">Child</option>
               <option value="Parent">Parent</option>
@@ -624,6 +539,73 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-glass-primary" onclick="addMemberByAccount()">Add Member</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Edit Members Modal -->
+<div class="modal fade" id="bulkEditMembersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content glass-modal">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-people-fill me-2"></i>Edit All Household Members</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="bulkEditMembersForm">
+          <div class="table-responsive">
+            <table class="glass-table">
+              <thead>
+                <tr>
+                  <th style="width: 50%;">Name</th>
+                  <th style="width: 50%;">Relationship</th>
+                </tr>
+              </thead>
+              <tbody id="bulkEditTableBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-glass-primary" id="saveBulkEditBtn" onclick="submitBulkEdit()">Update All Members</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Member Modal -->
+<div class="modal fade" id="editMemberModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-modal">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Member Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editMemberForm">
+          <input type="hidden" id="editMemberId" name="member_id">
+          <div class="mb-3">
+            <label class="form-label-glass">Relationship <span class="text-danger">*</span></label>
+            <select class="glass-select form-select" id="editRelationship" name="relationship" required>
+              <option value="Spouse">Spouse</option>
+              <option value="Child">Child</option>
+              <option value="Parent">Parent</option>
+              <option value="Sibling">Sibling</option>
+              <option value="Grandparent">Grandparent</option>
+              <option value="Grandchild">Grandchild</option>
+              <option value="Relative">Other Relative</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-glass-primary" onclick="updateMemberDetails()">Update Member</button>
       </div>
     </div>
   </div>
@@ -705,28 +687,51 @@
   padding: 20px;
 }
 
-/* Glass inputs */
-.glass-input, .glass-select {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  color: var(--mis-blue-dark);
-  padding: 10px 14px;
-  border-radius: 10px;
+/* Glass inputs + selects (same styling) */
+.glass-input,
+.glass-select {
+  background: var(--input-bg) !important;
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--mis-blue-dark) !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
 }
 
-.glass-input:focus, .glass-select:focus {
-  background: color-mix(in srgb, var(--mis-white) 30%, var(--mis-blue-dark) 70%);
-  border-color: var(--mis-yellow);
-  box-shadow: 0 0 0 3px var(--input-focus-glow);
+/* Force override for Bootstrap form-control defaults (prevents white backgrounds) */
+.glass-modal input.form-control,
+.glass-modal textarea.form-control {
+  background: var(--input-bg) !important;
+  background-color: var(--input-bg) !important;
+  color: var(--mis-blue-dark) !important;
+  border-color: var(--input-border) !important;
 }
 
 .glass-input::placeholder {
   color: color-mix(in srgb, var(--mis-blue-dark) 60%, transparent 40%);
 }
 
+.glass-select,
+.glass-select.form-select {
+  background: var(--input-bg) !important;
+  color: var(--mis-blue-dark) !important;
+  border-color: var(--input-border) !important;
+}
+
 .glass-select option {
-  background: var(--mis-blue-dark);
-  color: var(--mis-white);
+  background: var(--mis-blue-dark) !important;
+  color: var(--mis-white) !important;
+}
+
+.glass-select option:checked,
+.glass-select option:focus,
+.glass-select option:hover {
+  background: color-mix(in srgb, var(--mis-blue-dark) 85%, var(--mis-yellow) 15%) !important;
+  color: var(--mis-white) !important;
+}
+
+.glass-select:focus {
+  color: var(--mis-blue-dark) !important;
 }
 
 /* Form labels */
@@ -825,91 +830,104 @@
   color: var(--text-secondary);
   cursor: pointer;
 }
+
+/* Toast Animations */
+@keyframes toastSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.glass-toast {
+  animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
+}
 </style>
 @endpush
 
 @push('scripts')
 <script>
+// Reusable Toast Notification System
+function showToast(message, type = 'success') {
+  const wrapper = document.getElementById('toastWrapper') || (() => {
+    const el = document.createElement('div');
+    el.id = 'toastWrapper';
+    el.style.cssText = 'position: fixed; top: 25px; right: 25px; z-index: 999999; pointer-events: none;';
+    document.body.appendChild(el);
+    return el;
+  })();
+
+  const toastEl = document.createElement('div');
+  toastEl.style.pointerEvents = 'auto';
+  toastEl.className = `toast show align-items-center text-white border-0 mb-3 glass-toast`;
+  
+  // Colors matching the MIS brand and login glass style
+  const bg = type === 'success' 
+    ? 'linear-gradient(135deg, rgba(16, 85, 201, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%)'
+    : 'linear-gradient(135deg, rgba(220, 38, 38, 0.95) 0%, rgba(153, 27, 27, 0.95) 100%)';
+
+  toastEl.style.cssText = `
+    min-width: 320px;
+    border-radius: 12px;
+    background: ${bg};
+    transition: all 0.4s ease;
+  `;
+
+  const icon = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+
+  toastEl.innerHTML = `
+    <div class="d-flex p-3">
+      <div class="bg-white bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; min-width: 32px;">
+        <i class="bi ${icon} fs-6"></i>
+      </div>
+      <div class="toast-body p-0 flex-grow-1 d-flex align-items-center">
+        <div class="fw-medium">${message}</div>
+      </div>
+      <button type="button" class="btn-close btn-close-white ms-3" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  `;
+
+  wrapper.appendChild(toastEl);
+  setTimeout(() => {
+    toastEl.style.opacity = '0';
+    toastEl.style.transform = 'translateX(20px)';
+    setTimeout(() => toastEl.remove(), 300);
+  }, 2500); // Display for 2.5s to ensure the 2s reload transition is smooth
+}
+
 // Open modals
-document.getElementById('btnCreateHouseholdModal')?.addEventListener('click', () => {
-  new bootstrap.Modal(document.getElementById('householdFormModal')).show();
-});
+const btnCreateHouseholdModal = document.getElementById('btnCreateHouseholdModal');
+if (btnCreateHouseholdModal) {
+  btnCreateHouseholdModal.addEventListener('click', () => {
+    new bootstrap.Modal(document.getElementById('householdFormModal')).show();
+  });
+}
 
-document.getElementById('btnEditHousehold')?.addEventListener('click', () => {
-  new bootstrap.Modal(document.getElementById('householdFormModal')).show();
-});
+const btnEditHousehold = document.getElementById('btnEditHousehold');
+if (btnEditHousehold) {
+  btnEditHousehold.addEventListener('click', () => {
+    new bootstrap.Modal(document.getElementById('householdFormModal')).show();
+  });
+}
 
-document.getElementById('btnJoinHousehold')?.addEventListener('click', () => {
-  new bootstrap.Modal(document.getElementById('joinHouseholdModal')).show();
-});
+const btnJoinHousehold = document.getElementById('btnJoinHousehold');
+if (btnJoinHousehold) {
+  btnJoinHousehold.addEventListener('click', () => {
+    new bootstrap.Modal(document.getElementById('joinHouseholdModal')).show();
+  });
+}
 
-document.getElementById('addMemberBtnModal')?.addEventListener('click', () => {
-  new bootstrap.Modal(document.getElementById('addMemberModal')).show();
-});
+const addMemberBtnModal = document.getElementById('addMemberBtnModal');
+if (addMemberBtnModal) {
+  addMemberBtnModal.addEventListener('click', () => {
+    new bootstrap.Modal(document.getElementById('addMemberModal')).show();
+  });
+}
 
-// PWD toggle
-document.addEventListener('change', (e) => {
-  if (e.target.classList.contains('member-pwd-toggle')) {
-    const memberId = e.target.getAttribute('data-member-id');
-    if (memberId) {
-        fetch(`/resident/household/member/${memberId}/toggle-pwd`, {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ is_pwd: e.target.checked })
-        }).then(response => {
-          return response.json().catch(() => {
-            return response.text().then(text => {
-              console.error('Response is not JSON:', text);
-              throw new Error('Invalid JSON response from server: ' + text.substring(0, 200));
-            });
-          }).then(data => ({response, data}));
-        }).then(({response, data}) => {
-          if (!response.ok) {
-            alert(data.message || 'Failed to update PWD status');
-            e.target.checked = !e.target.checked;
-          }
-        }).catch((error) => {
-          console.error('Fetch error:', error);
-          alert('Error updating PWD status: ' + error.message);
-          e.target.checked = !e.target.checked;
-        });
-    }
-  }
-
-  // Handle relationship change
-  if (e.target.classList.contains('member-relation')) {
-    const memberId = e.target.getAttribute('data-member-id');
-    if (memberId) {
-        fetch(`/resident/household/member/${memberId}/update-relationship`, {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ relationship: e.target.value })
-        }).then(response => {
-          return response.json().catch(() => {
-            return response.text().then(text => {
-              console.error('Response is not JSON:', text);
-              throw new Error('Invalid JSON response from server: ' + text.substring(0, 200));
-            });
-          }).then(data => ({response, data}));
-        }).then(({response, data}) => {
-          if (!response.ok) {
-            alert(data.message || 'Failed to update relationship');
-            location.reload();
-          }
-        }).catch((error) => {
-          console.error('Fetch error:', error);
-          alert('Error updating relationship: ' + error.message);
-          location.reload();
-        });
-    }
-  }
- });
+/* Resident household change handlers removed to resolve script syntax issues in the Blade file.
+   PWD toggle and relationship update are handled elsewhere in this page. */
 
 // Add member by account
 function addMemberByAccount() {
@@ -926,51 +944,49 @@ function addMemberByAccount() {
        });
      }).then(data => ({response, data}));
    }).then(({response, data}) => {
-     if (response.ok) {
-       bootstrap.Modal.getInstance(document.getElementById('addMemberModal')).hide();
-       document.getElementById('addMemberForm').reset();
-       location.reload();
-     } else {
-       alert(data.message || 'Failed to add member');
+    if (response.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('addMemberModal')).hide();
+      document.getElementById('addMemberForm').reset();
+      showToast(data.message || 'Member added successfully!');
+      setTimeout(() => { location.reload(); }, 2000);
+    } else {
+       showToast(data.message || 'Failed to add member', 'danger');
      }
    }).catch((error) => {
      console.error('Fetch error:', error);
-     alert('An error occurred: ' + error.message);
+     showToast('An error occurred: ' + error.message, 'danger');
    });
 }
 
 // Join household request
 function sendJoinRequest() {
   const formData = new FormData(document.getElementById('joinRequestForm'));
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-  if (!csrfToken) { alert('CSRF token not found.'); return; }
+  const csrfEl = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = csrfEl ? csrfEl.content : null;
+  if (!csrfToken) { showToast('CSRF token not found.', 'danger'); return; }
    fetch('{{ route("resident.household.join") }}', {
      method: 'POST',
      headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
      body: formData
-   }).then(response => {
-     return response.json().catch(() => {
-       return response.text().then(text => {
-         console.error('Response is not JSON:', text);
-         throw new Error('Invalid JSON response from server: ' + text.substring(0, 200));
-       });
-     }).then(data => ({response, data}));
-   }).then(({response, data}) => {
-     if (response.ok && data.success) {
+   }).then(response => response.json().catch(() => response.text().then(t => { throw new Error(t) })))
+  .then(data => {
+     if (data.success) {
        bootstrap.Modal.getInstance(document.getElementById('joinHouseholdModal')).hide();
        document.getElementById('joinRequestForm').reset();
-       location.reload();
+       showToast(data.message || 'Join request sent successfully!');
+       setTimeout(() => { location.reload(); }, 2000);
      } else {
-       alert(data.message || 'Failed to send request');
+       showToast(data.message || 'Failed to send request', 'danger');
      }
    }).catch((error) => {
      console.error('Fetch error:', error);
-     alert('Error sending request: ' + error.message);
+     showToast('Error sending request: ' + error.message, 'danger');
    });
 }
 
 // Submit household form via AJAX
-document.getElementById('householdForm')?.addEventListener('submit', function(e) {
+const householdForm = document.getElementById('householdForm');
+if (householdForm) householdForm.addEventListener('submit', function(e) {
   e.preventDefault();
   const formData = new FormData(this);
   const url = this.action;
@@ -993,30 +1009,78 @@ document.getElementById('householdForm')?.addEventListener('submit', function(e)
     }).then(({response, data}) => {
       if (response.ok) {
         bootstrap.Modal.getInstance(document.getElementById('householdFormModal')).hide();
-        location.reload();
+        showToast('Household updated successfully!');
+        setTimeout(() => { location.reload(); }, 2000);
       } else {
-        alert(data.message || 'Failed to save household');
+        showToast(data.message || 'Failed to save household', 'danger');
       }
     }).catch((error) => {
       console.error('Fetch error:', error);
-      alert('An error occurred. Please try again: ' + error.message);
+      showToast('An error occurred: ' + error.message, 'danger');
     });
 });
 
-// Edit member function
-function editMember(memberId) {
-  // Find the member data
-  const members = @json($household ? $household->members : []);
-  const member = members.find(m => m.id == memberId);
-  if (member) {
-    // Pre-fill the add member modal with member data
-    document.getElementById('accountNo').value = member.resident?.account_no || '';
-    document.getElementById('relationship').value = member.relationship;
-    // Store member ID for update
-    document.getElementById('addMemberForm').setAttribute('data-edit-mode', 'true');
-    document.getElementById('addMemberForm').setAttribute('data-member-id', memberId);
-    new bootstrap.Modal(document.getElementById('addMemberModal')).show();
-  }
+function openBulkEditModal() {
+    const members = {!! json_encode($household ? $household->members : []) !!};
+    const tbody = document.getElementById('bulkEditTableBody');
+    tbody.innerHTML = '';
+
+    members.forEach((member, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="align-middle">
+                <input type="hidden" name="members[${index}][id]" value="${member.id}">
+                <span class="fw-bold">${member.first_name} ${member.last_name}</span>
+            </td>
+            <td class="align-middle">
+                ${member.relationship === 'Head' ? `
+                    <input type="hidden" name="members[${index}][relationship]" value="Head">
+                    <span class="badge badge-glass-secondary" style="font-size:0.75rem; padding:6px 12px; border-radius:50px; background: rgba(13,110,253,0.25); border: 1px solid rgba(13,110,253,0.4); color: #cfe2ff;">Head</span>
+                ` : `
+                    <select class="glass-select form-select form-select-sm" style="padding-top:6px; padding-bottom:6px; height:auto;" name="members[${index}][relationship]" required>
+                        <option value="Spouse" ${member.relationship === 'Spouse' ? 'selected' : ''}>Spouse</option>
+                        <option value="Child" ${member.relationship === 'Child' ? 'selected' : ''}>Child</option>
+                        <option value="Parent" ${member.relationship === 'Parent' ? 'selected' : ''}>Parent</option>
+                        <option value="Sibling" ${member.relationship === 'Sibling' ? 'selected' : ''}>Sibling</option>
+                        <option value="Relative" ${member.relationship === 'Relative' ? 'selected' : ''}>Relative</option>
+                        <option value="Other" ${member.relationship === 'Other' ? 'selected' : ''}>Other</option>
+                    </select>`}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    new bootstrap.Modal(document.getElementById('bulkEditMembersModal')).show();
+}
+
+function submitBulkEdit() {
+    const formData = new FormData(document.getElementById('bulkEditMembersForm'));
+    const btn = document.getElementById('saveBulkEditBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+
+    fetch('{{ route("resident.household.members.bulk-update") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: new URLSearchParams([...formData, ['_method', 'PUT']])
+    }).then(response => response.json()).then(data => {
+        if (data.success) {
+            showToast(data.message);
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showToast(data.message || 'Error updating members', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = 'Update All Members';
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred', 'danger');
+        btn.disabled = false;
+        btn.innerHTML = 'Update All Members';
+    });
 }
 
 // Approve or reject join request
@@ -1039,15 +1103,15 @@ function approveJoinRequest(requestId) {
       });
     }).then(data => ({response, data}));
   }).then(({response, data}) => {
-    if (response.ok) {
-      alert('Join request approved successfully!');
-      location.reload();
+    if (data.success) {
+      showToast(data.message || 'Join request approved successfully!');
+      setTimeout(() => { location.reload(); }, 2000);
     } else {
-      alert(data.message || 'Failed to approve request');
+      showToast(data.message || 'Failed to approve request.', 'danger');
     }
   }).catch((error) => {
     console.error('Fetch error:', error);
-    alert('Error approving request: ' + error.message);
+    showToast('Error approving request: ' + error.message, 'danger');
   });
 }
 
@@ -1070,15 +1134,15 @@ function rejectJoinRequest(requestId) {
       });
     }).then(data => ({response, data}));
   }).then(({response, data}) => {
-    if (response.ok) {
-      alert('Join request rejected successfully!');
-      location.reload();
+    if (data.success) {
+      showToast(data.message || 'Join request rejected.');
+      setTimeout(() => { location.reload(); }, 2000);
     } else {
-      alert(data.message || 'Failed to reject request');
+      showToast(data.message || 'Failed to reject request.', 'danger');
     }
   }).catch((error) => {
     console.error('Fetch error:', error);
-    alert('Error rejecting request: ' + error.message);
+    showToast('Error rejecting request: ' + error.message, 'danger');
   });
 }
 </script>

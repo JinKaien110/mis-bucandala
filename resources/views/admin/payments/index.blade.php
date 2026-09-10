@@ -9,9 +9,7 @@
             <h4 class="mb-1 fw-bold text-primary">Fees / Payments</h4>
             <p class="text-muted mb-0">Manage financial transactions</p>
         </div>
-        <a class="btn btn-primary" href="{{ route('admin.payments.create') }}">
-            <i class="bi bi-plus-lg me-1"></i> New Payment
-        </a>
+
     </div>
 
     @if(session('success'))
@@ -42,11 +40,12 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3">
-            <form method="GET" action="{{ route('admin.payments.index') }}" class="row g-3">
-                <div class="col-md-3">
+            <form method="GET" action="{{ route('admin.payments.index') }}" class="row g-2 g-md-3 align-items-end">
+                <div class="col-12 col-md-3">
                     <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ request('search') }}">
                 </div>
-                <div class="col-md-2">
+
+                <div class="col-12 col-md-2">
                     <select name="status" class="form-select">
                         <option value="">All Status</option>
                         <option value="success" {{ request('status') === 'success' ? 'selected' : '' }}>Success</option>
@@ -55,20 +54,25 @@
                         <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Failed</option>
                     </select>
                 </div>
-                <div class="col-md-2">
+
+                <div class="col-12 col-md-2">
                     <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
                 </div>
-                <div class="col-md-2">
+
+                <div class="col-12 col-md-2">
                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                 </div>
-                <div class="col-md-2">
+
+                <div class="col-12 col-md-2">
                     <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
                 </div>
-                <div class="col-md-1">
+
+                <div class="col-12 col-md-1">
                     <a href="{{ route('admin.payments.index') }}" class="btn btn-outline-secondary w-100">Clear</a>
                 </div>
             </form>
         </div>
+
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -76,7 +80,7 @@
                         <tr>
                             <th class="px-4 py-3">Control No.</th>
                             <th class="py-3">Document Type</th>
-                            <th class="py-3">Type</th>
+
                             <th class="py-3">Resident</th>
                             <th class="py-3">Amount</th>
                             <th class="py-3">Status</th>
@@ -91,11 +95,7 @@
                                     <span class="fw-bold text-primary">{{ $payment->documentRequest?->control_no ?? '-' }}</span>
                                 </td>
                                 <td>{{ $payment->documentRequest?->documentType?->name ?? $payment->description }}</td>
-                                <td>
-                                    <span class="badge bg-light text-dark border">
-                                        {{ ucfirst(str_replace('_', ' ', $payment->payment_type)) }}
-                                    </span>
-                                </td>
+                               
                                 <td>
                                     @if($payment->resident)
                                         {{ $payment->resident->first_name }} {{ $payment->resident->last_name }}
@@ -144,8 +144,14 @@
         </div>
         @if($payments->hasPages())
             <div class="card-footer bg-white border-top-0 py-3">
-                {{ $payments->links() }}
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Showing {{ $payments->firstItem() ?? 0 }} to {{ $payments->lastItem() ?? 0 }} of {{ $payments->total() }} results
+                    </div>
+                    <x-admin-pagination :paginator="$payments" />
+                </div>
             </div>
+
         @endif
     </div>
 </div>

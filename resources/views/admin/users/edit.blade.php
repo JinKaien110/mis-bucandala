@@ -32,7 +32,7 @@
                         <label class="form-label">Role</label>
                         <select name="role" class="form-select" required>
                             <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin (Captain)</option>
-                            <option value="secretary" {{ $user->role === 'secretary' ? 'selected' : '' }}>Staff (Secretary)</option>
+                            <option value="staff" {{ $user->role === 'staff' ? 'selected' : '' }}>Staff</option>
                             <option value="clerk" {{ $user->role === 'clerk' ? 'selected' : '' }}>Clerk</option>
                             <option value="blotter" {{ $user->role === 'blotter' ? 'selected' : '' }}>Blotter</option>
                             <option value="readonly" {{ $user->role === 'readonly' ? 'selected' : '' }}>Read Only</option>

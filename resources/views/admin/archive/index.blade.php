@@ -66,6 +66,38 @@
         </div>
       </div>
     </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-muted small text-uppercase fw-bold mb-1">Archived Blotters</div>
+              <div class="h3 fw-bold text-secondary mb-0" id="stat-blotters">0</div>
+            </div>
+            <div class="bg-secondary bg-gradient text-white rounded-circle p-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+              <i class="bi bi-journal-text fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-muted small text-uppercase fw-bold mb-1">Archived Cases</div>
+              <div class="h3 fw-bold text-dark mb-0" id="stat-cases">0</div>
+            </div>
+            <div class="bg-dark bg-gradient text-white rounded-circle p-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+              <i class="bi bi-clipboard2-check fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Flash Messages -->
@@ -94,6 +126,20 @@
             <span class="badge bg-success ms-1" id="badge-requests">0</span>
           </button>
         </li>
+
+        <li class="nav-item" role="presentation">
+          <button class="nav-link rounded-pill px-4 py-2" id="blotters-tab" data-bs-toggle="tab" data-bs-target="#blotters" type="button" role="tab">
+            <i class="bi bi-file-earmark-text me-2"></i>Blotters
+            <span class="badge bg-secondary ms-1" id="badge-blotters">0</span>
+          </button>
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <button class="nav-link rounded-pill px-4 py-2" id="cases-tab" data-bs-toggle="tab" data-bs-target="#cases" type="button" role="tab">
+            <i class="bi bi-clipboard2-check me-2"></i>Cases
+            <span class="badge bg-dark ms-1" id="badge-cases">0</span>
+          </button>
+        </li>
       </ul>
     </div>
 
@@ -102,6 +148,7 @@
       <div class="tab-content" id="archiveTabsContent">
         <!-- Residents Tab -->
         <div class="tab-pane fade show active" id="residents" role="tabpanel">
+
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
               <thead class="bg-light text-uppercase small text-muted">
@@ -182,9 +229,65 @@
             </table>
           </div>
         </div>
+
+        <!-- Blotters Tab -->
+        <div class="tab-pane fade" id="blotters" role="tabpanel">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light text-uppercase small text-muted">
+                <tr>
+                  <th class="px-3 py-3">#</th>
+                  <th class="py-3">Complainant</th>
+                  <th class="py-3">Respondent</th>
+                  <th class="py-3">Archived On</th>
+                  <th class="py-3 text-end pe-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="blotters-tbody">
+                <tr>
+                  <td colspan="5" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center">
+                      <div class="spinner-border text-secondary mb-2" role="status"></div>
+                      <small class="text-muted">Loading archived blotters...</small>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Cases Tab -->
+        <div class="tab-pane fade" id="cases" role="tabpanel">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light text-uppercase small text-muted">
+                <tr>
+                  <th class="px-3 py-3">#</th>
+                  <th class="py-3">Case Title</th>
+                  <th class="py-3">Status</th>
+                  <th class="py-3">Archived On</th>
+                  <th class="py-3 text-end pe-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cases-tbody">
+                <tr>
+                  <td colspan="5" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center">
+                      <div class="spinner-border text-dark mb-2" role="status"></div>
+                      <small class="text-muted">Loading archived cases...</small>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
+
 
   <!-- Info Banner -->
   <div class="mt-4">
@@ -322,10 +425,17 @@ function hideMsg(){
 const tbodyResidents = document.getElementById('residents-tbody');
 const tbodyDocuments = document.getElementById('documents-tbody');
 const tbodyRequests = document.getElementById('requests-tbody');
+const statBlotters = document.getElementById('stat-blotters');
+const statCases = document.getElementById('stat-cases');
+
+// Safety guards: if Blade markup is altered and a tbody is missing,
+// prevent hard JS crashes.
+const safeSetInnerHTML = (el, html) => { if (el) el.innerHTML = html; };
 
 // Load archived residents
 async function loadArchivedResidents() {
-  tbodyResidents.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="d-flex flex-column align-items-center"><div class="spinner-border text-primary mb-2"></div><small class="text-muted">Loading...</small></div></td></tr>`;
+  safeSetInnerHTML(tbodyResidents, `<tr><td colspan="6" class="text-center py-4"><div class="d-flex flex-column align-items-center"><div class="spinner-border text-primary mb-2"></div><small class="text-muted">Loading...</small></div></td></tr>`);
+
   
   try {
     const { res, data } = await api('/api/v1/archive/residents');
@@ -369,7 +479,8 @@ async function loadArchivedResidents() {
 
 // Load archived document types
 async function loadArchivedDocuments() {
-  tbodyDocuments.innerHTML = `<tr><td colspan="5" class="text-center py-4"><div class="d-flex flex-column align-items-center"><div class="spinner-border text-warning mb-2"></div><small class="text-muted">Loading...</small></div></td></tr>`;
+  safeSetInnerHTML(tbodyDocuments, `<tr><td colspan="5" class="text-center py-4"><div class="d-flex flex-column align-items-center"><div class="spinner-border text-warning mb-2"></div><small class="text-muted">Loading...</small></div></td></tr>`);
+
   
   try {
     const { res, data } = await api('/api/v1/archive/document-types');
@@ -407,20 +518,26 @@ async function loadArchivedDocuments() {
 
 // Load archived document requests
 async function loadArchivedRequests() {
-  tbodyRequests.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="d-flex flex-column align-items-center"><div class="spinner-border text-success mb-2"></div><small class="text-muted">Loading...</small></div></td></tr>`;
-  
+    safeSetInnerHTML(tbodyRequests, `<tr><td colspan="6" class="text-center py-4"><div class="d-flex flex-column align-items-center"><div class="spinner-border text-success mb-2"></div><small class="text-muted">Loading...</small></div></td></tr>`);
+
+  // If tbodyRequests doesn't exist due to markup issues, stop early to avoid “loading forever”.
+  if (!tbodyRequests) return;
+
   try {
     const { res, data } = await api('/api/v1/archive/document-requests');
     if (!res.ok) throw new Error(data.message || 'Failed to load');
-    
-    const list = data.document_requests || [];
+
+    // Must match backend response shape; fallback keys handled to avoid infinite loading
+    const list = data.document_requests || data.documentRequests || data.documentRequestsList || [];
+
     document.getElementById('stat-requests').textContent = list.length;
     document.getElementById('badge-requests').textContent = list.length;
 
     if (list.length === 0) {
-      tbodyRequests.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><i class="bi bi-journal-text fs-1 d-block mb-2 opacity-25"></i>No archived requests</td></tr>`;
+      safeSetInnerHTML(tbodyRequests, `<tr><td colspan="6" class="text-center py-5 text-muted"><i class="bi bi-journal-text fs-1 d-block mb-2 opacity-25"></i>No archived requests</td></tr>`);
       return;
     }
+
 
     tbodyRequests.innerHTML = list.map(req => `
       <tr>
@@ -439,8 +556,9 @@ async function loadArchivedRequests() {
       </tr>
     `).join('');
   } catch (err) {
-    tbodyRequests.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load requests</td></tr>`;
+    safeSetInnerHTML(tbodyRequests, `<tr><td colspan="6" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load requests</td></tr>`);
   }
+
 }
 
 // Event delegation for restore buttons
@@ -507,11 +625,15 @@ document.addEventListener('click', async (e) => {
 });
 
 // Initial load
-document.addEventListener('DOMContentLoaded', () => {
-  loadArchivedResidents();
-  loadArchivedDocuments();
-  loadArchivedRequests();
-});
+ document.addEventListener('DOMContentLoaded', () => {
+   loadArchivedResidents();
+   loadArchivedDocuments();
+   loadArchivedRequests();
+   // Blotters + Cases archived counts
+   // (These endpoints may be implemented server-side; if not, cards will remain 0.)
+   loadArchivedBlotters();
+   loadArchivedCases();
+ });
 
 // Refresh on tab change
 document.getElementById('archiveTabs').addEventListener('shown.bs.tab', (e) => {

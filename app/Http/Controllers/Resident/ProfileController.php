@@ -32,29 +32,45 @@ class ProfileController extends Controller
             'middle_name' => 'nullable|string|max:100',
             'last_name' => 'required|string|max:100',
             'contact_no' => 'nullable|string|max:30',
+            'phase' => 'nullable|string|max:50',
             'address_line' => 'nullable|string|max:255',
             'civil_status' => 'nullable|string|max:50',
             'occupation' => 'nullable|string|max:80',
+            'monthly_income' => 'nullable|string|max:80',
+            'educational_attainment' => 'nullable|string|max:100',
+            'pwd_status' => 'nullable|boolean',
+            'solo_parent' => 'nullable|boolean',
+            'indigent_status' => 'nullable|boolean',
+            'four_ps_beneficiary' => 'nullable|boolean',
+            'guardian_full_name' => 'nullable|string|max:150',
+            'guardian_email' => 'nullable|email|max:255',
+            'guardian_contact_no' => 'nullable|string|max:30',
+            'guardian_relationship' => 'nullable|string|max:50',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Update resident fields
-        $resident->update($request->except('profile_picture'));
-
-        // Handle profile picture upload
-        if ($request->hasFile('profile_picture')) {
-            // Delete old image if exists
-            if ($resident->profile_picture) {
-                Storage::disk('public')->delete($resident->profile_picture);
+        foreach (['pwd_status', 'solo_parent', 'indigent_status', 'four_ps_beneficiary'] as $boolField) {
+            if ($request->filled($boolField) || $request->has($boolField)) {
+                $validated[$boolField] = $request->boolean($boolField);
             }
-            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
-            $resident->update(['profile_picture' => $path]);
         }
 
-        // Update user name
+        $resident->fill($validated);
+        $resident->save();
+
+        if ($request->hasFile('profile_picture')) {
+            if ($resident->photo_path) {
+                Storage::disk('public')->delete($resident->photo_path);
+            }
+            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $resident->photo_path = $path;
+            $resident->save();
+        }
+
         $fullName = trim(($request->first_name ?? '') . ' ' . ($request->middle_name ?? '') . ' ' . ($request->last_name ?? ''));
         $user->update(['name' => $fullName]);
 
         return response()->json(['message' => 'Profile updated successfully!', 'success' => true]);
     }
 }
+

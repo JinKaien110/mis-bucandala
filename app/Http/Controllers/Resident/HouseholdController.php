@@ -24,10 +24,15 @@ class HouseholdController extends Controller
         $pendingRequestsCount = 0;
 
         if ($resident && $resident->household_id) {
-            $household = Household::with(['members.resident'])->find($resident->household_id);
+            $household = Household::with(['members.resident.user'])->find($resident->household_id);
             if ($household) {
-                // If resident is head of household, show pending join requests
-                if ($household->head_resident_id === $resident->id || ! $household->head_resident_id) {
+                // If resident is head of household (relationship-based), show pending join requests
+                $isHead = $household->members()
+                    ->where('resident_id', $resident->id)
+                    ->where('relationship', 'Head')
+                    ->exists();
+
+                if ($isHead) {
                     $joinRequests = HouseholdJoinRequest::where('household_id', $household->id)
                         ->where('status', 'pending')
                         ->with(['resident', 'responder'])
@@ -41,6 +46,43 @@ class HouseholdController extends Controller
         return view('resident.household', compact('user', 'resident', 'household', 'joinRequests', 'pendingRequestsCount'));
     }
 
+    private function serializeBarangayProgramParticipation(Request $request, array $validated): ?string
+    {
+        // Keep DB column as TEXT. Serialize selected checkboxes + optional "other" as comma-separated string.
+        $selected = $request->input('barangay_program_participation', []);
+        if (!is_array($selected)) {
+            $selected = [$selected];
+        }
+
+        $selected = array_values(array_filter(array_map(function ($v) {
+            return is_string($v) ? trim($v) : '';
+        }, $selected), function ($v) {
+            return $v !== '';
+        }));
+
+        $other = isset($validated['barangay_program_participation_other']) ? trim((string) $validated['barangay_program_participation_other']) : '';
+        if ($other !== '') {
+            $selected[] = $other;
+        }
+
+        if (count($selected) === 0) {
+            return null;
+        }
+
+        // De-duplicate but keep order.
+        $seen = [];
+        $unique = [];
+        foreach ($selected as $item) {
+            $key = mb_strtolower($item);
+            if (!isset($seen[$key])) {
+                $seen[$key] = true;
+                $unique[] = $item;
+            }
+        }
+
+        return implode(', ', $unique);
+    }
+
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -52,11 +94,10 @@ class HouseholdController extends Controller
 
         $validated = $request->validate([
             'address_line' => 'required|string|max:255',
-            'phase' => 'nullable|integer|min:1',
+            'phase' => 'nullable|in:A,B,C',
             'contact_no' => 'nullable|string|max:20',
             'household_type' => 'nullable|string|max:50',
             'homeownership_type' => 'nullable|string|max:50',
-            'house_type' => 'nullable|string|max:50',
             'has_toilet' => 'nullable|boolean',
             'has_bathroom' => 'nullable|boolean',
             'has_kitchen' => 'nullable|boolean',
@@ -69,8 +110,11 @@ class HouseholdController extends Controller
             'has_senior_citizen' => 'nullable|boolean',
             'has_pwd' => 'nullable|boolean',
             'has_chronic_illness' => 'nullable|boolean',
-            'disaster_risk_level' => 'nullable|string|max:50',
-            'barangay_program_participation' => 'nullable|string',
+
+            // Updated to accept checkbox array
+            'barangay_program_participation' => 'nullable|array',
+            'barangay_program_participation.*' => 'nullable|string|max:255',
+            'barangay_program_participation_other' => 'nullable|string|max:255',
         ]);
 
         // Generate household code (HH-YYYY-NNNNNNN)
@@ -82,15 +126,15 @@ class HouseholdController extends Controller
         }
         $householdCode = sprintf('HH-%s-%07d', $year, $nextNumber);
 
+        $barangayParticipationSerialized = $this->serializeBarangayProgramParticipation($request, $validated);
+
         $household = Household::create([
             'household_code' => $householdCode,
             'address_line' => $validated['address_line'],
             'phase' => $validated['phase'],
             'street' => $validated['street'] ?? null,
             'contact_no' => $validated['contact_no'],
-            'household_type' => $validated['household_type'],
             'homeownership_type' => $validated['homeownership_type'],
-            'house_type' => $validated['house_type'],
             'has_toilet' => $request->boolean('has_toilet'),
             'has_bathroom' => $request->boolean('has_bathroom'),
             'has_kitchen' => $request->boolean('has_kitchen'),
@@ -105,8 +149,7 @@ class HouseholdController extends Controller
             'has_senior_citizen' => $validated['has_senior_citizen'] ?? false,
             'has_pwd' => $validated['has_pwd'] ?? false,
             'has_chronic_illness' => $validated['has_chronic_illness'] ?? false,
-            'disaster_risk_level' => $validated['disaster_risk_level'] ?? null,
-            'barangay_program_participation' => $validated['barangay_program_participation'] ?? null,
+            'barangay_program_participation' => $barangayParticipationSerialized,
         ]);
 
         // Link resident to household as head
@@ -126,12 +169,10 @@ class HouseholdController extends Controller
 
         $validated = $request->validate([
             'address_line' => 'required|string|max:255',
-            'phase' => 'nullable|integer|min:1',
-            'street' => 'nullable|string|max:255', // Added street field
+            'phase' => 'nullable|in:A,B,C',
             'contact_no' => 'nullable|string|max:20',
             'household_type' => 'nullable|string|max:50',
             'homeownership_type' => 'nullable|string|max:50',
-            'house_type' => 'nullable|string|max:50',
             'has_toilet' => 'nullable|boolean',
             'has_bathroom' => 'nullable|boolean',
             'has_kitchen' => 'nullable|boolean',
@@ -144,18 +185,21 @@ class HouseholdController extends Controller
             'has_senior_citizen' => 'nullable|boolean',
             'has_pwd' => 'nullable|boolean',
             'has_chronic_illness' => 'nullable|boolean',
-            'disaster_risk_level' => 'nullable|string|max:50',
-            'barangay_program_participation' => 'nullable|string',
+
+            // Updated to accept checkbox array
+            'barangay_program_participation' => 'nullable|array',
+            'barangay_program_participation.*' => 'nullable|string|max:255',
+            'barangay_program_participation_other' => 'nullable|string|max:255',
         ]);
+
+        $barangayParticipationSerialized = $this->serializeBarangayProgramParticipation($request, $validated);
 
         $household->update([
             'address_line' => $validated['address_line'],
             'phase' => $validated['phase'],
             'street' => $validated['street'] ?? null,
             'contact_no' => $validated['contact_no'],
-            'household_type' => $validated['household_type'],
             'homeownership_type' => $validated['homeownership_type'],
-            'house_type' => $validated['house_type'],
             'has_toilet' => $request->boolean('has_toilet'),
             'has_bathroom' => $request->boolean('has_bathroom'),
             'has_kitchen' => $request->boolean('has_kitchen'),
@@ -170,8 +214,7 @@ class HouseholdController extends Controller
             'has_senior_citizen' => $request->boolean('has_senior_citizen'),
             'has_pwd' => $request->boolean('has_pwd'),
             'has_chronic_illness' => $request->boolean('has_chronic_illness'),
-            'disaster_risk_level' => $validated['disaster_risk_level'] ?? null,
-            'barangay_program_participation' => $validated['barangay_program_participation'] ?? null,
+            'barangay_program_participation' => $barangayParticipationSerialized,
         ]);
 
         return response()->json(['message' => 'Household updated successfully!', 'success' => true]);
@@ -205,13 +248,12 @@ class HouseholdController extends Controller
             return response()->json(['message' => 'Household code not found.'], 404);
         }
 
-        // Check if already requested
+        // Check if already requested (pending vs rejected)
         $existingRequest = HouseholdJoinRequest::where('household_id', $household->id)
             ->where('resident_id', $resident->id)
-            ->where('status', 'pending')
             ->first();
 
-        if ($existingRequest) {
+        if ($existingRequest && $existingRequest->status === 'pending') {
             return response()->json(['message' => 'You already have a pending request for this household.'], 400);
         }
 
@@ -250,10 +292,17 @@ class HouseholdController extends Controller
             return response()->json(['message' => 'Resident profile not found.'], 404);
         }
 
-        // Verify this resident is head of the household
+        // Verify this resident is head of the household (relationship-based, not head_resident_id)
         $household = $joinRequest->household;
-        if ($household && $household->head_resident_id !== $resident->id) {
-            return response()->json(['message' => 'Only the household head can approve requests.'], 403);
+        if ($household) {
+            $isHead = $household->members()
+                ->where('resident_id', $resident->id)
+                ->where('relationship', 'Head')
+                ->exists();
+
+            if (! $isHead) {
+                return response()->json(['message' => 'Only the household head can approve requests.'], 403);
+            }
         }
 
         if ($joinRequest->status !== 'pending') {
@@ -265,12 +314,13 @@ class HouseholdController extends Controller
             $joinRequest->resident->update(['household_id' => $joinRequest->household_id]);
 
             // Create household member record
+            // Relationship for joined members should be something other than 'Head'
             $joinRequest->household->members()->create([
                 'resident_id' => $joinRequest->resident->id,
                 'first_name' => $joinRequest->resident->first_name,
                 'last_name' => $joinRequest->resident->last_name,
                 'email' => $joinRequest->resident->email,
-                'relationship' => 'Self',
+                'relationship' => 'Member',
                 'birth_date' => $joinRequest->resident->birth_date,
             ]);
 
@@ -297,10 +347,17 @@ class HouseholdController extends Controller
             return response()->json(['message' => 'Resident profile not found.'], 404);
         }
 
-        // Verify this resident is head of the household
+        // Verify this resident is head of the household (relationship-based, not head_resident_id)
         $household = $joinRequest->household;
-        if ($household && $household->head_resident_id === $resident->id) {
-            return response()->json(['message' => 'Only the household head can reject requests.'], 403);
+        if ($household) {
+            $isHead = $household->members()
+                ->where('resident_id', $resident->id)
+                ->where('relationship', 'Head')
+                ->exists();
+
+            if (! $isHead) {
+                return response()->json(['message' => 'Only the household head can reject requests.'], 403);
+            }
         }
 
         if ($joinRequest->status !== 'pending') {
@@ -328,7 +385,19 @@ class HouseholdController extends Controller
             return response()->json(['message' => 'Resident profile not found.'], 404);
         }
 
-        $household = Household::where('head_resident_id', $resident->id)->first();
+        // Identify the household head via relationship, then use the CURRENT resident's household context.
+        // If the resident is head, they can only add members to their own household.
+        $household = $resident->household_id ? Household::find($resident->household_id) : null;
+
+        if (! $household) {
+            return response()->json(['message' => 'Only household head can add members.'], 403);
+        }
+
+        $isHead = HouseholdMember::where('household_id', $household->id)
+            ->where('resident_id', $resident->id)
+            ->where('relationship', 'Head')
+            ->exists();
+
         if (! $household) {
             return response()->json(['message' => 'Only household head can add members.'], 403);
         }
@@ -360,8 +429,86 @@ class HouseholdController extends Controller
             'relationship' => $validated['relationship'],
             'birth_date' => $memberResident->birth_date,
         ]);
+    }
 
-        return response()->json(['message' => 'Member added successfully.', 'success' => true]);
+    /**
+     * Head updates all household members details at once
+     */
+    public function bulkUpdateMembers(Request $request)
+    {
+        $user = Auth::user();
+        $resident = Resident::where('user_id', $user->id)->first();
+
+        if (!$resident || !$resident->household_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $household = Household::find($resident->household_id);
+        $isHead = $household->members()
+            ->where('resident_id', $resident->id)
+            ->where('relationship', 'Head')
+            ->exists();
+
+        if (!$isHead) {
+            return response()->json(['message' => 'Only the household head can update members.'], 403);
+        }
+
+        $validated = $request->validate([
+            'members' => 'required|array',
+            'members.*.id' => 'required|exists:household_members,id',
+            'members.*.relationship' => 'required|string|max:100',
+        ]);
+
+        foreach ($validated['members'] as $memberData) {
+            $member = HouseholdMember::where('id', $memberData['id'])
+                ->where('household_id', $household->id)
+                ->first();
+
+            if ($member) {
+                $member->update([
+                    'relationship' => $memberData['relationship'],
+                ]);
+            }
+        }
+
+        return response()->json(['message' => 'Household members updated successfully!', 'success' => true]);
+    }
+
+    /**
+     * Head updates a household member's details
+     */
+    public function updateMember(Request $request, HouseholdMember $member)
+    {
+        $user = Auth::user();
+        $resident = Resident::where('user_id', $user->id)->first();
+
+        if (!$resident) {
+            return response()->json(['message' => 'Resident profile not found.'], 404);
+        }
+
+        $household = $member->household;
+        if (!$household || $resident->household_id !== $household->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $isHead = $household->members()
+            ->where('resident_id', $resident->id)
+            ->where('relationship', 'Head')
+            ->exists();
+
+        if (!$isHead) {
+            return response()->json(['message' => 'Only the household head can update members.'], 403);
+        }
+
+        $validated = $request->validate([
+            'relationship' => 'required|string|max:100',
+        ]);
+
+        $member->update([
+            'relationship' => $validated['relationship'],
+        ]);
+
+        return response()->json(['message' => 'Member updated successfully!', 'success' => true]);
     }
 
     public function togglePWD(Request $request, HouseholdMember $member)
@@ -370,8 +517,18 @@ class HouseholdController extends Controller
         $resident = Resident::where('user_id', $user->id)->first();
 
         // Verify the member belongs to the resident's household
+        // and that the current resident is the household head (relationship-based)
         $household = $member->household;
-        if (!$household || $household->head_resident_id !== $resident->id) {
+        if (! $household) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $isHead = $household->members()
+            ->where('resident_id', $resident->id)
+            ->where('relationship', 'Head')
+            ->exists();
+
+        if (! $isHead) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -401,3 +558,4 @@ class HouseholdController extends Controller
         return response()->json($residents);
     }
 }
+

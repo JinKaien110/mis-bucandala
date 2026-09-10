@@ -113,11 +113,33 @@ class OfficialController extends Controller
         return back()->with('success', 'Term restored successfully.');
     }
 
+public function activeOfficials()
+{
+    $officials = BarangayOfficial::whereHas('term', function ($q) {
+        $q->where('is_active', true)->where('is_archived', false);
+    })
+    ->orderBy('position')
+    ->orderBy('last_name')
+    ->get([
+        'id',
+        'first_name',
+        'last_name',
+        'email',
+        'position',
+    ]);
+
+    return response()->json([
+        'officials' => $officials,
+    ]);
+}
+
+
     public function store(Request $request)
     {
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'position' => ['required', 'string', 'max:100'],
             'committee' => ['nullable', 'string', 'max:100'],
             'contact_no' => ['nullable', 'string', 'max:20'],
@@ -148,7 +170,8 @@ class OfficialController extends Controller
     {
         try {
             $data = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
+                'first_name' => ['required', 'string', 'max:255'],
+                'last_name' => ['required', 'string', 'max:255'],
                 'position' => ['required', 'string', 'max:100'],
                 'committee' => ['nullable', 'string', 'max:100'],
                 'contact_no' => ['nullable', 'string', 'max:20'],
@@ -219,7 +242,8 @@ class OfficialController extends Controller
         return response()->json([
             'official' => [
                 'id' => $official->id,
-                'name' => $official->name,
+                'first_name' => $official->first_name,
+                'last_name' => $official->last_name,
                 'position' => $official->position,
                 'committee' => $official->committee,
                 'contact_no' => $official->contact_no,

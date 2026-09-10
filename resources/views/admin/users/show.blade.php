@@ -43,7 +43,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <small class="text-muted text-uppercase fw-bold d-block">Name</small>
-                            <span>{{ $user->name }}</span>
+                            <span>{{ $user->admin->first_name }} {{ $user->admin->last_name }}</span>
                         </div>
                         <div class="col-md-6">
                             <small class="text-muted text-uppercase fw-bold d-block">Email</small>

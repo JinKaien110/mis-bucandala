@@ -15,12 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\AddCsrfTokenHeader::class,
         ]);
+    
 
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'captain' => \App\Http\Middleware\EnsureUserIsCaptain::class,
             'hasRole' => \App\Http\Middleware\EnsureUserHasRole::class,
             'blockAdmin' => \App\Http\Middleware\BlockAdminMiddleware::class,
+            'ability' => \App\Http\Middleware\AbilityMiddleware::class,
         ]);
     })
 

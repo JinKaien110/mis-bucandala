@@ -154,7 +154,11 @@
     <div class="text-muted small">
       Showing {{ $logs->firstItem() ?? 0 }} to {{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }} results
     </div>
-    {{ $logs->links() }}
+    @if($logs->hasPages())
+      <div>
+        <x-admin-pagination :paginator="$logs" />
+      </div>
+    @endif
   </div>
 </div>
 @foreach($logs as $log)

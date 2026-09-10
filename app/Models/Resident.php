@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Resident extends Model
 {
     protected $fillable = [
-        'first_name','middle_name','last_name','sex','birth_date',
+        'first_name','middle_name','last_name','suffix','sex','birth_date',
         'street','phase','address_line','barangay','city','province',
-        'contact_no','email','civil_status','occupation','household_id',
+        'contact_no','email','civil_status','occupation','employment_status','monthly_income','educational_attainment',
+        'solo_parent','pwd','indigent','four_ps_beneficiary',
+        'household_id',
         'account_no','user_id','verification_type','verification_id',
-        'photo_path','id_image_path','selfie_image_path','child_doc_path',
+        'photo_path','id_image_path','selfie_image_path','proof_of_billing_path','child_doc_path',
         'guardian_full_name','guardian_contact_no','guardian_relationship',
         'guardian_email','registered_via','verification_status',
         'verified_at','verified_by','status','archived_at',
@@ -20,6 +22,11 @@ class Resident extends Model
     protected $casts = [
         'birth_date' => 'date',
         'verified_at' => 'datetime',
+        'solo_parent' => 'boolean',
+        'pwd' => 'boolean',
+        'indigent' => 'boolean',
+        'four_ps_beneficiary' => 'boolean',
+        'monthly_income' => 'string', // Ensure this is cast as string for range values
         'archived_at' => 'datetime',
     ];
 

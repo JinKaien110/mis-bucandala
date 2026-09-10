@@ -1189,6 +1189,47 @@
       z-index: 9999;
     }
 
+    /* Resident form contrast fixes */
+    .form-label-glass,
+    .glass-input,
+    .glass-select,
+    input.glass-input,
+    textarea.glass-input {
+      color: #f8fafc !important;
+    }
+
+    .glass-input,
+    .glass-select {
+      background: rgba(255, 255, 255, 0.18) !important;
+      border: 1px solid rgba(255, 255, 255, 0.35) !important;
+      color: #f8fafc !important;
+      box-shadow: none !important;
+    }
+
+    .glass-input:focus,
+    .glass-select:focus {
+      background: rgba(255, 255, 255, 0.92) !important;
+      color: #0f172a !important;
+      border-color: rgba(255, 215, 0, 0.85) !important;
+      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.18) !important;
+    }
+
+    .glass-input::placeholder,
+    .form-control::placeholder,
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.75) !important;
+      opacity: 1 !important;
+    }
+
+    .glass-select option {
+      background: #ffffff !important;
+      color: #0f172a !important;
+    }
+
+    .form-label-glass {
+      color: #f8fafc !important;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .navbar-collapse {

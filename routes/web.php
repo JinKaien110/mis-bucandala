@@ -87,10 +87,28 @@ use App\Http\Controllers\Public\ResidentRegistrationController;
 
 Route::get('/auth/login', function () {
     $user = Auth::user();
+
     if ($user) {
-        if (in_array($user->role, ['admin', 'staff'])) {
-            return redirect()->route('admin.dashboard') ?: redirect('/admin/residents');
+        if($user->resident) {
+            return redirect()->route('resident.dashboard') ?: redirect('/resident/dashboard');
         }
+        if (in_array($user->admin->position, ['Barangay Captain', 'Barangay Secretary', 'Barangay Clerk'])) {
+            // Always send admins to analytics; avoid crashing if a named route isn't registered
+            return redirect('/admin/analytics');
+        }
+        if ($user->admin->position === 'Barangay Treasurer') {
+            // Always send admins to analytics; avoid crashing if a named route isn't registered
+            return redirect('/admin/payments');
+        }
+        if (in_array($user->admin->position, ['Lupon Member'])) {
+            // Always send admins to analytics; avoid crashing if a named route isn't registered
+            return redirect('/admin/blotters');
+        }
+        if (in_array($user->admin->position, ['Barangay Clerk'])) {
+            // Always send admins to analytics; avoid crashing if a named route isn't registered
+            return redirect('/admin/document-requests');
+        }
+
 
         return redirect()->route('resident.dashboard') ?: redirect('/resident/dashboard');
     }
@@ -101,7 +119,7 @@ Route::get('/auth/login', function () {
 Route::middleware(['auth', 'role:resident'])->group(function () {
     // Dashboard & Profile
     Route::get('/resident/dashboard', [App\Http\Controllers\Resident\DashboardController::class, 'index'])->name('resident.dashboard');
-    Route::post('/resident/profile/update', [App\Http\Controllers\Resident\DashboardController::class, 'updateProfile'])->name('resident.profile.update');
+    Route::post('/resident/profile/update', [App\Http\Controllers\Resident\ProfileController::class, 'update'])->name('resident.profile.update');
     Route::get('/resident/profile', [App\Http\Controllers\Resident\ProfileController::class, 'edit'])->name('resident.profile');
 
     // Pets
@@ -123,6 +141,12 @@ Route::middleware(['auth', 'role:resident'])->group(function () {
 
      // Toggle PWD status for member
      Route::post('/resident/household/member/{member}/toggle-pwd', [App\Http\Controllers\Resident\HouseholdController::class, 'togglePWD'])->name('resident.household.member.toggle-pwd');
+
+     // Bulk update household members details
+     Route::put('/resident/household/members/bulk-update', [App\Http\Controllers\Resident\HouseholdController::class, 'bulkUpdateMembers'])->name('resident.household.members.bulk-update');
+
+     // Update household member details
+     Route::put('/resident/household/member/{member}', [App\Http\Controllers\Resident\HouseholdController::class, 'updateMember'])->name('resident.household.member.update');
 
      // Search residents by account number
      Route::get('/resident/household/search-resident', [App\Http\Controllers\Resident\HouseholdController::class, 'searchByAccount'])->name('resident.household.search-resident');
@@ -151,69 +175,142 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin,staff'])->group(function () {
+// Backward-compatible API alias (no /admin prefix)
+// Used by some frontend components to fetch data from the root /api/v1 path
+Route::middleware(['auth', 'role:admin,staff'])->prefix('api/v1')->name('legacy.api.')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | ADMIN DASHBOARD (LANDING PAGE)
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/admin', function () {
-        return redirect()->route('admin.analytics');
-    })->name('admin.dashboard');
+    Route::middleware([
+        'ability:view-documents'
+    ])->group(function () {
+        Route::get('/residents/options', [DocumentRequestController::class, 'residentOptions']);
+        // Document type options
+        Route::get('/document-types/options', [DocumentRequestController::class, 'documentTypeOptions']);
+        // ✅ Backward-compatible Document Requests API (fixes 404 on /api/v1/document-requests)
+        Route::get('/document-requests', [DocumentRequestController::class, 'apiIndex']);
+        Route::get('/document-requests/{documentRequest}', [DocumentRequestController::class, 'apiShow']);
+        // ✅ Compatibility: Document Types API (fixes 404 on /api/v1/document-types)
+        Route::get('/document-types', [DocumentTypeController::class, 'index']);
+        Route::get('/document-types/{documentType}', [DocumentTypeController::class, 'show'])->whereNumber('documentType');
 
-    Route::get('/admin/dashboard', function () {
-        return redirect()->route('admin.analytics');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | ANALYTICS DASHBOARD
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/admin/analytics', [App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('admin.analytics');
-    Route::get('/admin/analytics/export', [App\Http\Controllers\Admin\AnalyticsController::class, 'export'])->name('admin.analytics.export');
 
-    /*
-    |--------------------------------------------------------------------------
-    | HOUSEHOLDS
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/admin/households', [HouseholdController::class, 'index'])->name('admin.households.index');
-    Route::get('/admin/households/create', [HouseholdController::class, 'create'])->name('admin.households.create');
-    Route::post('/admin/households', [HouseholdController::class, 'store'])->name('admin.households.store');
-    Route::get('/admin/households/{household}', [HouseholdController::class, 'show'])->name('admin.households.show');
-    Route::get('/admin/households/{household}/edit', [HouseholdController::class, 'edit'])->name('admin.households.edit');
-    Route::put('/admin/households/{household}', [HouseholdController::class, 'update'])->name('admin.households.update');
-    Route::delete('/admin/households/{household}', [HouseholdController::class, 'destroy'])->name('admin.households.destroy');
-    Route::post('/admin/households/{household}/restore', [HouseholdController::class, 'restore'])->name('admin.households.restore');
-    Route::post('/admin/households/{household}/add-member', [HouseholdController::class, 'addMember'])->name('admin.households.add-member');
-    Route::delete('/admin/households/{household}/members/{resident}', [HouseholdController::class, 'removeMember'])->name('admin.households.remove-member');
+    Route::middleware([
+        'ability:view-core-records,manage-records,create-users,view-users'
+    ])->group(function () {
+        
 
-    /*
-    |--------------------------------------------------------------------------
-    | ANNOUNCEMENTS
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcements.index');
-    Route::get('/admin/announcements/create', [AnnouncementController::class, 'create'])->name('admin.announcements.create');
-    Route::post('/admin/announcements', [AnnouncementController::class, 'store'])->name('admin.announcements.store');
-    Route::get('/admin/announcements/{announcement}', [AnnouncementController::class, 'show'])->name('admin.announcements.show');
-    Route::get('/admin/announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('admin.announcements.edit');
-    Route::put('/admin/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('admin.announcements.update');
-    Route::delete('/admin/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('admin.announcements.destroy');
-    Route::get('/admin/announcements/modal/create', [AnnouncementController::class, 'getCreateData'])->name('admin.announcements.modal.create');
-    Route::get('/admin/announcements/{announcement}/modal/edit', [AnnouncementController::class, 'getEditData'])->name('admin.announcements.modal.edit');
-    Route::get('/admin/announcements/{announcement}/modal/show', [AnnouncementController::class, 'getShowData'])->name('admin.announcements.modal.show');
 
-    Route::prefix('api/v1')->group(function () {
+        // Residents
+        Route::get('/residents', [ResidentController::class, 'index']);
+        Route::get('/residents/{resident}', [ResidentController::class, 'show']);
+        Route::patch('/residents/{resident}/toggle-status', [ResidentController::class, 'toggleStatus']);
+        Route::delete('/residents/{resident}', [ResidentController::class, 'destroy']);
+        Route::post('/residents/{resident}/archive', [ResidentController::class, 'archive']);
+        Route::post('/residents/{resident}/restore', [ResidentController::class, 'restore']);
+        Route::get('/residents/options', [DocumentRequestController::class, 'residentOptions']);
 
-        Route::get('/users', [UserController::class, 'index']);
-        Route::post('/users', [UserController::class, 'store']);
-        Route::get('/users/{user}', [UserController::class, 'show']);
-        Route::put('/users/{user}', [UserController::class, 'update']);
-        Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
-        Route::patch('/users/{user}/reset-password', [UserController::class, 'resetPassword']);
+        // Residents
+        Route::get('/residents', [ResidentController::class, 'index']);
+        Route::get('/residents/{resident}', [ResidentController::class, 'show']);
+        Route::patch('/residents/{resident}/toggle-status', [ResidentController::class, 'toggleStatus']);
+        Route::delete('/residents/{resident}', [ResidentController::class, 'destroy']);
+        Route::post('/residents/{resident}/archive', [ResidentController::class, 'archive']);
+        Route::post('/residents/{resident}/restore', [ResidentController::class, 'restore']);
+
+    });
+
+
+        
+   
+
+});
+
+
+
+Route::middleware(['auth', 'role:admin,staff'])->prefix('admin')->name('admin.')->group(function () {
+
+
+Route::middleware([
+
+    'ability:view-dashboard'
+])->group(function () {
+        /*
+
+        |--------------------------------------------------------------------------
+        | ADMIN DASHBOARD (LANDING PAGE)
+        |--------------------------------------------------------------------------
+        */
+    
+        Route::get('/admin', function () {
+            return redirect()->route('admin.analytics');
+        })->name('dashboard');
+
+        Route::get('/admin/dashboard', function () {
+            return redirect()->route('admin.analytics');
+        })->name('dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ANALYTICS DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/analytics', [App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics');
+        Route::get('/analytics/export', [App\Http\Controllers\Admin\AnalyticsController::class, 'export'])->name('analytics.export');
+
+});
+
+
+Route::middleware([
+        'ability:view-households,view-community'
+    ])->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | HOUSEHOLDS
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');
+        Route::get('/households/create', [HouseholdController::class, 'create'])->name('households.create');
+        Route::post('/households', [HouseholdController::class, 'store'])->name('households.store');
+        Route::get('/households/{household}', [HouseholdController::class, 'show'])->name('households.show');
+        Route::get('/households/{household}/edit', [HouseholdController::class, 'edit'])->name('households.edit');
+        Route::put('/households/{household}', [HouseholdController::class, 'update'])->name('households.update');
+        Route::delete('/households/{household}', [HouseholdController::class, 'destroy'])->name('households.destroy');
+        Route::post('/households/{household}/restore', [HouseholdController::class, 'restore'])->name('households.restore');
+        Route::post('/households/{household}/add-member', [HouseholdController::class, 'addMember'])->name('households.add-member');
+        Route::delete('/households/{household}/members/{resident}', [HouseholdController::class, 'removeMember'])->name('households.remove-member');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ANNOUNCEMENTS
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('/announcements/create', [AnnouncementController::class, 'create'])->name('announcements.create');
+        Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+        Route::get('/announcements/{announcement}', [AnnouncementController::class, 'show'])->name('announcements.show');
+        Route::get('/announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
+        Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('announcements.update');
+        Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+        Route::get('/announcements/modal/create', [AnnouncementController::class, 'getCreateData'])->name('announcements.modal.create');
+        Route::get('/announcements/{announcement}/modal/edit', [AnnouncementController::class, 'getEditData'])->name('announcements.modal.edit');
+        Route::get('/announcements/{announcement}/modal/show', [AnnouncementController::class, 'getShowData'])->name('announcements.modal.show');
+    });
+    
+
+    Route::middleware([
+        'ability:manage-users,create-users,view-users'
+    ])->group(function () {
+        Route::prefix('api/v1')->group(function () {
+
+            Route::get('/users', [UserController::class, 'index']);
+            Route::post('/users', [UserController::class, 'store']);
+            Route::get('/users/{user}', [UserController::class, 'show']);
+            Route::put('/users/{user}', [UserController::class, 'update']);
+            Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
+            Route::patch('/users/{user}/reset-password', [UserController::class, 'resetPassword']);
+        });
+
     });
 
     /*
@@ -222,27 +319,29 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::view('/admin/residents', 'admin.residents.index')
-        ->name('admin.residents');
+    Route::middleware([
+        'ability:view-core-records'
+    ])->group(function () {
 
-    Route::post('/admin/residents', [ResidentController::class, 'store'])
-        ->name('admin.residents.store');
+        Route::view('/residents', 'admin.residents.index')
+            ->name('residents');
 
-    Route::put('/admin/residents/{resident}', [ResidentController::class, 'update'])
-        ->name('admin.residents.update');
+        Route::post('/residents', [ResidentController::class, 'store'])
+            ->name('residents.store');
 
-    Route::prefix('api/v1')->group(function () {
+        Route::put('/residents/{resident}', [ResidentController::class, 'update'])
+            ->name('residents.update');
 
-        // ✅ put OPTIONS FIRST
-        Route::get('/residents/options', [DocumentRequestController::class, 'residentOptions']);
+        Route::prefix('api/v1')->group(function () {
 
-        // then list + show
-        Route::get('/residents', [ResidentController::class, 'index']);
-        Route::get('/residents/{resident}', [ResidentController::class, 'show']);
-         Route::patch('/residents/{resident}/toggle-status', [ResidentController::class, 'toggleStatus']);
-         Route::delete('/residents/{resident}', [ResidentController::class, 'destroy']);
-         Route::post('/residents/{resident}/archive', [ResidentController::class, 'archive']);
-         Route::post('/residents/{resident}/restore', [ResidentController::class, 'restore']);
+            // then list + show
+            Route::get('/residents', [ResidentController::class, 'index']);
+            Route::get('/residents/{resident}', [ResidentController::class, 'show']);
+            Route::patch('/residents/{resident}/toggle-status', [ResidentController::class, 'toggleStatus']);
+            Route::delete('/residents/{resident}', [ResidentController::class, 'destroy']);
+            Route::post('/residents/{resident}/archive', [ResidentController::class, 'archive']);
+            Route::post('/residents/{resident}/restore', [ResidentController::class, 'restore']);
+        });
     });
 
     /*
@@ -251,24 +350,28 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:admin,staff'])->group(function () {
-        Route::view('/admin/documents', 'admin.document-management.index')
-            ->name('admin.document-types.index');
+        Route::middleware([
+            'ability:view-documents'
+        ])->group(function () {
+        
+        Route::view('/document-types', 'admin.document-management.index')
+            ->name('document-types.index');
 
-        Route::get('/admin/document-types', [DocumentTypeController::class, 'index'])
-            ->name('admin.document-types.index');
+        Route::get('/document-types/list', [DocumentTypeController::class, 'index'])->name('document-types.list');
 
-        Route::post('/admin/document-types', [DocumentTypeController::class, 'store'])
-            ->name('admin.document-types.store');
+        Route::post('/document-types', [DocumentTypeController::class, 'store'])
+            ->name('document-types.store');
 
-        Route::put('/admin/document-types/{documentType}', [DocumentTypeController::class, 'update'])
-            ->name('admin.document-types.update');
+        Route::put('/document-types/{documentType}', [DocumentTypeController::class, 'update'])
+                    ->name('admin.document-types.update');
 
-        Route::patch('/admin/document-types/{documentType}/toggleStatus', [DocumentTypeController::class, 'toggleStatus'])
-            ->name('admin.document-types.toggleStatus');
+        Route::patch('/document-types/{documentType}/toggleStatus', [DocumentTypeController::class, 'toggleStatus'])
+                    ->name('admin.document-types.toggleStatus');
 
-        Route::delete('/admin/document-types/{documentType}', [DocumentTypeController::class, 'destroy'])
-            ->name('admin.document-types.destroy');
+        Route::delete('/document-types/{documentType}', [DocumentTypeController::class, 'destroy'])
+                    ->name('admin.document-types.destroy');
 
+        // Existing API (mounted under /admin/api/v1)
         Route::prefix('api/v1')->group(function () {
             Route::get('/document-types', [DocumentTypeController::class, 'index']);
 
@@ -276,43 +379,62 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
 
         });
 
+        // ✅ Compatibility API (mounted under /admin/document-types/api/v1)
+        // Fixes 404 when frontend calls: /admin/document-types/api/v1/document-types
+        Route::prefix('document-types')->group(function () {
+            Route::prefix('api/v1')->group(function () {
+                Route::get('/document-types', [DocumentTypeController::class, 'index']);
+                Route::get('/document-types/{documentType}', [DocumentTypeController::class, 'show'])->whereNumber('documentType');
+            });
+        });
+
+
         /*
         |--------------------------------------------------------------------------
         | DOCUMENT REQUESTS
         |--------------------------------------------------------------------------
         */
 
-        Route::get('/admin/document/requests', [DocumentRequestController::class, 'index'])
-            ->name('admin.document-requests.index');
+        Route::get('/document-requests', [DocumentRequestController::class, 'index'])
+            ->name('document-requests.index');
 
-        Route::post('/admin/document/requests', [DocumentRequestController::class, 'store'])
-            ->name('admin.document-requests.store');
+        Route::post('/document-requests', [DocumentRequestController::class, 'store'])
+            ->name('document-requests.store');
 
-        Route::put('/admin/document/requests/{documentRequest}', [DocumentRequestController::class, 'update'])
-            ->name('admin.document-requests.update');
+        Route::put('/document-requests/{documentRequest}', [DocumentRequestController::class, 'update'])
+            ->name('document-requests.update');
 
-        Route::patch('/admin/document/requests/{documentRequest}/toggle', [DocumentRequestController::class, 'toggle'])
-            ->name('admin.document-requests.toggle');
+        Route::patch('/document-requests/{documentRequest}/toggle', [DocumentRequestController::class, 'toggle'])
+            ->name('document-requests.toggle');
 
-        Route::delete('/admin/document/requests/{documentRequest}', [DocumentRequestController::class, 'destroy'])
-            ->name('admin.document-requests.destroy');
+        Route::delete('/document-requests/{documentRequest}', [DocumentRequestController::class, 'destroy'])
+            ->name('document-requests.destroy');
 
          Route::get('/admin/document-requests/{documentRequest}/patawag',
              [DocumentRequestPrintController::class, 'patawagComplainant']
          )->name('admin.document-requests.patawag');
+        });
+
+
 
         Route::prefix('api/v1')->group(function () {
 
+            Route::middleware([
+                'ability:view-documents'
+            ])->group(function () {
+            // NOTE: archive routes here are mounted under: /admin/api/v1/archive/*
             Route::get('/document-requests', [DocumentRequestController::class, 'apiIndex']);
             Route::get('/document-requests/{documentRequest}', [DocumentRequestController::class, 'apiShow']);
 
-             Route::get('/residents/options', [DocumentRequestController::class, 'residentOptions']);
-             Route::get('/document-types/options', [DocumentRequestController::class, 'documentTypeOptions']);
-
-             // Archive API
+             // Archive API (mounted under /admin/api/v1)
              Route::get('/archive/residents', [App\Http\Controllers\Admin\ArchiveController::class, 'residents']);
              Route::get('/archive/document-types', [App\Http\Controllers\Admin\ArchiveController::class, 'documentTypes']);
              Route::get('/archive/document-requests', [App\Http\Controllers\Admin\ArchiveController::class, 'documentRequests']);
+
+
+            });
+            
+
 
              // Restore endpoints
              Route::post('/residents/{resident}/restore', [App\Http\Controllers\Admin\ResidentController::class, 'restore']);
@@ -328,24 +450,26 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     */
 
      Route::middleware(['auth', 'role:admin,staff'])->group(function () {
-         Route::get('/admin/document-requests/{documentRequest}/download',
+         Route::get('/document-requests/{documentRequest}/download',
              [DocumentRequestPrintController::class, 'download']
-         )->name('admin.document-requests.download');
+         )->name('document-requests.download');
 
-         Route::get('/admin/document-requests/{documentRequest}/print',
+         Route::get('/document-requests/{documentRequest}/print',
              [DocumentRequestPrintController::class, 'print']
-         )->name('admin.document-requests.print');
+         )->name('document-requests.print');
      });
 
-    /*
+    
+    
+    Route::middleware([
+                'ability:view-blotters'
+            ])->group(function () {
+     /*
+    
     |--------------------------------------------------------------------------
     | BLOTTERS (ADMIN)
     |--------------------------------------------------------------------------
     */
-
-    // routes/web.php
-
-    Route::middleware(['auth', 'role:admin,staff'])->prefix('admin')->name('admin.')->group(function () {
 
         // Blotters
         Route::get('/blotters', [BlotterController::class, 'index'])->name('blotters.index');
@@ -366,13 +490,20 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
 
         // Close
         Route::post('/cases/{case}/close', [CaseController::class, 'close'])->name('cases.close');
+        });
 
+
+
+
+        Route::middleware([
+                'ability:view-dashboard'
+            ])->group(function () {
         /*
         |--------------------------------------------------------------------------
         | ACTIVITY LOGS
         |--------------------------------------------------------------------------
         */
-        Route::get('/admin/logs', [AuditLogController::class, 'index'])->name('logs.index');
+        Route::get('/logs', [AuditLogController::class, 'index'])->name('logs.index');
 
         // Officials - API/Modal routes
         Route::get('/officials', [OfficialController::class, 'index'])->name('officials.index');
@@ -384,6 +515,8 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
         Route::get('/officials/modal/create', [OfficialController::class, 'getCreateData'])->name('officials.modal.create');
         Route::get('/officials/{official}/modal/edit', [OfficialController::class, 'getEditData'])->name('officials.modal.edit');
         Route::get('/officials/{official}/modal/show', [OfficialController::class, 'getShowData'])->name('officials.modal.show');
+        Route::get('/officials/api/active', [OfficialController::class, 'activeOfficials']);
+
 
         // Official Terms - API/Modal routes
         Route::get('/officials/terms', [OfficialController::class, 'termsIndex'])->name('officials.terms.index');
@@ -414,61 +547,62 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
         Route::put('/pets/{pet}', [PetController::class, 'update'])->name('pets.update');
         Route::delete('/pets/{pet}', [PetController::class, 'destroy'])->name('pets.destroy');
 
-        // Payments / Fees
-        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-        Route::get('/payments/create', [PaymentController::class, 'create'])->name('payments.create');
-        Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
-        Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
-        Route::get('/payments/{payment}/edit', [PaymentController::class, 'edit'])->name('payments.edit');
-        Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
-        Route::post('/payments/{payment}/mark-paid', [PaymentController::class, 'markAsPaid'])->name('payments.markPaid');
-        Route::post('/payments/{payment}/cancel', [PaymentController::class, 'cancel'])->name('payments.cancel');
-        Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+        });
 
+
+        
+            Route::middleware([
+                'ability:view-payments'
+            ])->group(function () {
+                // Payments / Fees
+                Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+                // NOTE: Removed create/store endpoints to hide/disable "Add Payment" button
+                // Route::get('/payments/create', [PaymentController::class, 'create'])->name('payments.create');
+                // Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+
+                Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
+                Route::get('/payments/{payment}/edit', [PaymentController::class, 'edit'])->name('payments.edit');
+                Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+                Route::post('/payments/{payment}/mark-paid', [PaymentController::class, 'markAsPaid'])->name('payments.markPaid');
+                Route::post('/payments/{payment}/cancel', [PaymentController::class, 'cancel'])->name('payments.cancel');
+                Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+            });
+
+
+            Route::middleware([
+                'ability:view-core-records'
+            ])->group(function () {
         // Users & Roles
-        Route::middleware(['captain'])->group(function () {
+
             Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
             Route::post('/users', [UserController::class, 'store'])->name('users.store');
-        });
-
-        Route::middleware(['hasRole:admin,staff'])->group(function () {
             Route::get('/users', [UserController::class, 'index'])->name('users.index');
             Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
-        });
-
-        Route::middleware(['captain'])->group(function () {
             Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
             Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
             Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
             Route::post('/users/{user}/reset-password', [UserController::class, 'updatePassword'])->name('users.resetPassword');
             Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-        });
 
          // Reports (Admin/Captain & Staff/Secretary)
-         Route::middleware(['hasRole:admin,staff'])->group(function () {
              Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
              Route::get('/reports/residents', [ReportController::class, 'residents'])->name('reports.residents');
              Route::get('/reports/financial', [ReportController::class, 'financial'])->name('reports.financial');
              Route::get('/reports/blotters', [ReportController::class, 'blotters'])->name('reports.blotters');
              Route::get('/reports/documents', [ReportController::class, 'documents'])->name('reports.documents');
-         });
-
           // Archive
           Route::get('/archive', [App\Http\Controllers\Admin\ArchiveController::class, 'index'])->name('archive.index');
+        });    
       });
-
-});
-
-Route::prefix('api/v1/public')->group(function () {
-    Route::post('/otp/send', [OtpController::class, 'send']);
-    Route::post('/otp/verify', [OtpController::class, 'verify']);
-})->middleware('blockAdmin');
-
-Route::prefix('api/v1/public')->group(function () {
-    Route::post('/residents/register', [ResidentRegistrationController::class, 'register']);
-})->middleware('blockAdmin');
-
 use App\Http\Controllers\Admin\CasePrintController;
 
 Route::get('/admin/cases/{case}/cert-to-file-action/docx', [CasePrintController::class, 'certToFileAction'])
     ->name('admin.cases.cert_to_file_action.docx');
+
+Route::prefix('api/v1/public')->group(function () {
+    Route::post('/otp/send', [OtpController::class, 'send']);
+    Route::post('/otp/verify', [OtpController::class, 'verify']);
+    Route::post('/residents/register', [ResidentRegistrationController::class, 'register']);
+})->middleware('blockAdmin');
+
+

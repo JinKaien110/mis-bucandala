@@ -7,6 +7,8 @@ use App\Models\DocumentRequest;
 use App\Models\DocumentType;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use PhpOffice\PhpWord\TemplateProcessor;
+use Illuminate\Support\Str;
 
 class DocumentRequestController extends Controller
 {
@@ -39,11 +41,13 @@ class DocumentRequestController extends Controller
             'control_no' => $controlNo,
             'resident_id' => $data['resident_id'],
             'document_type_id' => $data['document_type_id'],
-            'fee' => $fee,
+            // Ensure consistency: selected document type fee must match stored request fee_amount
+            'fee_amount' => $fee,
             'purpose' => $data['purpose'] ?? null,
             'remarks' => $data['remarks'] ?? null,
             'status' => 'released',
         ]);
+
 
         // Auto-create payment record if there's a fee
         if ($fee > 0) {
@@ -55,6 +59,7 @@ class DocumentRequestController extends Controller
             ]);
         }
 
+
         $feeLabel = $fee > 0 ? number_format($fee, 2) : 'FREE';
 
         if ($request->expectsJson()) {
@@ -62,6 +67,71 @@ class DocumentRequestController extends Controller
         }
 
         return back()->with('success', "Document request created. Control No: {$req->control_no} | Fee: {$feeLabel}");
+    }
+
+    public function download(DocumentRequest $documentRequest)
+    {
+
+        $documentRequest->load(['resident', 'documentType']);
+        $templatePath = $documentRequest->documentType->template_path ?? null;
+        if (!$templatePath) {
+            return back()->with('error', 'No template uploaded for this document type.');
+        }
+        $fullTemplate = storage_path('app/public/' . $templatePath);
+        if (!file_exists($fullTemplate)) {
+            return back()->with('error', 'Template file missing in storage.');
+        }
+
+        $r = $documentRequest->resident;
+        $age = '';
+        if ($r->birth_date) {
+            $birth = strtotime($r->birth_date);
+            $age = date('Y') - date('Y', $birth);
+            if (date('n', $birth) > date('n') || (date('n', $birth) == date('n') && date('j', $birth) > date('j'))) {
+                $age--;
+            }
+        }
+
+        $processor = new TemplateProcessor($fullTemplate);
+
+        // Common placeholders for all certificate types
+        $processor->setValue('full_name', trim($r->first_name.' '.$r->middle_name.' '.$r->last_name));
+        $processor->setValue('age', $age);
+        $processor->setValue('address', $r->address_line ?? '');
+        $processor->setValue('purpose', $documentRequest->purpose ?? 'N/A');
+        $processor->setValue('control_no', $documentRequest->control_no ?? '');
+        $processor->setValue('day', date('d'));
+        $processor->setValue('month', date('F'));
+        $processor->setValue('year', date('Y'));
+
+        // Document-type specific placeholders
+        $docTypeName = strtolower($documentRequest->documentType->name ?? '');
+        if (str_contains($docTypeName, 'unemployment')) {
+            $cs = strtolower(trim($r->civil_status ?? ''));
+            $processor->setValue('single_check',    $cs === 'single'    ? '✓' : ' ');
+            $processor->setValue('married_check',   $cs === 'married'   ? '✓' : ' ');
+            $processor->setValue('widow_check',     in_array($cs, ['widow','widowed']) ? '✓' : ' ');
+            $processor->setValue('separated_check', $cs === 'separated' ? '✓' : ' ');
+        } else {
+            $cs = strtolower(trim($r->civil_status ?? ''));
+            $processor->setValue('is_single',    $cs === 'single'    ? 'Single(w✓)'   : 'Single( )');
+            $processor->setValue('is_married',   $cs === 'married'   ? 'Married(✓)'  : 'Married( )');
+            $processor->setValue('is_widow',     in_array($cs, ['widow','widowed']) ? 'Widow/Widower(✓)' : 'Widow/Widower( )');
+            $processor->setValue('is_separated', $cs === 'separated' ? 'Separated(✓)' : 'Separated( )');
+            $processor->setValue('residency_since', $documentRequest->created_at ? date('F d, Y', strtotime($documentRequest->created_at)) : date('F d, Y'));
+        }
+
+        $processor->setValue('barangay_captain', 'HON. JUAN DELA CRUZ');
+        $processor->setValue('barangay_secretary', 'MARIA SANTOS');
+
+        $filename = 'document_' . ($documentRequest->control_no ?? Str::random(8)) . '.docx';
+        $outPath = storage_path('app/temp/' . $filename);
+        if (!is_dir(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0777, true);
+        }
+        $processor->saveAs($outPath);
+
+        return response()->download($outPath)->deleteFileAfterSend(true);
     }
 
     /**

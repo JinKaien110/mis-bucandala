@@ -288,10 +288,10 @@
           <td class="text-muted small">${escapeHtml(String(x.created_at ?? '').replace('T',' ').slice(0,19))}</td>
             <td class="text-end pe-4">
               <div class="d-flex justify-content-end gap-2">
-                  <a class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${x.id}/download" target="_blank" title="Download DOCX">
+                  <a class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${x.id}/download" title="Download DOCX">
                       <i class="bi bi-file-earmark-word"></i>
                   </a>
-                  <a class="btn btn-sm btn-success rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${x.id}/print" target="_blank" title="Print">
+                  <a class="btn btn-sm btn-success rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${x.id}/print" title="Print">
                       <i class="bi bi-printer"></i>
                   </a>
                   <form method="POST" action="/admin/document/requests/${x.id}" style="display:inline;" class="archive-form">

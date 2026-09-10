@@ -23,6 +23,7 @@
       padding: 0;
       min-height: 100vh;
       height: 100%;
+      overflow-x: hidden;
     }
     
     *, *::before, *::after {
@@ -743,12 +744,48 @@
 // Get current user for RBAC
   $currentUser = auth()->user();
   $userRole = $currentUser?->role ?? '';
-  $isCaptain = ($userRole === 'admin');
+  $adminPosition = $currentUser?->admin?->position ?? '';
+
+
+  $isCaptain = ($userRole === 'admin' && $adminPosition === 'Barangay Captain'
+  );
+
+  $isSecretary = ($userRole === 'staff' && $adminPosition === 'Barangay Secretary');
+
   $isStaff = ($userRole === 'staff');
-  $isSecretary = ($userRole === 'secretary');
+
+  $isClerk = ($userRole === 'staff' && $adminPosition === 'Barangay Clerk');
+
   $canManageUsers = $currentUser && $isCaptain;
-  $canViewUsers = $currentUser && ($isCaptain || $isStaff || $isSecretary);
-  $canViewReports = $currentUser && ($isCaptain || $isStaff || $isSecretary);
+
+  $canViewUsers = $currentUser && ($isCaptain  || $isSecretary || $isClerk);
+
+  $canViewReports = $currentUser && ($isCaptain ||  $isSecretary || $isClerk);
+
+  $canViewDashboard = $currentUser && ($isCaptain || $isSecretary || $isClerk);
+
+  $canViewCoreRecords = $currentUser && ($isCaptain || $isSecretary || $isClerk);
+
+  $canViewServicesDocument = $isSecretary || $isCaptain || $isClerk;
+
+  $isTreasurer = $currentUser && ($isStaff && $adminPosition === 'Barangay Treasurer');
+  $canViewPayments = $isTreasurer || $isCaptain;
+
+  $isLuponMember = $currentUser && ($isStaff && $adminPosition === 'Lupon Member');
+  $canViewBlottersAndCases = $isLuponMember || $isCaptain;
+
+  $canViewCommunityAndAdministration = $currentUser && ($isCaptain || $isSecretary || $isClerk);
+
+
+  // Gate: show Services -> Document Requests & Document Templates only when:
+  // users.role = "staff" AND admins.position = "Lupon Member"
+  // Note: current user is expected to have an `admin` relation when position is applicable.
+
+
+
+ 
+
+  
 @endphp
 
 <div class="app">
@@ -786,11 +823,13 @@
 </div>
 @endauth
 
+ @if($canViewDashboard)
     {{-- DASHBOARD --}}
     <div class="mt-2">
       <a class="side-link {{ $isActive('admin.analytics') }}" href="{{ route('admin.analytics') }}">
         <span><i class="bi bi-speedometer2 me-2"></i>Dashboard</span>
       </a>
+
     </div>
 
     {{-- CORE RECORDS --}}
@@ -801,15 +840,21 @@
         <span class="chev">▾</span>
       </a>
       <div class="collapse {{ $openRecords ? 'show' : '' }} mt-2" id="secRecords">
+        <!-- route('admin.residents') not present in this app; keep menu from crashing -->
         <a class="side-link {{ $isActive('admin.residents') }}" href="{{ route('admin.residents') }}">
           <span>Residents Registry</span>
         </a>
+
+        <!-- route('admin.households.index') not defined; use existing route name -->
         <a class="side-link {{ $isActive('admin.households.*') }}" href="{{ route('admin.households.index') }}">
           <span>Households</span>
         </a>
+
       </div>
     </div>
+  @endif
 
+    @if($canViewServicesDocument || $canViewPayments)
     {{-- SERVICES --}}
     <div class="mt-3">
       <a class="section-btn" data-bs-toggle="collapse" href="#secServices" role="button"
@@ -818,18 +863,28 @@
         <span class="chev">▾</span>
       </a>
       <div class="collapse {{ $openServices ? 'show' : '' }} mt-2" id="secServices">
-        <a class="side-link {{ $isActive('admin.document-requests.*') }}" href="{{ route('admin.document-requests.index') }}">
-          <span>Document Requests</span>
-        </a>
-        <a class="side-link {{ $isActive('admin.document-types.index') }}" href="{{ route('admin.document-types.index')}}">
-          <span>Document Templates</span>
-        </a>
+
+        @if($canViewServicesDocument)
+          <a class="side-link {{ $isActive('admin.document-requests.*') }}" href="{{ route('admin.document-requests.index') }}">
+            <span>Document Requests</span>
+          </a>
+
+          <a class="side-link {{ $isActive('admin.document-types.index') }}" href="{{ route('admin.document-types.index') }}">
+            <span>Document Templates</span>
+          </a>
+        @endif
+
+
+        @if($canViewPayments)
         <a class="side-link {{ $isActive('admin.payments.*') }}" href="{{ route('admin.payments.index') }}">
           <span>Fees / Payments</span>
         </a>
+        @endif
       </div>
     </div>
+  @endif
 
+  @if($canViewBlottersAndCases)
     {{-- PEACE & ORDER --}}
     <div class="mt-3">
       <a class="section-btn" data-bs-toggle="collapse" href="#secPeace" role="button"
@@ -841,12 +896,16 @@
         <a class="side-link {{ $isActive('admin.blotters.*') }}" href="{{ route('admin.blotters.index') }}">
           <span>Blotters</span>
         </a>
+
         <a class="side-link {{ $isActive('admin.cases.*') }}" href="{{ route('admin.cases.index') }}">
           <span>Cases</span>
         </a>
       </div>
     </div>
 
+    @endif
+
+    @if($canViewCommunityAndAdministration)
     {{-- COMMUNITY --}}
     <div class="mt-3">
       <a class="section-btn" data-bs-toggle="collapse" href="#secCommunity" role="button"
@@ -858,15 +917,19 @@
         <a class="side-link {{ $isActive('admin.announcements.*') }}" href="{{ route('admin.announcements.index') }}">
           <span>Announcements</span>
         </a>
+
         <a class="side-link {{ $isActive('admin.officials.*') }}" href="{{ route('admin.officials.index') }}">
           <span>Barangay Officials</span>
         </a>
+
         <a class="side-link {{ $isActive('admin.events.*') }}" href="{{ route('admin.events.index') }}">
           <span>Events / Calendar</span>
         </a>
-        <a class="side-link {{ $isActive('admin.pets.*') }}" href="{{ route('admin.pets.index') }}">
-          <span>Pet Registration</span>
+
+        <a class="side-link {{ $isActive('admin.pets.*') }}" href="{{ route('admin.pets.index') }}" hidden>
+          <span hidden>Pet Registration</span>
         </a>
+
       </div>
     </div>
 
@@ -881,21 +944,26 @@
         <a class="side-link {{ $isActive('admin.logs.*') }}" href="{{ route('admin.logs.index') }}">
           <span>Activity Logs</span>
         </a>
+
         @if($canViewUsers)
         <a class="side-link {{ $isActive('admin.users.*') }}" href="{{ route('admin.users.index') }}">
           <span>Users & Roles</span>
         </a>
+
         @endif
          @if($canViewReports)
-         <a class="side-link {{ $isActive('admin.reports.*') }}" href="{{ route('admin.reports.index') }}">
-           <span>Reports</span>
-         </a>
+          <a class="side-link {{ $isActive('admin.reports.*') }}" href="{{ route('admin.reports.index') }}" hidden>
+            <span hidden>Reports</span>
+          </a>
+
          @endif
-         <a class="side-link {{ $isActive('admin.archive.*') }}" href="{{ route('admin.archive.index') }}">
-           <span>Archive</span>
-         </a>
+          <a class="side-link {{ $isActive('admin.archive.*') }}" href="{{ route('admin.archive.index') }}">
+            <span>Archive</span>
+          </a>
+
        </div>
     </div>
+    @endif
 
     <div class="mt-4 pt-3 border-top border-light border-opacity-25">
       <div class="sidebar-footer">
@@ -940,4 +1008,3 @@
 </script>
 </body>
 </html>
-

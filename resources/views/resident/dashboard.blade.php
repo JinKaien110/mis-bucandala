@@ -4,64 +4,70 @@
 <div class="container">
   <!-- Welcome Section -->
   <div class="row">
-    <div class="col-lg-4">
-      <!-- Resident Info -->
-      <div class="glass p-4 mb-4" style="background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);">
-        <h5 class="mb-4"><i class="bi bi-person-badge me-2"></i>My Profile</h5>
-        
-        <div class="text-center mb-4">
-          <div class="user-avatar large mx-auto mb-3">
-            <i class="bi bi-person"></i>
+          <div class="col-lg-4">
+        <!-- Resident Info -->
+        <div class="glass p-4 mb-4" style="background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);">
+          <h5 class="mb-4"><i class="bi bi-person-badge me-2"></i>My Profile</h5>
+          
+          <div class="text-center mb-4 pb-3 border-bottom border-light border-opacity-10">
+            <div class="mb-3 position-relative d-inline-block">
+              @if($resident->photo_path ?? false)
+                <img src="{{ asset('storage/' . $resident->photo_path) }}" alt="Profile" class="rounded-circle shadow-lg" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid rgba(255,255,255,0.2);">
+              @else
+                <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle shadow" style="width: 100px; height: 100px; background: linear-gradient(135deg, var(--mis-blue) 0%, var(--mis-blue-light) 100%); border: 4px solid rgba(255,255,255,0.2);">
+                  <i class="bi bi-person text-white" style="font-size: 48px; opacity: 0.8;"></i>
+                </div>
+              @endif
+            </div>
+            <h5 class="mb-1 fw-bold">{{ $resident ? $resident->first_name . ' ' . $resident->last_name : ($user->name ?? 'Resident') }}</h5>
+            <p class="small opacity-75 mb-0"><i class="bi bi-envelope me-1"></i>{{ $user->email }}</p>
           </div>
-          <h5 class="mb-1">{{ $resident ? $resident->first_name . ' ' . $resident->last_name : ($user->name ?? 'Resident') }}</h5>
-          <small class="opacity-75">{{ $user->email }}</small>
+
+          <div class="profile-info-items">
+            <div class="profile-info-item">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-telephone opacity-75"></i>
+                <span class="opacity-75">Contact</span>
+              </div>
+              <span class="fw-medium">{{ $resident->contact_no ?? 'Not set' }}</span>
+            </div>
+            <div class="profile-info-item">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-credit-card opacity-75"></i>
+                <span class="opacity-75">Account No</span>
+              </div>
+              <span class="fw-medium">{{ $resident->account_no ?? 'Not set' }}</span>
+            </div>
+
+            <div class="profile-info-item">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-geo-alt opacity-75"></i>
+                <span class="opacity-75">Address</span>
+              </div>
+              <span class="text-end" style="max-width: 150px;">{{ $resident->address_line ?? 'Not set' }}</span>
+            </div>
+            <div class="profile-info-item">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle opacity-75"></i>
+                <span class="opacity-75">Status</span>
+              </div>
+            <span class="badge badge-glass-success py-1 px-3">Active</span>
+            </div>
+            <div class="profile-info-item">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-calendar opacity-75"></i>
+                <span class="opacity-75">Member Since</span>
+              </div>
+            <span>{{ $user->created_at->format('M Y') }}</span>
+            </div>
+          </div>
+
+          <a href="{{ route('resident.profile') }}" class="btn btn-glass-primary w-100 mt-4">
+            <i class="bi bi-pencil me-2"></i>Edit Profile
+          </a>
         </div>
-
-        <div class="profile-info-items">
-          <div class="profile-info-item">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-telephone opacity-75"></i>
-              <span class="opacity-75">Contact</span>
-            </div>
-            <span class="fw-medium">{{ $resident->contact_no ?? 'Not set' }}</span>
-          </div>
-          <div class="profile-info-item">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-geo-alt opacity-75"></i>
-              <span class="opacity-75">Address</span>
-            </div>
-            <span class="text-end" style="max-width: 150px;">{{ $resident->address_line ?? 'Not set' }}</span>
-          </div>
-          <div class="profile-info-item">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-check-circle opacity-75"></i>
-              <span class="opacity-75">Status</span>
-            </div>
-            <span class="badge badge-glass-success">Active</span>
-          </div>
-          <div class="profile-info-item">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-calendar opacity-75"></i>
-              <span class="opacity-75">Member Since</span>
-            </div>
-            <span>{{ $user->created_at->format('Y') }}</span>
-          </div>
-        </div>
-
-        <a href="{{ route('resident.profile') }}" class="btn btn-glass-primary w-100 mt-4">
-          <i class="bi bi-pencil me-2"></i>Edit Profile
-        </a>
-      </div>
-
-      <div class="glass p-4 mb-4 h-auto" style="background: linear-gradient(135deg, rgba(254, 238, 145, 0.15) 0%, rgba(254, 238, 145, 0.05) 100%); border: 1px solid rgba(254, 238, 145, 0.3);">
-        <h5 class="mb-3"><i class="bi bi-info-circle me-2" style="color: #FEEE91;"></i>Notice</h5>
-        <p class="small opacity-75 mb-0">
-          For blotter reports, please visit the Barangay Hall in person. Blotter filing is a walk-in process.
-        </p>
-      </div>
     </div>
 
-    
     <div class="col-lg-8">
       <!-- Welcome Header -->
       <div class="glass p-4 mb-4" style="background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);">
@@ -82,9 +88,9 @@
       </div>
 
       <!-- Stats Row -->
-      <div class="row g-3 mb-4">
-        <div class="col-md-6 col-lg-4">
-          <div class="stat-card" style="cursor: pointer;" onclick="document.getElementById('docsModal').style.display='flex'; document.getElementById('docsModal').classList.add('show');">
+      <div class="row g-3 mb-4 align-items-stretch">
+        <div class="col-md-4 d-flex align-items-stretch">
+          <div class="stat-card w-100 h-100" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#docsModal">
             <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
               <i class="bi bi-file-earmark-text"></i>
             </div>
@@ -92,17 +98,9 @@
             <div class="stat-label">Document Requests</div>
           </div>
         </div>
-        <div class="col-md-6 col-lg-4">
-          <a href="{{ route('resident.pets') }}" class="stat-card text-white text-decoration-none" style="display: block;">
-            <div class="stat-icon" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">
-              <i class="bi bi-paw"></i>
-            </div>
-            <div class="stat-value">{{ count($myPets) }}</div>
-            <div class="stat-label">My Pets</div>
-          </a>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <a href="{{ route('resident.household') }}" class="stat-card text-white text-decoration-none" style="display: block;">
+
+        <div class="col-md-4 d-flex align-items-stretch">
+          <a href="{{ route('resident.household') }}" class="stat-card w-100 h-100 text-white text-decoration-none" style="display: block;">
             <div class="stat-icon" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;">
               <i class="bi bi-people"></i>
             </div>
@@ -110,82 +108,91 @@
             <div class="stat-label">Household Members</div>
           </a>
         </div>
-        
-      </div>
-      
 
-      <!-- Quick Actions -->
-      <div class="glass p-4 mb-4">
-        <h5 class="mb-3"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
-        <div class="row g-3">
-          <div class="col-md-6 h-auto">
-            <a href="{{ route('resident.pets') }}" class="quick-link">
-              <div class="quick-link-icon" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
-                <i class="bi bi-paw"></i>
-              </div>
-              <div>
-                <div class="fw-bold">Pet Registration</div>
-                <small class="opacity-75">Register your pets</small>
-              </div>
-            </a>
+        <div class="col-md-4 d-flex align-items-stretch">
+          <div class="stat-card w-100 h-100" style="background: linear-gradient(135deg, rgba(254, 238, 145, 0.12) 0%, rgba(254, 238, 145, 0.04) 100%); border: 1px solid rgba(254, 238, 145, 0.25);">
+            <div class="stat-icon" style="background: rgba(254, 238, 145, 0.16); color: #FEEE91;">
+              <i class="bi bi-info-circle"></i>
+            </div>
+            <div class="stat-label" style="font-size: 0.95rem; opacity: 0.95; color: rgba(255,255,255,0.95);">
+              Notice
+            </div>
+            <p class="small opacity-75 mb-0" style="margin-top: 4px;">
+              For blotter reports, please visit the Barangay Hall in person. Blotter filing is a walk-in process.
+            </p>
           </div>
-          <div class="col-md-6 h-auto">
-            <a href="{{ route('resident.household') }}" class="quick-link">
-              <div class="quick-link-icon" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);">
-                <i class="bi bi-people"></i>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="glass p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Document Requests</h5>
+          <button class="btn btn-glass btn-sm" data-bs-toggle="modal" data-bs-target="#docsModal">View All</button>
+        </div>
+
+        <div class="activity-list">
+          @if(count($documentRequests) > 0)
+            @foreach($documentRequests->take(5) as $request)
+            <div class="activity-item d-flex align-items-center justify-content-between py-3 border-bottom border-light border-opacity-10">
+              <div class="d-flex align-items-center gap-3">
+                <div class="icon-circle bg-white bg-opacity-10 d-flex align-items-center justify-content-center rounded-3" style="width: 40px; height: 40px;">
+                  <i class="bi bi-file-earmark-text opacity-75"></i>
+                </div>
+                <div>
+                  <div class="small fw-bold">{{ $request->document_type ?? 'Document Request' }}</div>
+                  <small class="opacity-50" style="font-size: 0.75rem;">{{ $request->created_at->format('M d, Y') }}</small>
+                </div>
               </div>
-              <div>
-                <div class="fw-bold">Household Registry</div>
-                <small class="opacity-75">Manage household</small>
+              <span class="badge-glass 
+                @if($request->status === 'completed') badge-glass-success
+                @elseif($request->status === 'pending') badge-glass-warning
+                @elseif($request->status === 'processing') badge-glass-info
+                @else badge-glass-secondary @endif">
+                {{ ucfirst($request->status ?? 'pending') }}
+              </span>
+            </div>
+            @endforeach
+          @else
+            <div class="text-center py-5">
+              <i class="bi bi-inbox fs-1 opacity-25 mb-3"></i>
+              <p class="opacity-75 mb-0">No document requests yet.</p>
+              <div class="btn btn-glass-primary btn-sm mt-3" style="pointer-events: none; opacity: 0.8;">
+                <i class="bi bi-geo-alt me-1"></i>Visit Barangay Hall to request documents
               </div>
-            </a>
-          </div>
-         
+            </div>
+          @endif
         </div>
       </div>
     </div>
   </div>
-
-      <div class="glass p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0"><i class="bi bi-list-task me-2"></i>Recent Document Requests</h5>
-          <button class="btn btn-glass btn-sm" onclick="document.getElementById('docsModal').style.display='flex'; document.getElementById('docsModal').classList.add('show');">
-            View All
-          </button>
-        </div>
-        
-        @if(count($documentRequests) > 0)
-          @foreach($documentRequests->take(5) as $request)
-          <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-light">
-            <div>
-              <div class="small fw-bold">{{ $request->document_type ?? 'Document Request' }}</div>
-              <small class="opacity-50">{{ $request->created_at->format('M d, Y') }}</small>
-            </div>
-            <span class="badge-glass 
-              @if($request->status === 'completed') badge-glass-success
-              @elseif($request->status === 'pending') badge-glass-warning
-              @elseif($request->status === 'processing') badge-glass-info
-              @else badge-glass-secondary @endif">
-              {{ ucfirst($request->status ?? 'pending') }}
-            </span>
-          </div>
-          @endforeach
-        @else
-          <div class="text-center py-4">
-            <i class="bi bi-inbox fs-1 opacity-50 mb-2"></i>
-            <p class="opacity-75 mb-0">No document requests yet.</p>
-            <div class="btn btn-glass-primary btn-sm mt-2">
-</i>Walk-in on barangay to request documents
 </div>
-          </div>
-        @endif
-
-    <!-- Notice -->
-   
-  </div>
-</div>
-
 @endsection
+
+@push('styles')
+<style>
+.profile-info-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.profile-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+.activity-item:last-child {
+  border-bottom: none !important;
+}
+.stat-card:hover {
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border-color: rgba(255,255,255,0.4) !important;
+}
+</style>
+@endpush
 
  @push('scripts')
  <script>
@@ -212,28 +219,7 @@
    document.getElementById('docCount').textContent = visibleCount + ' found';
  }
 
-function filterDocs(status) {
-  const search = document.getElementById('docSearch').value.toLowerCase();
-  const statusFilter = status || document.getElementById('docStatusFilter').value;
-  const rows = document.querySelectorAll('.doc-row');
-  
-  let visibleCount = 0;
-  rows.forEach(row => {
-    const type = row.dataset.type || '';
-    const rowStatus = row.dataset.status || '';
-    const matchesSearch = type.includes(search);
-    const matchesStatus = !statusFilter || rowStatus === statusFilter;
-    
-    if (matchesSearch && matchesStatus) {
-      row.style.display = '';
-      visibleCount++;
-    } else {
-      row.style.display = 'none';
-    }
-  });
-  
-  document.getElementById('docCount').textContent = visibleCount + ' found';
-}
+
 
 document.getElementById('saveProfileBtn').addEventListener('click', async function() {
   const form = document.getElementById('profileForm');

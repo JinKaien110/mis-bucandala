@@ -59,8 +59,10 @@ class DocumentRequestPrintController extends Controller
 
     public function download(DocumentRequest $documentRequest)
     {
+
         $documentRequest->load(['resident', 'documentType']);
         $templatePath = $documentRequest->documentType->template_path ?? null;
+        
         if (!$templatePath) {
             return back()->with('error', 'No template uploaded for this document type.');
         }
@@ -90,23 +92,84 @@ class DocumentRequestPrintController extends Controller
         $processor->setValue('day', date('d'));
         $processor->setValue('month', date('F'));
         $processor->setValue('year', date('Y'));
+        $processor->setValue('date_of_birth', $r->birth_date ? date('F d, Y', strtotime($r->birth_date)) : '');
 
         // Document-type specific placeholders
-        $docTypeName = strtolower($documentRequest->documentType->name ?? '');
-        if (str_contains($docTypeName, 'unemployment')) {
-            $cs = strtolower(trim($r->civil_status ?? ''));
-            $processor->setValue('single_check',    $cs === 'single'    ? '✓' : ' ');
-            $processor->setValue('married_check',   $cs === 'married'   ? '✓' : ' ');
-            $processor->setValue('widow_check',     in_array($cs, ['widow','widowed']) ? '✓' : ' ');
-            $processor->setValue('separated_check', $cs === 'separated' ? '✓' : ' ');
-        } else {
-            $cs = strtolower(trim($r->civil_status ?? ''));
-            $processor->setValue('is_single',    $cs === 'single'    ? 'Single(✓)'   : 'Single( )');
-            $processor->setValue('is_married',   $cs === 'married'   ? 'Married(✓)'  : 'Married( )');
-            $processor->setValue('is_widow',     in_array($cs, ['widow','widowed']) ? 'Widow/Widower(✓)' : 'Widow/Widower( )');
-            $processor->setValue('is_separated', $cs === 'separated' ? 'Separated(✓)' : 'Separated( )');
-            $processor->setValue('residency_since', $documentRequest->created_at ? date('F d, Y', strtotime($documentRequest->created_at)) : date('F d, Y'));
-        }
+       $docTypeName = strtolower(trim($documentRequest->documentType->name ?? ''));
+
+if (str_contains($docTypeName, 'unemployment')) {
+
+    $cs = strtolower(trim($r->civil_status ?? ''));
+
+    // Normalize possible database variations
+    $isSingle = $cs === 'single';
+    $isMarried = $cs === 'married';
+    $isWidow = in_array($cs, ['widow', 'widowed', 'widower']);
+    $isSeparated = $cs === 'separated';
+    
+
+    $processor->setValue(
+        'single_check',
+        $isSingle ? '✓' : ' '
+    );
+
+    $processor->setValue(
+        'separated_check',
+        $isSeparated ? '✓' : ' '
+    );
+
+    $processor->setValue(
+        'widow_check',
+        $isWidow ? '✓' : ' '
+    );
+
+    $processor->setValue(
+        'married_check',
+        $isMarried ? '✓' : ' '
+    );
+
+} else {
+
+    $cs = strtolower(trim($r->civil_status ?? ''));
+    
+    $isSingle = $cs === 'single';
+    $isMarried = $cs === 'married';
+    $isWidow = in_array($cs, ['widow', 'widowed', 'widower']);
+    $isSeparated = $cs === 'separated';
+
+    $processor->setValue(
+        'single_check',
+        $cs === 'single' ? '✓' : ' '
+    );
+
+    $processor->setValue(
+        'married_check',
+        $cs === 'married' ? '✓)' : ' '
+    );
+
+    $processor->setValue(
+        'widow_check',
+        in_array($cs, ['widow', 'widowed', 'widower'])
+            ? '✓'
+            : ' '
+    );
+
+    $processor->setValue(
+        'separated_check',
+        $cs === 'separated'
+            ? '✓'
+            : ' '
+    );
+
+    $processor->setValue(
+        'residency_since',
+        $documentRequest->created_at
+            ? date('F d, Y', strtotime($documentRequest->created_at))
+            : date('F d, Y')
+    );
+    
+}
+
 
         $processor->setValue('barangay_captain', 'HON. JUAN DELA CRUZ');
         $processor->setValue('barangay_secretary', 'MARIA SANTOS');

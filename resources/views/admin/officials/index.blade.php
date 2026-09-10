@@ -166,8 +166,12 @@
         <div class="modal-body">
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
-              <input type="text" name="name" class="form-control border-0 shadow-sm" required>
+              <label class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+              <input type="text" name="first_name" class="form-control border-0 shadow-sm" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+              <input type="text" name="last_name" class="form-control border-0 shadow-sm" required>
             </div>
 
             <div class="col-md-6">

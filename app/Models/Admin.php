@@ -13,6 +13,7 @@ class Admin extends Model
 
     protected $fillable = [
         'user_id',
+        'barangay_official_id',
         'first_name',
         'last_name',
         'role',
@@ -21,6 +22,7 @@ class Admin extends Model
         'phone',
         'timestamp',
     ];
+
 
     protected function casts(): array
     {
@@ -33,4 +35,10 @@ class Admin extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function barangayOfficial(): BelongsTo
+    {
+        return $this->belongsTo(BarangayOfficial::class, 'barangay_official_id');
+    }
 }
+

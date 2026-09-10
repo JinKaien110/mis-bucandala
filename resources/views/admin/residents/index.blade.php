@@ -94,8 +94,16 @@
       </div>
     </div>
     <div class="card-footer bg-white border-top-0 py-3">
-        <div class="text-muted small">
-            <i class="bi bi-info-circle me-1"></i> Photos are stored in <code>storage/app/public</code>
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+            <div class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i> Photos are stored in <code>storage/app/public</code>
+            </div>
+
+            <div>
+                <nav aria-label="Residents pagination">
+                    <ul id="residents-pagination" class="pagination pagination-modern mb-0"></ul>
+                </nav>
+            </div>
         </div>
     </div>
   </div>
@@ -221,13 +229,10 @@
                     </select>
                 </div>
 
+               
                 <div class="col-md-4">
-                    <label class="form-label small text-muted fw-bold">Street <span class="text-danger">*</span></label>
-                    <input name="street" class="form-control" value="{{ old('street') }}" placeholder="Street name" required @disabled(!$canCreate)>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small text-muted fw-bold">Phase <span class="text-danger">*</span></label>
-                    <input name="phase" class="form-control" value="{{ old('phase') }}" placeholder="Phase 1, 2, 3..." required @disabled(!$canCreate)>
+                    <label class="form-label small text-muted fw-bold">Phase</label>
+                    <input name="phase" class="form-control" value="{{ old('phase') }}" placeholder="Phase 1, 2, 3..." @disabled(!$canCreate)>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label small text-muted fw-bold">Address Line <span class="text-danger">*</span></label>
@@ -468,8 +473,11 @@
 </div>
 
 @push('scripts')
-<script>
+<script type="text/javascript">
+
   const tbody = document.getElementById('tbody');
+  const paginationWrap = document.getElementById('residents-pagination');
+  if (paginationWrap) paginationWrap.innerHTML = '';
   const msgBox = document.getElementById('message');
   const csrf = () => document.querySelector('meta[name="csrf-token"]').content;
 
@@ -686,17 +694,26 @@
   document.getElementById('c_id_image_path').addEventListener('change', function(e) { previewFile(e.target, 'dz_c_id_image'); });
   document.getElementById('c_selfie_path').addEventListener('change', function(e) { previewFile(e.target, 'dz_c_selfie'); });
 
-   async function loadResidents() {
-     console.log('loadResidents called');
+  async function loadResidents(page = 1) { 
+     
+     // NOTE: Residents list is API-driven. Pagination controls are rendered separately.
+
+     console.log('loadResidents called', page);
      hideMsg();
      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted"><div class="spinner-border text-primary mb-2" role="status"></div><div class="small">Loading residents...</div></td></tr>`;
 
      const q = document.getElementById('search').value.trim();
-     const url = q ? `/api/v1/residents?q=${encodeURIComponent(q)}` : `/api/v1/residents`;
+     const params = new URLSearchParams();
+     params.set('page', page);
+     params.set('limit', 10);
+     if (q) params.set('q', q);
+
+     const url = `/api/v1/residents?${params.toString()}`;
      console.log('Fetching:', url);
 
      const { res, data } = await api(url);
      console.log('API response:', { status: res.status, data });
+
 
      // DEBUG
      console.log('URL:', url);
@@ -710,7 +727,10 @@
      }
 
      const residents = data.residents || [];
-    if (!residents.length) {
+     // Render pagination controls
+    renderResidentsPagination(data.pagination || null);
+
+     if (!residents.length) {
       tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted"><i class="bi bi-people fs-1 d-block mb-2 opacity-25"></i>No residents found.</td></tr>`;
       return;
     }
@@ -868,15 +888,66 @@
     }
   });
 
-  document.getElementById('btnReload').addEventListener('click', loadResidents);
+  // Simple numbered pagination (API-driven)
+  function renderResidentsPagination(pagination) {
+    const wrapper = document.getElementById('residents-pagination');
+    if (!wrapper) return;
+
+
+    const current = pagination?.current_page ?? 1;
+    const last = pagination?.last_page ?? 1;
+
+    if (last <= 1) {
+      wrapper.innerHTML = '';
+      return;
+    }
+
+    let html = '';
+    html += `<li class="page-item ${current <= 1 ? 'disabled' : ''}">`;
+    html += current <= 1
+      ? `<span class="page-link">‹</span>`
+      : `<a class="page-link" href="#" data-page="${current - 1}">‹</a>`;
+    html += `</li>`;
+
+    for (let p = 1; p <= last; p++) {
+      html += `<li class="page-item ${p === current ? 'active' : ''}">`;
+      html += p === current
+        ? `<span class="page-link">${p}</span>`
+        : `<a class="page-link" href="#" data-page="${p}">${p}</a>`;
+      html += `</li>`;
+    }
+
+    html += `<li class="page-item ${current >= last ? 'disabled' : ''}">`;
+    html += current >= last
+      ? `<span class="page-link">›</span>`
+      : `<a class="page-link" href="#" data-page="${current + 1}">›</a>`;
+    html += `</li>`;
+
+    wrapper.innerHTML = html;
+  }
+
+  // initial load with page 1
+  document.getElementById('btnReload').addEventListener('click', () => loadResidents(1));
   document.getElementById('search').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') loadResidents();
+    if (e.key === 'Enter') loadResidents(1);
   });
 
+  document.getElementById('residents-pagination')?.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-page]');
+    if (!a) return;
+    e.preventDefault();
+    const page = parseInt(a.getAttribute('data-page'), 10);
+    loadResidents(page);
+  });
+
+  @php /* keep blade endif outside <script> block if IDE mis-parses; */ @endphp
   @if ($errors->any())
     createModal.show();
   @endif
 
+
 </script>
 @endpush
 @endsection
+
+

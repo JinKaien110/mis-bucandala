@@ -323,14 +323,14 @@
 
     .alertbox { display: none; white-space: pre-wrap; }
     
-    .dropzone { 
-      border: 2px dashed #cbd5e1; 
-      border-radius: 16px; 
-      padding: 20px; 
+    .dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 16px;
       background: linear-gradient(135deg, #f8f9ff 0%, #f0f5ff 100%);
       transition: all 0.3s ease;
       text-align: center;
-      min-height: 200px;
+      min-height: 160px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -350,7 +350,7 @@
       transform: scale(1.02);
     }
     .dropzone-icon {
-      font-size: 32px;
+      font-size: 24px;
       color: #1055C9;
       margin-bottom: 8px;
     }
@@ -489,6 +489,62 @@
       background: rgba(255, 255, 255, 0.2);
       color: #fff;
     }
+
+    /* Checkbox styling - consistent with theme */
+    .form-check {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-check-input {
+      width: 20px;
+      height: 20px;
+      margin-top: 0;
+      border: 2px solid #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      background-color: #fff;
+      accent-color: #1055C9;
+    }
+
+    .form-check-input:hover {
+      border-color: #1055C9;
+      box-shadow: 0 0 0 3px rgba(16, 85, 201, 0.1);
+    }
+
+    .form-check-input:checked {
+      background-color: #1055C9;
+      border-color: #1055C9;
+      box-shadow: 0 2px 8px rgba(16, 85, 201, 0.3);
+    }
+
+    .form-check-input:checked:hover {
+      background-color: #0d47a1;
+      border-color: #0d47a1;
+      box-shadow: 0 2px 12px rgba(16, 85, 201, 0.4);
+    }
+
+    .form-check-input:focus {
+      border-color: #1055C9;
+      box-shadow: 0 0 0 5px rgba(16, 85, 201, 0.1);
+      outline: none;
+    }
+
+    .form-check-label {
+      color: #374151;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 0;
+      user-select: none;
+    }
+
+    .form-check-label:hover {
+      color: #1055C9;
+    }
   </style>
 </head>
 
@@ -614,14 +670,14 @@
         </div>
 
         <div class="form-check mb-3">
-          <input class="form-check-input" type="checkbox" id="agreeTerms" style="width:20px;height:20px;">
+          <input class="form-check-input" type="checkbox" id="agreeTerms">
           <label class="form-check-label fw-semibold" for="agreeTerms">
             I have read and agree to the <a href="{{ route('public.data-privacy') }}" target="_blank" class="text-decoration-underline">Data Privacy Policy</a> and Terms of Service
           </label>
         </div>
 
         <div class="form-check mb-3">
-          <input class="form-check-input" type="checkbox" id="agreeProcess" style="width:20px;height:20px;">
+          <input class="form-check-input" type="checkbox" id="agreeProcess">
           <label class="form-check-label fw-semibold" for="agreeProcess">
             I consent to the collection and processing of my personal information for resident registration purposes
           </label>
@@ -652,142 +708,252 @@
             <form id="regForm" enctype="multipart/form-data" class="d-flex flex-column flex-grow-1">
               <div class="row g-3">
                 <div class="col-12">
-                  <label class="form-label mb-1">Full Name <span class="req">*</span></label>
-                  <div class="row g-2">
-                    <div class="col-4">
-                      <input class="form-control" name="first_name" placeholder="First name" required />
+                  <label class="form-label mb-1">Name <span class="req">*</span></label>
+                  <div class="row g-2 align-items-end">
+                    <div class="col-2" style="max-width: 10.5%; flex: 0 0 10.5%;">
+                      <select class="form-select" name="suffix" aria-label="Suffix" style="font-size:1rem; padding-top:14px; padding-bottom:14px; padding-left:12px; padding-right:12px; width: 100%; height: 100%;">
+
+                        <option value="">Sfx</option>
+                        <option value="N/A">N/A</option>
+                        <option value="Jr">Jr.</option>
+                        <option value="Sr">Sr.</option>
+                        <option value="II">II</option>
+                        <option value="III">III</option>
+                        <option value="IV">IV</option>
+                        <option value="V">V</option>
+                      </select>
                     </div>
-                    <div class="col-4">
-                      <input class="form-control" name="middle_name" placeholder="Middle name" />
+                    <div class="col">
+                      <input class="form-control" name="first_name" placeholder="First" required style="padding-left: 16px; padding-right: 16px; width: 100%;" />
                     </div>
-                    <div class="col-4">
-                      <input class="form-control" name="last_name" placeholder="Last name" required />
+                    <div class="col">
+                      <input class="form-control" name="middle_name" placeholder="Middle" style="padding-left: 16px; padding-right: 16px; width: 100%;" />
+                    </div>
+                    <div class="col">
+                      <input class="form-control" name="last_name" placeholder="Last" required style="padding-left: 16px; padding-right: 16px; width: 100%;" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label mb-1">Birth date <span class="req">*</span></label>
+                  <input class="form-control" name="birth_date" id="birth_date" type="date" required />
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label mb-1">Sex <span class="req">*</span></label>
+                  <select class="form-select" name="sex" required>
+                    <option value="">Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+
+                <div class="col-12">
+                  <div class="section-divider"><span>Contact & Address</span></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1" id="email_label">Email <span class="req">*</span></label>
+                  <input class="form-control" name="email" id="email" type="email" placeholder="Used for OTP" />
+                  <div class="hint" id="email_hint">OTP will be sent to this email.</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Contact no</label>
+                  <div class="input-group">
+                    <span class="input-group-text" style="background: white; border-color: #ced4da;">+63</span>
+                    <input type="text" class="form-control" name="contact_no" id="contact_no" placeholder="917 123 4567" maxlength="12" required style="border-left: 0;" />
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Address Line <span class="req">*</span></label>
+                  <input class="form-control" name="address_line" required placeholder="Block and Lot" />
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Phase</label>
+                  <select class="form-select" name="phase">
+                    <option value="">Select (optional)</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                  </select>
+                </div>
+
+                <div class="col-12">
+                  <div class="section-divider"><span>Socioeconomic Information</span></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Monthly Income</label>
+                  <select class="form-select" name="monthly_income">
+                    <option value="">Select (optional)</option>
+                    <option value="below_10k">Below ₱10,000</option>
+                    <option value="10k_20k">₱10,000 - ₱20,000</option>
+                    <option value="20k_30k">₱20,000 - ₱30,000</option>
+                    <option value="30k_50k">₱30,000 - ₱50,000</option>
+                    <option value="50k_above">₱50,000 and above</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Occupation</label>
+                  <select class="form-select" name="occupation">
+                    <option value="">Select (optional)</option>
+                    <option value="student">Student</option>
+                    <option value="employed">Employed (Regular)</option>
+                    <option value="contractual">Contractual/Temporary</option>
+                    <option value="self_employed">Self-employed</option>
+                    <option value="business_owner">Business Owner</option>
+                    <option value="farmer">Farmer</option>
+                    <option value="fisherman">Fisherman</option>
+                    <option value="vendor">Vendor/Trader</option>
+                    <option value="artisan">Artisan/Craftsman</option>
+                    <option value="driver">Driver</option>
+                    <option value="construction_worker">Construction Worker</option>
+                    <option value="laborer">General Laborer</option>
+                    <option value="domestic_worker">Domestic Worker</option>
+                    <option value="healthcare">Healthcare Worker</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="engineer">Engineer</option>
+                    <option value="accountant">Accountant</option>
+                    <option value="manager">Manager/Supervisor</option>
+                    <option value="administrative">Administrative/Clerical</option>
+                    <option value="sales">Sales Representative</option>
+                    <option value="service">Service Industry</option>
+                    <option value="hospitality">Hospitality/Tourism</option>
+                    <option value="transport">Transportation</option>
+                    <option value="manufacturing">Manufacturing</option>
+                    <option value="it_professional">IT Professional</option>
+                    <option value="creative">Creative Professional</option>
+                    <option value="ofw">Overseas Filipino Worker (OFW)</option>
+                    <option value="retired">Retired</option>
+                    <option value="unemployed">Unemployed</option>
+                    <option value="pwswd">PWD/Senior Citizen (Unable to Work)</option>
+                    <option value="homemaker">Homemaker</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Civil Status</label>
+                  <select class="form-select" name="civil_status">
+                    <option value="">Select (optional)</option>
+                    <option value="single">Single</option>
+                    <option value="married">Married</option>
+                    <option value="widowed">Widowed</option>
+                    <option value="separated">Separated</option>
+                    <option value="divorced">Divorced</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Educational Attainment</label>
+                  <select class="form-select" name="educational_attainment">
+                    <option value="">Select (optional)</option>
+                    <option value="no_formal">No Formal Education</option>
+                    <option value="elementary">Elementary</option>
+                    <option value="junior_high">Junior High School</option>
+                    <option value="senior_high">Senior High School (SHS)</option>
+                    <option value="vocational">Vocational/Technical</option>
+                    <option value="college">College/University</option>
+                    <option value="postgraduate">Postgraduate</option>
+                  </select>
+                </div>
+
+                <div class="col-12">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="pwd_status" id="pwd_status" value="1" />
+                        <label class="form-check-label" for="pwd_status">
+                          Person with Disability (PWD)
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="solo_parent" id="solo_parent" value="1" />
+                        <label class="form-check-label" for="solo_parent">
+                          Solo Parent
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="four_ps_beneficiary" id="four_ps_beneficiary" value="1" />
+                        <label class="form-check-label" for="four_ps_beneficiary">
+                          4Ps Beneficiary
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="indigent_status" id="indigent_status" value="1" />
+                        <label class="form-check-label" for="indigent_status">
+                          Certified Indigent
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                  <div class="col-6">
-                    <label class="form-label mb-1">Birth date <span class="req">*</span></label>
-                    <input class="form-control" name="birth_date" id="birth_date" type="date" required />
+                <div class="col-12">
+                  <div class="section-divider"><span>Account</span></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Password <span class="req">*</span></label>
+                  <div class="input-group">
+                    <input class="form-control" name="password" id="password" type="password" placeholder="Create a password" />
+                    <button class="btn btn-outline-secondary" type="button" data-password-toggle="password" aria-label="Show password" title="Show password">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
                   </div>
+                  <div class="hint">Minimum 8 characters.</div>
+                </div>
 
-                  <div class="col-6">
-                    <label class="form-label mb-1">Sex <span class="req">*</span></label>
-                    <select class="form-select" name="sex" required>
-                      <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                    </select>
+                <div class="col-md-6">
+                  <label class="form-label mb-1">Confirm Password <span class="req">*</span></label>
+                  <div class="input-group">
+                    <input class="form-control" name="password_confirmation" id="password_confirmation" type="password" placeholder="Confirm password" />
+                    <button class="btn btn-outline-secondary" type="button" data-password-toggle="password_confirmation" aria-label="Show password" title="Show password">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
                   </div>
+                </div>
 
-                  <div class="col-6">
-                    <label class="form-label mb-1">Civil status</label>
-                    <select class="form-select" name="civil_status">
-                      <option value="">Select (optional)</option>
-                      <option value="single">Single</option>
-                      <option value="married">Married</option>
-                      <option value="widowed">Widowed</option>
-                      <option value="separated">Separated</option>
-                      <option value="divorced">Divorced</option>
-                    </select>
-                  </div>
-
-                  <div class="col-6">
-                    <label class="form-label mb-1">Occupation</label>
-                    <select class="form-select" name="occupation">
-                      <option value="">Select (optional)</option>
-                      <option value="student">Student</option>
-                      <option value="employed">Employed</option>
-                      <option value="self_employed">Self-employed</option>
-                      <option value="unemployed">Unemployed</option>
-                      <option value="ofw">OFW</option>
-                      <option value="retired">Retired</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                   <div class="col-md-6">
-                     <label class="form-label mb-1">Phase <span class="req">*</span></label>
-                    <input type="number" class="form-control" name="phase" required placeholder="e.g. 1" min="1" />
-                   </div>
-
-                   <div class="col-md-6">
-                     <label class="form-label mb-1">Address Line <span class="req">*</span></label>
-                     <input class="form-control" name="address_line" required placeholder="Block/Lot, Purok, Barangay..." />
-                   </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label mb-1">Contact no</label>
-                    <div class="input-group">
-                      <span class="input-group-text" style="background: white; border-color: #ced4da;">+63</span>
-                      <input type="text" class="form-control" name="contact_no" id="contact_no" placeholder="917 123 4567" maxlength="12" required style="border-left: 0;" />
+                <div class="col-12" id="guardianSection" style="display:none;">
+                  <div class="p-3 rounded-3" style="background:#fef3c7;border:1px solid #fcd34d;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <div class="fw-bold">Guardian Details (Minor)</div>
+                      <span class="badge bg-warning text-dark">Required</span>
                     </div>
-                  </div>
-
-                  <div class="col-6">
-                    <label class="form-label mb-1" id="email_label">Email <span class="req">*</span></label>
-                    <input class="form-control" name="email" id="email" type="email" placeholder="Used for OTP" />
-                    <div class="hint" id="email_hint">OTP will be sent to this email.</div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label mb-1">Password <span class="req">*</span></label>
-                    <input class="form-control" name="password" id="password" type="password" placeholder="Create a password" style="max-width: 100%;" />
-                    <div class="hint">Minimum 8 characters.</div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label mb-1">Confirm Password <span class="req">*</span></label>
-                    <input class="form-control" name="password_confirmation" id="password_confirmation" type="password" placeholder="Confirm password" style="max-width: 100%;" />
-                  </div>
-
-                  <div class="col-6">
-                    <label class="form-label mb-1">Valid ID Type <span class="req">*</span></label>
-                    <select class="form-select" name="verification_type" required>
-                      <option value="">Select</option>
-                      <option value="philid">PhilSys ID</option>
-                      <option value="drivers_license">Driver's License</option>
-                      <option value="passport">Passport</option>
-                      <option value="postal">Postal ID</option>
-                      <option value="voters">Voter's ID</option>
-                      <option value="umid">UMID</option>
-                      <option value="tin">TIN ID</option>
-                      <option value="pagibig">Pag-IBIG ID</option>
-                      <option value="schoolid">School ID</option>
-                    </select>
-                  </div>
-
-                  <div class="col-6">
-                    <label class="form-label mb-1">ID Number</label>
-                    <input class="form-control" name="verification_id" placeholder="Optional" />
-                  </div>
-
-                  <div class="col-12" id="guardianSection" style="display:none;">
-                    <div class="p-3 rounded-3" style="background:#fef3c7;border:1px solid #fcd34d;">
-                      <div class="d-flex align-items-center justify-content-between mb-2">
-                        <div class="fw-bold">Guardian Details (Minor)</div>
-                        <span class="badge bg-warning text-dark">Required</span>
+                    <div class="row g-2">
+                      <div class="col-4">
+                        <input class="form-control" name="guardian_full_name" id="guardian_full_name" placeholder="Full name" />
                       </div>
-                      <div class="row g-2">
-                        <div class="col-4">
-                          <input class="form-control" name="guardian_full_name" id="guardian_full_name" placeholder="Full name" />
-                        </div>
-                        <div class="col-4">
-                          <select class="form-select" name="guardian_relationship" id="guardian_relationship">
-                            <option value="">Relationship</option>
-                            <option value="mother">Mother</option>
-                            <option value="father">Father</option>
-                            <option value="guardian">Guardian</option>
-                          </select>
-                        </div>
-                        <div class="col-4">
-                          <input class="form-control" name="guardian_contact_no" id="guardian_contact_no" placeholder="Contact no" />
-                        </div>
+                      <div class="col-4">
+                        <select class="form-select" name="guardian_relationship" id="guardian_relationship">
+                          <option value="">Relationship</option>
+                          <option value="mother">Mother</option>
+                          <option value="father">Father</option>
+                          <option value="guardian">Guardian</option>
+                        </select>
+                      </div>
+                      <div class="col-4">
+                        <input class="form-control" name="guardian_contact_no" id="guardian_contact_no" placeholder="Contact no" />
                       </div>
                     </div>
                   </div>
                 </div>
-              </form>
+              </div>
+            </form>
             </div>
           </div>
         </div>
@@ -801,7 +967,24 @@
                 <i class="bi bi-cloud-upload me-2"></i>Upload Requirements
               </div>
               <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-12">
+                  <label class="form-label mb-1">Valid ID Type</label>
+                  <select class="form-select" id="verification_type" name="verification_type">
+                    <option value="">Select</option>
+                    <option value="philid">PhilSys ID</option>
+                    <option value="drivers_license">Driver's License</option>
+                    <option value="passport">Passport</option>
+                    <option value="postal">Postal ID</option>
+                    <option value="voters">Voter's ID</option>
+                    <option value="umid">UMID</option>
+                    <option value="tin">TIN ID</option>
+                    <option value="pagibig">Pag-IBIG ID</option>
+                    <option value="schoolid">School ID</option>
+                  </select>
+                  <div class="hint mt-1" id="verification_type_hint">If a valid ID type is selected, upload Government ID and Selfie Holding ID. Otherwise, upload Proof of Billing.</div>
+                </div>
+
+                <div class="col-12">
                   <label for="photo_path" class="dropzone" id="dz_photo" style="cursor:pointer;">
                     <input type="file" name="photo_path" id="photo_path" accept=".jpg,.jpeg,.png" style="display:none;" />
                     <div class="dropzone-content" id="dz_photo_content">
@@ -809,31 +992,44 @@
                       <div class="dropzone-text fw-semibold">Profile Photo</div>
                       <div class="dropzone-hint">Click or drag to upload</div>
                     </div>
-                    <div class="sub mt-1">JPG / PNG (max 5MB)</div>
+                    <div class="sub mt-1">JPG / PNG (max 10MB)</div>
                   </label>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-12" id="idUploadRequirement">
                   <label for="id_image_path" class="dropzone" id="dz_id" style="cursor:pointer;">
-                    <input type="file" name="id_image_path" id="id_image_path" accept=".jpg,.jpeg,.png,.pdf" required style="display:none;" />
+                    <input type="file" name="id_image_path" id="id_image_path" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" />
                     <div class="dropzone-content" id="dz_id_content">
                       <i class="bi bi-person-badge dropzone-icon"></i>
                       <div class="dropzone-text fw-semibold">Government ID Photo</div>
-                      <div class="dropzone-hint">Click or drag to upload <span class="req">*</span></div>
+                      <div class="dropzone-hint">Click or drag to upload</div>
                     </div>
                     <div class="sub mt-1">JPG / PNG / PDF (max 5MB)</div>
                   </label>
                 </div>
 
-                <div class="col-12">
+                <div class="col-12" id="selfieUploadRequirement">
                   <label for="selfie_image_path" class="dropzone" id="dz_selfie" style="cursor:pointer;">
-                    <input type="file" name="selfie_image_path" id="selfie_image_path" accept=".jpg,.jpeg,.png" required style="display:none;" />
+                    <input type="file" name="selfie_image_path" id="selfie_image_path" accept=".jpg,.jpeg,.png" style="display:none;" />
                     <div class="dropzone-content" id="dz_selfie_content">
                       <i class="bi bi-camera dropzone-icon"></i>
                       <div class="dropzone-text fw-semibold">Selfie Holding ID</div>
-                      <div class="dropzone-hint">Click or drag to upload <span class="req">*</span></div>
+                      <div class="dropzone-hint">Click or drag to upload</div>
                     </div>
                     <div class="sub mt-1">JPG / PNG (max 5MB)</div>
+                  </label>
+                </div>
+
+                <div class="col-12" id="proofUploadRequirement">
+                  <label for="proof_of_billing_path" class="dropzone" id="dz_proof_of_billing" style="cursor:pointer;">
+                    <input type="file" name="proof_of_billing_path" id="proof_of_billing_path" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" />
+                    <div class="dropzone-content" id="dz_proof_of_billing_content">
+                      <i class="bi bi-file-earmark-pdf dropzone-icon"></i>
+                      <div class="dropzone-text fw-semibold">Proof of Billing</div>
+                      <div class="dropzone-hint">Click or drag to upload</div>
+                    </div>
+                    <div class="sub mt-1">JPG / PNG / PDF (max 5MB)</div>
+                    <div class="hint mt-1" style="color: #dc2626;">If no valid ID, upload proof of billing instead (e.g. water or electric bills)</div>
                   </label>
                 </div>
               </div>
@@ -841,8 +1037,8 @@
           </div>
 
           {{-- Email Verification (OTP) --}}
-          <div class="cardx flex-grow-1" style="min-height: 200px;">
-            <div class="cardx-body d-flex flex-column justify-content-between h-100" style="padding: 24px;">
+          <div class="cardx" style="min-height: 200px;">
+            <div class="cardx-body" style="padding: 24px;">
               <div class="flex-grow-1">
                 <div class="section-title mb-3" style="font-size: 1.1rem;">
                   <i class="bi bi-envelope-check me-2"></i>Email Verification (OTP)
@@ -932,6 +1128,20 @@
   const btnSendOtp = document.getElementById('btnSendOtp');
   const btnVerifyOtp = document.getElementById('btnVerifyOtp');
   const btnSubmit = document.getElementById('btnSubmit');
+
+  document.querySelectorAll('[data-password-toggle]').forEach(function(button) {
+    button.addEventListener('click', function() {
+      const input = document.getElementById(button.dataset.passwordToggle);
+      const icon = button.querySelector('i');
+      const isHidden = input.type === 'password';
+
+      input.type = isHidden ? 'text' : 'password';
+      icon.classList.toggle('bi-eye', !isHidden);
+      icon.classList.toggle('bi-eye-slash', isHidden);
+      button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+      button.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
+    });
+  });
 
   const dobInput = document.getElementById('birth_date');
 
@@ -1104,6 +1314,13 @@
     const minorNow = (age !== null && age < 18);
     console.log('is minor:', minorNow);
 
+    // Auto-set senior citizen status based on age (60+)
+    const isSenior = (age !== null && age >= 60);
+    const seniorCheckbox = document.getElementById('senior_citizen_status');
+    if (seniorCheckbox) {
+      seniorCheckbox.checked = isSenior;
+    }
+
     if (minorNow !== isMinor) {
       isMinor = minorNow;
 
@@ -1264,6 +1481,7 @@ function setupDropzone(dzId, inputId) {
 setupDropzone('dz_photo', 'photo_path');
 setupDropzone('dz_id', 'id_image_path');
 setupDropzone('dz_selfie', 'selfie_image_path');
+setupDropzone('dz_proof_of_billing', 'proof_of_billing_path');
 
 // Preview on file select
 document.getElementById('photo_path').addEventListener('change', (e) => {
@@ -1277,6 +1495,63 @@ document.getElementById('id_image_path').addEventListener('change', (e) => {
 document.getElementById('selfie_image_path').addEventListener('change', (e) => {
   previewFile(e.target, 'dz_selfie');
 });
+
+document.getElementById('proof_of_billing_path').addEventListener('change', (e) => {
+  previewFile(e.target, 'dz_proof_of_billing');
+});
+
+  const verificationTypeEl = document.getElementById('verification_type');
+  const idImagePathEl = document.getElementById('id_image_path');
+  const selfiePathEl = document.getElementById('selfie_image_path');
+  const proofOfBillingEl = document.getElementById('proof_of_billing_path');
+  const verificationTypeHint = document.getElementById('verification_type_hint');
+  const idUploadRequirement = document.getElementById('idUploadRequirement');
+  const selfieUploadRequirement = document.getElementById('selfieUploadRequirement');
+  const proofUploadRequirement = document.getElementById('proofUploadRequirement');
+  const idDropzoneHint = document.querySelector('#dz_id .dropzone-hint');
+  const selfieDropzoneHint = document.querySelector('#dz_selfie .dropzone-hint');
+  const proofDropzoneHint = document.querySelector('#dz_proof_of_billing .dropzone-hint');
+
+  function clearUpload(inputEl, dzId) {
+    inputEl.value = '';
+    const dz = document.getElementById(dzId);
+    dz.classList.remove('has-file');
+    dz.querySelector('.dropzone-preview')?.remove();
+  }
+
+  function updateDocumentRequirements() {
+    const hasValidIdType = verificationTypeEl && verificationTypeEl.value.trim() !== '';
+
+    if (hasValidIdType) {
+      idUploadRequirement.style.display = '';
+      selfieUploadRequirement.style.display = '';
+      proofUploadRequirement.style.display = 'none';
+      clearUpload(proofOfBillingEl, 'dz_proof_of_billing');
+      idImagePathEl.required = true;
+      selfiePathEl.required = true;
+      proofOfBillingEl.required = false;
+      if (verificationTypeHint) verificationTypeHint.textContent = 'Valid ID type selected. Government ID and Selfie Holding ID are required.';
+      if (idDropzoneHint) idDropzoneHint.textContent = 'Required: upload a government ID.';
+      if (selfieDropzoneHint) selfieDropzoneHint.textContent = 'Required: upload a selfie holding your ID.';
+      if (proofDropzoneHint) proofDropzoneHint.textContent = 'Optional: proof of billing if you do not have a valid ID type selected.';
+    } else {
+      idUploadRequirement.style.display = 'none';
+      selfieUploadRequirement.style.display = 'none';
+      proofUploadRequirement.style.display = '';
+      clearUpload(idImagePathEl, 'dz_id');
+      clearUpload(selfiePathEl, 'dz_selfie');
+      idImagePathEl.required = false;
+      selfiePathEl.required = false;
+      proofOfBillingEl.required = true;
+      if (verificationTypeHint) verificationTypeHint.textContent = 'No valid ID type selected. Proof of Billing is required.';
+      if (idDropzoneHint) idDropzoneHint.textContent = 'Upload government ID only if you selected a valid ID type.';
+      if (selfieDropzoneHint) selfieDropzoneHint.textContent = 'Upload selfie holding your ID only if a valid ID type is selected.';
+      if (proofDropzoneHint) proofDropzoneHint.textContent = 'Required: upload proof of billing when no valid ID type is selected.';
+    }
+  }
+
+  verificationTypeEl.addEventListener('change', updateDocumentRequirements);
+  updateDocumentRequirements();
 
 
   dobInput.addEventListener('change', onDobChange);
@@ -1386,14 +1661,27 @@ document.getElementById('selfie_image_path').addEventListener('change', (e) => {
     const photoPathEl = document.getElementById('photo_path');
     const idImagePathEl = document.getElementById('id_image_path');
     const selfiePathEl = document.getElementById('selfie_image_path');
+    const proofOfBillingEl = document.getElementById('proof_of_billing_path');
+    const verificationTypeEl = document.getElementById('verification_type');
+    const childDocEl = document.getElementById('child_doc');
     
     console.log('photo_path files:', photoPathEl.files.length);
     console.log('id_image_path files:', idImagePathEl.files.length);
     console.log('selfie_image_path files:', selfiePathEl.files.length);
+    console.log('proof_of_billing_path files:', proofOfBillingEl ? proofOfBillingEl.files.length : 'missing');
     console.log('isMinor:', isMinor);
 
-    if (!idImagePathEl.files.length) return showMsg('Please upload your Government ID.', 'error');
-    if (!selfiePathEl.files.length) return showMsg('Please upload your selfie holding ID.', 'error');
+    const hasValidIdType = verificationTypeEl && verificationTypeEl.value.trim() !== '';
+    const hasIdFile = idImagePathEl.files.length > 0;
+    const hasSelfieFile = selfiePathEl.files.length > 0;
+    const hasProofFile = proofOfBillingEl && proofOfBillingEl.files.length > 0;
+
+    if (hasValidIdType) {
+      if (!hasIdFile) return showMsg('Please upload your Government ID when a valid ID type is selected.', 'error');
+      if (!hasSelfieFile) return showMsg('Please upload your selfie holding your ID.', 'error');
+    } else {
+      if (!hasProofFile) return showMsg('Please upload proof of billing when no valid ID type is selected.', 'error');
+    }
 
     const form = document.getElementById('regForm');
     const fd = new FormData(form);
@@ -1414,10 +1702,16 @@ document.getElementById('selfie_image_path').addEventListener('change', (e) => {
     if (selfiePathEl.files.length > 0) {
       fd.append('selfie_image_path', selfiePathEl.files[0]);
     }
+    if (proofOfBillingEl && proofOfBillingEl.files.length > 0) {
+      fd.append('proof_of_billing_path', proofOfBillingEl.files[0]);
+    }
+    if (childDocEl && childDocEl.files.length > 0) {
+      fd.append('child_doc', childDocEl.files[0]);
+    }
     
     fd.append('verification_token', verificationToken);
     fd.append('household_mode', 'new');
-
+    
     // Debug: Log email and password
     console.log('=== Registration Debug ===');
     console.log('Email:', fd.get('email'));
@@ -1440,7 +1734,16 @@ document.getElementById('selfie_image_path').addEventListener('change', (e) => {
     btnSubmit.disabled = false;
     btnSubmit.textContent = 'Submit Registration';
 
-    if (!res.ok) return showMsg(data, 'error');
+    if (!res.ok) {
+      // Show raw response payload for debugging
+      let debugText = '';
+      try {
+        debugText = JSON.stringify(data, null, 2);
+      } catch (e) {
+        debugText = String(data);
+      }
+      return showMsg(debugText, 'error');
+    }
 
     // Show success message
     form.reset();

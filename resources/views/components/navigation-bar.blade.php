@@ -47,12 +47,12 @@ $isResident = $isAuthenticated && ($user->role === 'resident');
             </a>
             <ul class="dropdown-menu dropdown-menu-end" style="background: rgba(16, 85, 201, 0.98); border: 1px solid rgba(255,255,255,0.15);">
               @if($isAdmin)
-                <li><a class="dropdown-item" href="{{ route('admin.residents') }}" style="color: #fff;">Admin Dashboard</a></li>
+                <li><a class="dropdown-item" href="/admin/analytics" style="color: #fff;">Admin Dashboard</a></li>
               @endif
+
               <li><a class="dropdown-item" href="{{ route('resident.dashboard') }}" style="color: #fff;">Dashboard</a></li>
               <li><a class="dropdown-item" href="{{ route('resident.profile') }}" style="color: #fff;">My Profile</a></li>
-              <li><a class="dropdown-item" href="#" style="color: #fff;">My Requests</a></li>
-              <li><a class="dropdown-item" href="{{ route('resident.pets') }}" style="color: #fff;">Pet Registration</a></li>
+
               <li><a class="dropdown-item" href="{{ route('resident.household') }}" style="color: #fff;">Household Registry</a></li>
               <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.2);"></li>
               <li><a class="dropdown-item" href="{{ route('logout') }}" style="color: #fca5a5;"><i class="bi bi-box-arrow-right me-1"></i>Logout</a></li>

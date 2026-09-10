@@ -110,7 +110,14 @@
     </div>
     @if($blotters->hasPages())
         <div class="card-footer bg-white border-top-0 py-3">
-            {{ $blotters->links() }}
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="text-muted small">
+                    Showing {{ $blotters->firstItem() ?? 0 }} to {{ $blotters->lastItem() ?? 0 }} of {{ $blotters->total() }} results
+                </div>
+                <div>
+                    <x-admin-pagination :paginator="$blotters" />
+                </div>
+            </div>
         </div>
     @endif
   </div>

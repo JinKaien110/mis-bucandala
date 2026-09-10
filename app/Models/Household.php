@@ -31,7 +31,7 @@ class Household extends Model
 
         // Socio-Economic
         'monthly_income_range',
-        'employment_status',
+
         'primary_income_source',
         'is_4ps_beneficiary',
         'is_indigent',
@@ -74,6 +74,7 @@ class Household extends Model
         'total_minors' => 'integer',
         'total_senior_citizens' => 'integer',
         'total_pwd' => 'integer',
+        'monthly_income_range' => 'string', // Ensure this is cast as string for range values
         'registered_pets_count' => 'integer',
     ];
 

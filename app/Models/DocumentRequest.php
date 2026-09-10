@@ -14,6 +14,9 @@ class DocumentRequest extends Model
         'purpose',
         'remarks',
         'fee_amount',
+        // legacy column in some code paths
+        'fee',
+
         'status',
         'requested_by',
         'requested_via',

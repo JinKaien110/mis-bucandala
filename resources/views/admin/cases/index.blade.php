@@ -82,7 +82,14 @@
     </div>
     @if($cases->hasPages())
         <div class="card-footer bg-white border-top-0 py-3">
-            {{ $cases->links() }}
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="text-muted small">
+                    Showing {{ $cases->firstItem() ?? 0 }} to {{ $cases->lastItem() ?? 0 }} of {{ $cases->total() }} results
+                </div>
+                <div>
+                    <x-admin-pagination :paginator="$cases" />
+                </div>
+            </div>
         </div>
     @endif
   </div>

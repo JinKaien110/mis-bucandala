@@ -82,7 +82,16 @@
     @endforelse
   </div>
 
-  {{ $announcements->links() }}
+  @if($announcements->hasPages())
+    <div class="mt-3">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="text-muted small">
+          Showing {{ $announcements->firstItem() ?? 0 }} to {{ $announcements->lastItem() ?? 0 }} of {{ $announcements->total() }} results
+        </div>
+        <x-admin-pagination :paginator="$announcements" />
+      </div>
+    </div>
+  @endif
 </div>
 
 <!-- Create Modal -->

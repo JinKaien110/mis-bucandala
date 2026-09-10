@@ -1,26 +1,17 @@
 <?php
-/** 
- * use App\Http\Controllers\Api\AuthController;
- * use Illuminate\Support\Facades\Route;
- * use App\Http\Controllers\Admin\DocumentTypeController
- * Route::prefix('v1')->middleware(['auth', 'admin,staff'])->group(function () {
- * Route::post('/document-types', [DocumentTypeController::class, 'store']);
- * Route::put('/document-types/{documentType}', [DocumentTypeController::class, 'update']);
- * Route::patch('/document-types/{documentType}/toggle-status', [DocumentTypeController::class, 'toggleStatus'])
- * });
- * use App\Http\Controllers\Api\DocumentTypeApiController
- * Route::prefix('v1')->group(function () {
- * Route::get('/document-types', [DocumentTypeApiController::class, 'index']);
- * Route::get('/document-types/{documentType}', [DocumentTypeApiController::class, 'show']);
- * });
 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- */
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ArchiveController;
+
+// Archive API (root): /api/v1/archive/*
+Route::prefix('v1')->group(function () {
+    Route::prefix('archive')->group(function () {
+
+        // Keep method names consistent with ArchiveController
+        Route::get('/residents', [ArchiveController::class, 'residents']);
+        Route::get('/document-types', [ArchiveController::class, 'documentTypes']);
+        Route::get('/document-requests', [ArchiveController::class, 'documentRequests']);
+    });
+});
+
+

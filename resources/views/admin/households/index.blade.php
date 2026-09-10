@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+  @extends('layouts.admin')
 
 @section('title', 'Households - Barangay MIS')
 
@@ -68,6 +68,7 @@
         <table class="table table-hover mb-0 align-middle">
           <thead class="bg-light text-uppercase small text-muted">
             <tr>
+              <th class="px-4 py-3 border-0">#</th>
               <th class="px-4 py-3 border-0">Household Code</th>
               <th class="py-3 border-0">Address</th>
               <th class="py-3 border-0 text-center">Members</th>
@@ -76,9 +77,14 @@
           </thead>
 
           <tbody>
+            @php($rowNumber = ($households->currentPage()-1) * $households->perPage() + 1)
             @forelse($households as $household)
               <tr>
                 <td class="px-4">
+                  <span class="text-muted">{{ $rowNumber }}</span>
+                </td>
+
+                <td>
                   <div class="d-flex align-items-center">
                     <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                         <i class="bi bi-house-door-fill"></i>
@@ -151,18 +157,25 @@
       </div>
     </div>
     
-    @if($households->hasPages())
-    <div class="card-footer bg-white border-top-0 py-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="text-muted small">
-              Showing {{ $households->firstItem() ?? 0 }} to {{ $households->lastItem() ?? 0 }} of {{ $households->total() }} results
+@if($households->hasPages())
+                <div class="card-footer bg-white border-top-0 py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+              <div class="text-muted small">
+                Showing {{ $households->firstItem() ?? 0 }} to {{ $households->lastItem() ?? 0 }} of {{ $households->total() }} results
+              </div>
+              <div>
+                {{-- Copy exact pagination UI/behavior from /admin/residents --}}
+                <x-admin-pagination :paginator="$households->appends(request()->query())" />
+                <div class="text-muted small mt-2">
+                    Page {{ $households->currentPage() }} of {{ $households->lastPage() }} • perPage {{ $households->perPage() }} • total {{ $households->total() }}
+                </div>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-list-check me-1"></i> Showing {{ $households->firstItem() ?? 0 }} to {{ $households->lastItem() ?? 0 }} of {{ $households->total() }} results
+                </div>
+              </div>
             </div>
-            <div>
-                {{ $households->links() }}
-            </div>
-        </div>
-    </div>
-    @endif
+          </div>
+          @endif
   </div>
 
 </div>

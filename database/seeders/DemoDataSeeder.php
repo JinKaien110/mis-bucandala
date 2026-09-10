@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Announcement;
+use App\Models\Admin;
 use App\Models\AuditLog;
 use App\Models\BarangayOfficial;
 use App\Models\BarangayTerm;
@@ -36,6 +37,16 @@ class DemoDataSeeder extends Seeder
                 ]
             );
 
+            Admin::updateOrCreate(
+                ['user_id' => $adminUser->id],
+                [
+                    'first_name' => 'Sherlyn',
+                    'last_name' => 'Quider',
+                    'position' => 'Barangay Captain',
+                    'timestamp' => now(),
+                ]
+            );
+
             $staffUser = User::updateOrCreate(
                 ['email' => 'staff@barangay.test'],
                 [
@@ -45,6 +56,76 @@ class DemoDataSeeder extends Seeder
                     'registered_via' => 'admin',
                 ]
             );
+
+            Admin::updateOrCreate(
+                ['user_id' => $staffUser->id],
+                [
+                    'first_name' => 'Maria',
+                    'last_name' => 'Santos',
+                    'position' => 'Barangay Secretary',
+                    'timestamp' => now(),
+                ]
+            );
+
+            $additionalStaff = [
+                [
+                    'email' => 'treasurer@barangay.test',
+                    'first_name' => 'Arnel',
+                    'last_name' => 'Santos',
+                    'position' => 'Barangay Treasurer',
+                    'role' => 'staff'
+                ],
+                [
+                    'email' => 'clerk@barangay.test',
+                    'first_name' => 'Karen',
+                    'last_name' => 'Lopez',
+                    'position' => 'Barangay Clerk',
+                    'role' => 'clerk'
+                ],
+                [
+                    'email' => 'lupon1@barangay.test',
+                    'first_name' => 'Ricardo',
+                    'last_name' => 'Velasco',
+                    'position' => 'Lupon Member',
+                    'role' => 'blotter'
+                ],
+                [
+                    'email' => 'lupon2@barangay.test',
+                    'first_name' => 'Diana',
+                    'last_name' => 'Davis',
+                    'position' => 'Lupon Member',
+                    'role' => 'blotter'
+                ],
+                [
+                    'email' => 'lupon3@barangay.test',
+                    'first_name' => 'Robert',
+                    'last_name' => 'Castillo',
+                    'position' => 'Lupon Member',
+                    'role' => 'blotter'
+                ],
+            ];
+
+            foreach ($additionalStaff as $staff) {
+                $u = User::updateOrCreate(
+                    ['email' => $staff['email']],
+                    [
+                        'password' => Hash::make('password123'),
+                        'role' => $staff['role'],
+                        'status' => 'active',
+                        'registered_via' => 'admin',
+                    ]
+                );
+
+                Admin::updateOrCreate(
+                    ['user_id' => $u->id],
+                    [
+                        'first_name' => $staff['first_name'],
+                        'last_name' => $staff['last_name'],
+                        'position' => $staff['position'],
+                        'timestamp' => now(),
+                    ]
+                );
+            }
 
             $residentsData = [
                 [
@@ -295,11 +376,283 @@ class DemoDataSeeder extends Seeder
                     'occupation' => 'Fitness Trainer',
                 ],
                 [
-
+                    'email' => 'eva.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Eva',
+                    'middle_name' => 'R.',
+                    'last_name' => 'Santos',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(28)->format('Y-m-d'),
+                    'contact_no' => '09199012346',
+                    'address_line' => '888 Roxas Boulevard',
+                    'civil_status' => 'married',
+                    'occupation' => 'Accountant',
+                ],
+                [
+                    'email' => 'robert.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Robert',
+                    'middle_name' => 'V.',
+                    'last_name' => 'Castillo',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(41)->format('Y-m-d'),
+                    'contact_no' => '09200123456',
+                    'address_line' => '999 Retiro Street',
+                    'civil_status' => 'married',
+                    'occupation' => 'Consultant',
+                ],
+                [
+                    'email' => 'fiona.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Fiona',
+                    'middle_name' => 'B.',
+                    'last_name' => 'Summers',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(26)->format('Y-m-d'),
+                    'contact_no' => '09201234567',
+                    'address_line' => '100 Mahabang Parang',
+                    'civil_status' => 'single',
+                    'occupation' => 'Teacher',
+                ],
+                [
+                    'email' => 'lucas.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Lucas',
+                    'middle_name' => 'H.',
+                    'last_name' => 'Santos',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(34)->format('Y-m-d'),
+                    'contact_no' => '09202345678',
+                    'address_line' => '101 Alabang Street',
+                    'civil_status' => 'married',
+                    'occupation' => 'Engineer',
+                ],
+                [
+                    'email' => 'claire.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Claire',
+                    'middle_name' => 'N.',
+                    'last_name' => 'Martinez',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(19)->format('Y-m-d'),
+                    'contact_no' => '09203456789',
+                    'address_line' => '102 Kalikasan Street',
+                    'civil_status' => 'single',
+                    'occupation' => 'College Student',
+                ],
+                [
+                    'email' => 'david.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'David',
+                    'middle_name' => 'J.',
+                    'last_name' => 'Wilson',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(37)->format('Y-m-d'),
+                    'contact_no' => '09204567890',
+                    'address_line' => '103 Inya ng Laya',
+                    'civil_status' => 'married',
+                    'occupation' => 'Businessman',
+                ],
+                [
+                    'email' => 'grace.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Grace',
+                    'middle_name' => 'O.',
+                    'last_name' => 'Johnson',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(43)->format('Y-m-d'),
+                    'contact_no' => '09205678901',
+                    'address_line' => '104 Likhaan Street',
+                    'civil_status' => 'married',
+                    'occupation' => 'Administrator',
+                ],
+                [
+                    'email' => 'mark.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Mark',
+                    'middle_name' => 'K.',
+                    'last_name' => 'Brown',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(25)->format('Y-m-d'),
+                    'contact_no' => '09206789012',
+                    'address_line' => '105 Lipat ng Bahay',
+                    'civil_status' => 'single',
+                    'occupation' => 'Developer',
+                ],
+                [
+                    'email' => 'diana.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Diana',
+                    'middle_name' => 'X.',
+                    'last_name' => 'Davis',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(32)->format('Y-m-d'),
+                    'contact_no' => '09207890123',
+                    'address_line' => '106 Liwayway Avenue',
+                    'civil_status' => 'married',
+                    'occupation' => 'Manager',
+                ],
+                [
+                    'email' => 'oliver.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Oliver',
+                    'middle_name' => 'Z.',
+                    'last_name' => 'Garcia',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(20)->format('Y-m-d'),
+                    'contact_no' => '09208901234',
+                    'address_line' => '107 Lopende Bahay',
+                    'civil_status' => 'single',
+                    'occupation' => 'Student',
+                ],
+                [
+                    'email' => 'sophia.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Sophia',
+                    'middle_name' => 'U.',
+                    'last_name' => 'Rodriguez',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(27)->format('Y-m-d'),
+                    'contact_no' => '09209012345',
+                    'address_line' => '108 Lupang Hinirang',
+                    'civil_status' => 'single',
+                    'occupation' => 'Designer',
+                ],
+                [
+                    'email' => 'james.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'James',
+                    'middle_name' => 'Q.',
+                    'last_name' => 'Thompson',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(39)->format('Y-m-d'),
+                    'contact_no' => '09210123456',
+                    'address_line' => '109 Mahigit Street',
+                    'civil_status' => 'married',
+                    'occupation' => 'Technician',
+                ],
+                [
+                    'email' => 'rachel.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Rachel',
+                    'middle_name' => 'W.',
+                    'last_name' => 'Martinez',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(23)->format('Y-m-d'),
+                    'contact_no' => '09211234567',
+                    'address_line' => '110 Mahiwagang Ayala',
+                    'civil_status' => 'single',
+                    'occupation' => 'Analyst',
+                ],
+                [
+                    'email' => 'christopher.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Christopher',
+                    'middle_name' => 'Y.',
+                    'last_name' => 'Anderson',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(44)->format('Y-m-d'),
+                    'contact_no' => '09212345678',
+                    'address_line' => '111 Mahusay Street',
+                    'civil_status' => 'married',
+                    'occupation' => 'Director',
+                ],
+                [
+                    'email' => 'emma.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Emma',
+                    'middle_name' => 'L.',
+                    'last_name' => 'Taylor',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(18)->format('Y-m-d'),
+                    'contact_no' => '09213456789',
+                    'address_line' => '112 Makabago Street',
+                    'civil_status' => 'single',
+                    'occupation' => 'Intern',
+                ],
+                [
+                    'email' => 'ryan.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Ryan',
+                    'middle_name' => 'F.',
+                    'last_name' => 'Thomas',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(28)->format('Y-m-d'),
+                    'contact_no' => '09214567890',
+                    'address_line' => '113 Makabuluhan Street',
+                    'civil_status' => 'single',
+                    'occupation' => 'Artist',
+                ],
+                [
+                    'email' => 'victoria.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Victoria',
+                    'middle_name' => 'E.',
+                    'last_name' => 'Jackson',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(35)->format('Y-m-d'),
+                    'contact_no' => '09215678901',
+                    'address_line' => '114 Makakalikasan Street',
+                    'civil_status' => 'married',
+                    'occupation' => 'Lawyer',
+                ],
+                [
+                    'email' => 'andrew.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Andrew',
+                    'middle_name' => 'M.',
+                    'last_name' => 'White',
+                    'sex' => 'male',
+                    'birth_date' => now()->subYears(30)->format('Y-m-d'),
+                    'contact_no' => '09216789012',
+                    'address_line' => '115 Makakasama Street',
+                    'civil_status' => 'married',
+                    'occupation' => 'Doctor',
+                ],
+                [
+                    'email' => 'michelle.resident@barangay.test',
+                    'password' => 'password123',
+                    'first_name' => 'Michelle',
+                    'middle_name' => 'A.',
+                    'last_name' => 'Harris',
+                    'sex' => 'female',
+                    'birth_date' => now()->subYears(29)->format('Y-m-d'),
+                    'contact_no' => '09217890123',
+                     'address_line' => '116 Makarakal Street',
+                     'civil_status' => 'single',
+                     'occupation' => 'Nurse',
+                 ],
+                 [
+                     'email' => 'fernando.resident@barangay.test',
+                     'password' => 'password123',
+                     'first_name' => 'Fernando',
+                     'middle_name' => 'R.',
+                     'last_name' => 'Santos',
+                     'sex' => 'male',
+                     'birth_date' => now()->subYears(25)->format('Y-m-d'),
+                     'contact_no' => '09218901234',
+                     'address_line' => '117 New Street',
+                     'civil_status' => 'single',
+                     'occupation' => 'Worker',
+                 ],
+                 [
+                     'email' => 'geralda.resident@barangay.test',
+                     'password' => 'password123',
+                     'first_name' => 'Geralda',
+                     'middle_name' => 'M.',
+                     'last_name' => 'Lopez',
+                     'sex' => 'female',
+                     'birth_date' => now()->subYears(28)->format('Y-m-d'),
+                     'contact_no' => '09219012345',
+                     'address_line' => '118 Another Street',
+                     'civil_status' => 'married',
+                     'occupation' => 'Employee',
+                 ],
+             ];
 
             $residents = [];
             $residentEmails = [];
-            foreach ($residentsData as $data) {
+            foreach ($residentsData as $key => $data) {
                 $user = User::updateOrCreate(
                     ['email' => $data['email']],
                     [
@@ -310,24 +663,33 @@ class DemoDataSeeder extends Seeder
                     ]
                 );
 
+                $educationalAttainments = ['No Formal Education', 'Elementary Graduate', 'High School Graduate', 'College Graduate', 'Vocational', 'Post Graduate'];
                 $residentData = [
-                    'first_name' => $data['first_name'],
-                    'middle_name' => $data['middle_name'],
-                    'last_name' => $data['last_name'],
-                    'sex' => $data['sex'],
-                    'birth_date' => $data['birth_date'],
-                    'address_line' => $data['address_line'],
-                    'barangay' => 'Bucandala 1',
-                    'city' => 'Imus',
-                    'province' => 'Cavite',
-                    'contact_no' => $data['contact_no'],
-                    'email' => $data['email'],
-                    'civil_status' => $data['civil_status'],
-                    'occupation' => $data['occupation'],
-                    'verification_status' => 'verified',
-                    'registered_via' => 'public_form',
-                    'status' => 'active',
-                    'user_id' => $user->id,
+                    'first_name'              => $data['first_name'],
+                    'middle_name'             => $data['middle_name'],
+                    'last_name'               => $data['last_name'],
+                    'sex'                     => $data['sex'],
+                    'birth_date'              => $data['birth_date'],
+                    'address_line'            => $data['address_line'],
+                    'barangay'                => 'Bucandala 1',
+                    'city'                    => 'Imus',
+                    'province'                => 'Cavite',
+                    'contact_no'              => $data['contact_no'],
+                    'email'                   => $data['email'],
+                    'civil_status'            => $data['civil_status'],
+                    'occupation'              => $data['occupation'],
+                    'verification_status'     => 'verified',
+                    'registered_via'          => 'public_form',
+                    'status'                  => 'active',
+                    'user_id'                 => $user->id,
+                    'account_no'              => Resident::generateAccountNo(),
+                    'monthly_income'          => round(mt_rand(5000, 45000) + mt_rand(1, 99) / 100, 2),
+                    'educational_attainment'  => $educationalAttainments[array_rand($educationalAttainments)],
+                    'solo_parent'             => (int) (mt_rand(1, 10) === 1),
+                    'pwd'                     => (int) (mt_rand(1, 20) === 1),
+                    'indigent'                => (int) (mt_rand(1, 7) === 1),
+                    'four_ps_beneficiary'     => (int) (mt_rand(1, 5) === 1),
+                    'employment_status'       => in_array(strtolower($data['occupation'] ?? ''), ['student', 'unemployed']) ? 'unemployed' : 'employed',
                 ];
 
                 $resident = Resident::updateOrCreate(
