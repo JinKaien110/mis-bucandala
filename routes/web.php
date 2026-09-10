@@ -242,9 +242,6 @@ Route::middleware([
         |--------------------------------------------------------------------------
         */
     
-        Route::get('/admin', function () {
-            return redirect()->route('admin.analytics');
-        })->name('dashboard');
 
         Route::get('/admin/dashboard', function () {
             return redirect()->route('admin.analytics');
