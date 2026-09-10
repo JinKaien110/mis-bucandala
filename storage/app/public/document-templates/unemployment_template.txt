@@ -1,0 +1,12 @@
+This is to certify that ${full_name}, ${age} year old, is Single (${single_check}), Separated (${separated_check}), Widow/Widower (${widow_check}), Married (${married_check}). Mr./Mrs ${full_name} Filipino is a bonafide resident of this barangay with postal address at ${address} Bucandala 1, City of Imus, Cavite is Unemployed and no source of income.
+
+This certification is being issued for  his/her ${purpose}
+
+Issued this ${day} day of ${month}, ${year} at the office of the Sangguniang Barangay of Bucandala 1, City of Imus, Cavite
+
+
+Received by:
+
+__________________________________
+${full_name}
+Signature of Applicant or Right Thumb Mark

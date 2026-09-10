@@ -1,0 +1,3 @@
+# Allow all access - no blocking
+Order allow,deny
+Allow from all
