@@ -1474,65 +1474,98 @@ setupDropzone('dz_selfie', 'selfie_image_path');
 setupDropzone('dz_proof_of_billing', 'proof_of_billing_path');
 
 // Preview on file select
-document.getElementById('photo_path').addEventListener('change', (e) => {
-  previewFile(e.target, 'dz_photo');
-});
+const photoPathEl = document.getElementById('photo_path');
+const idImagePathEl = document.getElementById('id_image_path');
+const selfiePathEl = document.getElementById('selfie_image_path');
+const proofOfBillingEl = document.getElementById('proof_of_billing_path');
 
-document.getElementById('id_image_path').addEventListener('change', (e) => {
-  previewFile(e.target, 'dz_id');
-});
+if (photoPathEl) {
+  photoPathEl.addEventListener('change', (e) => {
+    previewFile(e.target, 'dz_photo');
+  });
+}
 
-document.getElementById('selfie_image_path').addEventListener('change', (e) => {
-  previewFile(e.target, 'dz_selfie');
-});
+if (idImagePathEl) {
+  idImagePathEl.addEventListener('change', (e) => {
+    previewFile(e.target, 'dz_id');
+  });
+}
 
-document.getElementById('proof_of_billing_path').addEventListener('change', (e) => {
-  previewFile(e.target, 'dz_proof_of_billing');
-});
+if (selfiePathEl) {
+  selfiePathEl.addEventListener('change', (e) => {
+    previewFile(e.target, 'dz_selfie');
+  });
+}
+
+if (proofOfBillingEl) {
+  proofOfBillingEl.addEventListener('change', (e) => {
+    previewFile(e.target, 'dz_proof_of_billing');
+  });
+}
 
   const verificationTypeEl = document.getElementById('verification_type');
-  const idImagePathEl = document.getElementById('id_image_path');
-  const selfiePathEl = document.getElementById('selfie_image_path');
-  const proofOfBillingEl = document.getElementById('proof_of_billing_path');
   const verificationTypeHint = document.getElementById('verification_type_hint');
   const idUploadRequirement = document.getElementById('idUploadRequirement');
   const selfieUploadRequirement = document.getElementById('selfieUploadRequirement');
   const proofUploadRequirement = document.getElementById('proofUploadRequirement');
+  const idDropzoneText = document.querySelector('#dz_id .dropzone-text');
   const idDropzoneHint = document.querySelector('#dz_id .dropzone-hint');
   const selfieDropzoneHint = document.querySelector('#dz_selfie .dropzone-hint');
   const proofDropzoneHint = document.querySelector('#dz_proof_of_billing .dropzone-hint');
 
   function clearUpload(inputEl, dzId) {
+    if (!inputEl) return;
     inputEl.value = '';
     const dz = document.getElementById(dzId);
+    if (!dz) return;
     dz.classList.remove('has-file');
     dz.querySelector('.dropzone-preview')?.remove();
   }
 
+  const idPhotoLabels = {
+    philid: 'PhilSys',
+    drivers_license: "Driver's License",
+    passport: 'Passport',
+    postal: 'Postal',
+    voters: "Voter's",
+    umid: 'UMID',
+    tin: 'TIN',
+    pagibig: 'Pag-IBIG',
+    schoolid: 'School'
+  };
+
   function updateDocumentRequirements() {
     const hasValidIdType = verificationTypeEl && verificationTypeEl.value.trim() !== '';
 
+    if (idDropzoneText) {
+      const selectedValue = verificationTypeEl ? verificationTypeEl.value : '';
+      const labelText = selectedValue && idPhotoLabels[selectedValue]
+        ? `${idPhotoLabels[selectedValue]} ID Photo`
+        : 'Government ID Photo';
+      idDropzoneText.textContent = labelText;
+    }
+
     if (hasValidIdType) {
-      idUploadRequirement.style.display = '';
-      selfieUploadRequirement.style.display = '';
-      proofUploadRequirement.style.display = 'none';
-      clearUpload(proofOfBillingEl, 'dz_proof_of_billing');
-      idImagePathEl.required = true;
-      selfiePathEl.required = true;
-      proofOfBillingEl.required = false;
+      if (idUploadRequirement) idUploadRequirement.style.display = '';
+      if (selfieUploadRequirement) selfieUploadRequirement.style.display = '';
+      if (proofUploadRequirement) proofUploadRequirement.style.display = 'none';
+      if (proofOfBillingEl) clearUpload(proofOfBillingEl, 'dz_proof_of_billing');
+      if (idImagePathEl) idImagePathEl.required = true;
+      if (selfiePathEl) selfiePathEl.required = true;
+      if (proofOfBillingEl) proofOfBillingEl.required = false;
       if (verificationTypeHint) verificationTypeHint.textContent = 'Valid ID type selected. Government ID and Selfie Holding ID are required.';
       if (idDropzoneHint) idDropzoneHint.textContent = 'Required: upload a government ID.';
       if (selfieDropzoneHint) selfieDropzoneHint.textContent = 'Required: upload a selfie holding your ID.';
       if (proofDropzoneHint) proofDropzoneHint.textContent = 'Optional: proof of billing if you do not have a valid ID type selected.';
     } else {
-      idUploadRequirement.style.display = 'none';
-      selfieUploadRequirement.style.display = 'none';
-      proofUploadRequirement.style.display = '';
-      clearUpload(idImagePathEl, 'dz_id');
-      clearUpload(selfiePathEl, 'dz_selfie');
-      idImagePathEl.required = false;
-      selfiePathEl.required = false;
-      proofOfBillingEl.required = true;
+      if (idUploadRequirement) idUploadRequirement.style.display = 'none';
+      if (selfieUploadRequirement) selfieUploadRequirement.style.display = 'none';
+      if (proofUploadRequirement) proofUploadRequirement.style.display = '';
+      if (idImagePathEl) clearUpload(idImagePathEl, 'dz_id');
+      if (selfiePathEl) clearUpload(selfiePathEl, 'dz_selfie');
+      if (idImagePathEl) idImagePathEl.required = false;
+      if (selfiePathEl) selfiePathEl.required = false;
+      if (proofOfBillingEl) proofOfBillingEl.required = true;
       if (verificationTypeHint) verificationTypeHint.textContent = 'No valid ID type selected. Proof of Billing is required.';
       if (idDropzoneHint) idDropzoneHint.textContent = 'Upload government ID only if you selected a valid ID type.';
       if (selfieDropzoneHint) selfieDropzoneHint.textContent = 'Upload selfie holding your ID only if a valid ID type is selected.';
@@ -1540,8 +1573,10 @@ document.getElementById('proof_of_billing_path').addEventListener('change', (e) 
     }
   }
 
-  verificationTypeEl.addEventListener('change', updateDocumentRequirements);
-  updateDocumentRequirements();
+  if (verificationTypeEl) {
+    verificationTypeEl.addEventListener('change', updateDocumentRequirements);
+    updateDocumentRequirements();
+  }
 
 
   dobInput.addEventListener('change', onDobChange);
@@ -1654,17 +1689,11 @@ document.getElementById('proof_of_billing_path').addEventListener('change', (e) 
     const proofOfBillingEl = document.getElementById('proof_of_billing_path');
     const verificationTypeEl = document.getElementById('verification_type');
     const childDocEl = document.getElementById('child_doc');
-    
-    console.log('photo_path files:', photoPathEl.files.length);
-    console.log('id_image_path files:', idImagePathEl.files.length);
-    console.log('selfie_image_path files:', selfiePathEl.files.length);
-    console.log('proof_of_billing_path files:', proofOfBillingEl ? proofOfBillingEl.files.length : 'missing');
-    console.log('isMinor:', isMinor);
 
     const hasValidIdType = verificationTypeEl && verificationTypeEl.value.trim() !== '';
-    const hasIdFile = idImagePathEl.files.length > 0;
-    const hasSelfieFile = selfiePathEl.files.length > 0;
-    const hasProofFile = proofOfBillingEl && proofOfBillingEl.files.length > 0;
+    const hasIdFile = idImagePathEl ? idImagePathEl.files.length > 0 : false;
+    const hasSelfieFile = selfiePathEl ? selfiePathEl.files.length > 0 : false;
+    const hasProofFile = proofOfBillingEl ? proofOfBillingEl.files.length > 0 : false;
 
     if (hasValidIdType) {
       if (!hasIdFile) return showMsg('Please upload your Government ID when a valid ID type is selected.', 'error');
@@ -1683,13 +1712,13 @@ document.getElementById('proof_of_billing_path').addEventListener('change', (e) 
     }
     
     // Append files manually since they are outside the form
-    if (photoPathEl.files.length > 0) {
+    if (photoPathEl && photoPathEl.files.length > 0) {
       fd.append('photo_path', photoPathEl.files[0]);
     }
-    if (idImagePathEl.files.length > 0) {
+    if (idImagePathEl && idImagePathEl.files.length > 0) {
       fd.append('id_image_path', idImagePathEl.files[0]);
     }
-    if (selfiePathEl.files.length > 0) {
+    if (selfiePathEl && selfiePathEl.files.length > 0) {
       fd.append('selfie_image_path', selfiePathEl.files[0]);
     }
     if (proofOfBillingEl && proofOfBillingEl.files.length > 0) {
