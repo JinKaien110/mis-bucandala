@@ -479,7 +479,7 @@
             <label>Email Address</label>
             <div class="input-group">
               <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-              <input type="email" class="form-control" id="email" value="admin@barangay.test" required placeholder="Enter your email">
+              <input type="email" class="form-control" id="email"  required placeholder="Enter your email">
             </div>
           </div>
           
@@ -487,7 +487,7 @@
             <label>Password</label>
             <div class="input-group">
               <span class="input-group-text"><i class="bi bi-lock"></i></span>
-              <input type="password" class="form-control" id="password" value="password123" required placeholder="Enter your password">
+              <input type="password" class="form-control" id="password" required placeholder="Enter your password">
               <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password" title="Show password">
                 <i class="bi bi-eye" aria-hidden="true"></i>
               </button>

@@ -984,17 +984,7 @@
                   <div class="hint mt-1" id="verification_type_hint">If a valid ID type is selected, upload Government ID and Selfie Holding ID. Otherwise, upload Proof of Billing.</div>
                 </div>
 
-                <div class="col-12">
-                  <label for="photo_path" class="dropzone" id="dz_photo" style="cursor:pointer;">
-                    <input type="file" name="photo_path" id="photo_path" accept=".jpg,.jpeg,.png" style="display:none;" />
-                    <div class="dropzone-content" id="dz_photo_content">
-                      <i class="bi bi-person dropzone-icon"></i>
-                      <div class="dropzone-text fw-semibold">Profile Photo</div>
-                      <div class="dropzone-hint">Click or drag to upload</div>
-                    </div>
-                    <div class="sub mt-1">JPG / PNG (max 10MB)</div>
-                  </label>
-                </div>
+              
 
                 <div class="col-12" id="idUploadRequirement">
                   <label for="id_image_path" class="dropzone" id="dz_id" style="cursor:pointer;">
