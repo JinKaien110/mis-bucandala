@@ -15,6 +15,10 @@ use App\Models\Pet;
 use App\Models\Announcement;
 use App\Observers\AuditObserver;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoTransportFactory;
+use Symfony\Component\Mailer\Transport\Dsn;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,5 +47,12 @@ class AppServiceProvider extends ServiceProvider
         Event::observe(AuditObserver::class);
         Pet::observe(AuditObserver::class);
         Announcement::observe(AuditObserver::class);
+          Mail::extend('brevo', function () {
+            return (new BrevoTransportFactory)->create(
+                Dsn::fromString(
+                    'brevo+api://' . rawurlencode(config('services.brevo.key')) . '@default'
+                )
+            );
+        });
     }
 }
