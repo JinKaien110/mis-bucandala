@@ -783,8 +783,6 @@
 
 
 
- 
-
   
 @endphp
 
@@ -811,7 +809,7 @@
   <div class="d-flex align-items-center justify-content-between">
     <div class="small text-white">
       <div>Welcome, <span class="fw-semibold">{{ $currentUser->admin?->first_name ?? $currentUser->name }}</span>!</div>
-      <div class="opacity-75" style="font-size:0.7rem;">{{ ucfirst($currentUser->role) }}</div>
+      <div class="opacity-75" style="font-size:0.7rem;">{{ ucfirst($adminPosition) }}</div>
     </div>
     <form method="GET" action="{{ route('logout') }}">
       @csrf
