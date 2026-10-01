@@ -117,9 +117,7 @@
                 </div>
             </div>
             <div class="mt-3 d-flex gap-2">
-                <a href="{{ route('admin.payments.edit', $payment) }}" class="btn btn-outline-primary flex-grow-1">
-                    <i class="bi bi-pencil me-1"></i> Edit
-                </a>
+                
                 @if($payment->status === 'pending')
                     <form method="POST" action="{{ route('admin.payments.cancel', $payment) }}" class="flex-grow-1">
                         @csrf

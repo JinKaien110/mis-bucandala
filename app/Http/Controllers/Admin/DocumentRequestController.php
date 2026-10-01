@@ -54,7 +54,7 @@ class DocumentRequestController extends Controller
             Payment::create([
                 'document_request_id' => $req->id,
                 'amount' => $fee,
-                'status' => 'success',
+                'status' => 'pending',
                 'paid_at' => now(),
             ]);
         }

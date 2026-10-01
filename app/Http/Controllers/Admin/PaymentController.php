@@ -147,7 +147,7 @@ class PaymentController extends Controller
     public function markAsPaid(Payment $payment)
     {
         $payment->update([
-            'status' => 'paid',
+            'status' => 'success',
             'paid_at' => now(),
         ]);
 
