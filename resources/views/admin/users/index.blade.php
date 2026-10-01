@@ -6,7 +6,7 @@
 <div class="page-surface">
     @php
         $currentUserRole = auth()->user()->role ?? '';
-        $canCreateUsers = $currentUserRole === 'admin';
+        $canCreateUsers = $currentUserRole === 'admin' || 'staff';
     @endphp
 
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -121,7 +121,10 @@
                             <tr>
                                 <td class="px-4">
                                     <span class="fw-bold">
-                                        {{ trim(($user->admin->first_name ?? '') . ' ' . ($user->admin->last_name ?? '')) }}
+                                    @php 
+                                        $userDesignation = in_array($user->role, ["admin", "staff", "superadmin"]) ? $user->admin : $user->resident;
+                                    @endphp
+                                        {{ trim(($userDesignation->first_name ?? '') . ' ' . ($userDesignation->last_name ?? '')) }}
                                     </span>
                                 </td>
 

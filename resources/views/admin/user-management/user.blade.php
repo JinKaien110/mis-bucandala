@@ -7,7 +7,8 @@
 
   $isSuper = $role === 'superadmin';
   $isAdmin = $role === 'admin';
-  $canManageUsers = $isSuper || $isAdmin; // you can tighten if you want
+  $isSecretary = $role === 'staff'
+  $canManageUsers = $isSuper || $isAdmin || $isSecretary; // you can tighten if you want
 @endphp
 
 <div class="container py-3">

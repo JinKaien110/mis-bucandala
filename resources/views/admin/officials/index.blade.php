@@ -74,13 +74,18 @@
             <div class="card border-0 shadow-sm h-100 official-card">
               <div class="card-body text-center py-4">
                 @if($official->photo_path)
-                  <img src="{{ asset('storage/' . $official->photo_path) }}" alt="{{ $official->name }}" class="rounded-circle mx-auto mb-3 border border-3 border-primary" style="width: 90px; height: 90px; object-fit: cover;">
+                  <img src="{{ asset('storage/' . $official->photo_path) }}" alt="{{ $official->first_name }}" class="rounded-circle mx-auto mb-3 border border-3 border-primary" style="width: 90px; height: 90px; object-fit: cover;">
                 @else
                   <div class="avatar avatar-xl bg-gradient text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
                     <i class="bi bi-person-badge-fill fs-2"></i>
                   </div>
                 @endif
-                <h5 class="fw-bold mb-1">{{ $official->name }}</h5>
+              @php 
+                  $Suffix = ($official->position === "Punong Barangay") ? "Hon. " : ""; 
+              @endphp
+
+              <h5 class="fw-bold mb-1">{{ $Suffix . $official->first_name . " " . $official->last_name }}</h5>
+
                 <span class="badge bg-warning bg-opacity-25 text-warning border rounded-pill mb-2 px-3">{{ $official->position }}</span>
                 
                 @if($official->committee)
@@ -89,7 +94,7 @@
                   <div class="mb-3"></div>
                 @endif
 
-                <div class="d-flex justify-content-center gap-2 mb-3">
+                <div class="d-flex justify-content-center gap-2">
                   @if($official->contact_no)
                       <a href="tel:{{ $official->contact_no }}" class="btn btn-sm btn-outline-secondary rounded-circle" title="Call">
                           <i class="bi bi-telephone-fill"></i>

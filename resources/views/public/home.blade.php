@@ -2240,98 +2240,87 @@
   <!-- Officials Section -->
   <section id="officials" class="section">
     <div class="container">
-      <h2 class="section-title mb-4"><i class="bi bi-award"></i>Barangay Officials</h2>
-      <p style="margin-bottom: 30px; color: rgba(255,255,255,0.8);">Meet our dedicated team serving the community</p>
+        <h2 class="section-title mb-4">
+            <i class="bi bi-award"></i>Barangay Officials
+        </h2>
 
-      <!-- Search & Filter -->
-      <div class="glass p-4 mb-4">
-        <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
-          <input type="text" class="search-box" id="searchOfficial" placeholder="Search officials...">
-          <button class="filter-btn active" data-filter="all">All</button>
-          <button class="filter-btn" data-filter="captain">Captain</button>
-          <button class="filter-btn" data-filter="councilor">Councilor</button>
-          <button class="filter-btn" data-filter="secretary">Secretary</button>
-          <button class="filter-btn" data-filter="tanod">Tanod</button>
-        </div>
-      </div>
+        <p style="margin-bottom: 30px; color: rgba(255,255,255,0.8);">
+            Meet our dedicated team serving the community
+        </p>
 
-      <!-- Officials Grid -->
-      <div class="row g-4" id="officialsList">
-        <div class="col-md-4 col-lg-3" data-position="captain">
-          <div class="official-card glass">
-            <div class="captain-badge">Barangay Captain</div>
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Barangay Captain" class="official-avatar">
-            <h4 class="official-name">Hon. Juan Dela Cruz</h4>
-            <p class="official-position">Barangay Captain</p>
-            <p class="official-contact"><i class="bi bi-telephone me-2"></i>(046) 123-4567</p>
-          </div>
+        <!-- Search & Filter -->
+        <div class="glass p-4 mb-4">
+            <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+                <input type="text" class="search-box" id="searchOfficial"
+                    placeholder="Search officials...">
+
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="captain">Captain</button>
+                <button class="filter-btn" data-filter="councilor">Councilor</button>
+                <button class="filter-btn" data-filter="secretary">Secretary</button>
+                <button class="filter-btn" data-filter="tanod">Tanod</button>
+            </div>
         </div>
 
-        <div class="col-md-4 col-lg-3" data-position="councilor">
-          <div class="official-card glass">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Councilor" class="official-avatar">
-            <h4 class="official-name">Hon. Maria Santos</h4>
-            <p class="official-position">Councilor</p>
-            <p class="official-contact"><i class="bi bi-telephone me-2"></i>(046) 123-4568</p>
-          </div>
-        </div>
+        <!-- Officials Grid -->
+        <div class="row g-4" id="officialsList">
 
-        <div class="col-md-4 col-lg-3" data-position="councilor">
-          <div class="official-card glass">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Councilor" class="official-avatar">
-            <h4 class="official-name">Hon. Pedro Reyes</h4>
-            <p class="official-position">Councilor</p>
-            <p class="official-contact"><i class="bi bi-telephone me-2"></i>(046) 123-4569</p>
-          </div>
-        </div>
+            @foreach ($officials as $official)
+                @php
+                    $positionFilter = match (strtolower($official->position)) {
+                        'punong barangay', 'barangay captain' => 'captain',
+                        'barangay councilor', 'councilor' => 'councilor',
+                        'barangay secretary' => 'secretary',
+                        'tanod', 'tanod chief' => 'tanod',
+                        default => 'other',
+                    };
 
-        <div class="col-md-4 col-lg-3" data-position="councilor">
-          <div class="official-card glass">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Councilor" class="official-avatar">
-            <h4 class="official-name">Hon. Ana Garcia</h4>
-            <p class="official-position">Councilor</p>
-            <p class="official-contact"><i class="bi bi-telephone me-2"></i>(046) 123-4570</p>
-          </div>
-        </div>
+                    $fullName = trim(
+                        $official->first_name . ' ' . $official->last_name
+                    );
 
-        <div class="col-md-4 col-lg-3" data-position="secretary">
-          <div class="official-card glass">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Secretary" class="official-avatar">
-            <h4 class="official-name">Mrs. Carmen Lim</h4>
-            <p class="official-position">Barangay Secretary</p>
-            <p class="official-contact"><i class="bi bi-envelope me-2"></i>secretary@bucandala1.gov.ph</p>
-          </div>
-        </div>
+                    $photoPath = $official->photo_path
+                        ? asset('storage/' . $official->photo_path)
+                        : null;
 
-        <div class="col-md-4 col-lg-3" data-position="tanod">
-          <div class="official-card glass">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Tanod" class="official-avatar">
-            <h4 class="official-name">Mr. Jose Mangubat</h4>
-            <p class="official-position">Tanod Chief</p>
-            <p class="official-contact"><i class="bi bi-telephone me-2"></i>(046) 123-4571</p>
-          </div>
-        </div>
+                    $fallbackPhoto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E";
+                @endphp
 
-        <div class="col-md-4 col-lg-3" data-position="tanod">
-          <div class="official-card glass">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Tanod" class="official-avatar">
-            <h4 class="official-name">Mr. Mario Basco</h4>
-            <p class="official-position">Tanod</p>
-            <p class="official-contact"><i class="bi bi-telephone me-2"></i>(046) 123-4572</p>
-          </div>
-        </div>
+                <div class="col-md-4 col-lg-3"
+                    data-position="{{ $positionFilter }}">
 
-        <div class="col-md-4 col-lg-3" data-position="tanod">
-          <div class="official-card glass">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Tanod" class="official-avatar">
-            <h4 class="official-name">Mr. Rico Dimagiba</h4>
-            <p class="official-position">Tanod</p>
-            <p class="official-contact"><i class="bi bi-telephone me-2"></i>(046) 123-4573</p>
-          </div>
+                    <div class="official-card glass">
+
+
+
+                        <img
+                            src="{{ $photoPath ?? $fallbackPhoto }}"
+                            alt="{{ $official->position }}"
+                            class="official-avatar"
+                            onerror="this.onerror=null;this.src='{{ $fallbackPhoto }}';"
+                        >
+
+                        <h4 class="official-name">
+                            {{ $positionFilter === 'secretary' ? 'Mrs.' : 'Hon.' }}
+                            {{ $fullName }}
+                        </h4>
+
+                        <p class="official-position">
+                            {{ $official->position }}
+                        </p>
+
+                        <p class="official-contact">
+                            <i class="bi bi-telephone me-2"></i>
+                            {{ $official->contact_no ?: 'Contact unavailable' }}
+                        </p>
+
+                    </div>
+                </div>
+            @endforeach
+
         </div>
-      </div>
     </div>
-  </section>
+</section>
 
   <script>
     // Search

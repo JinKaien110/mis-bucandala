@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\Event;
+use App\Models\BarangayOfficial;
 
 class PublicController extends Controller
 {
@@ -119,6 +120,8 @@ class PublicController extends Controller
             ->orderBy('start_datetime', 'desc')
             ->get();
 
+        $officials = BarangayOfficial::all();
+
         foreach ($allAnnouncements as $announcement) {
             $calendarEvents[] = [
                 'id' => 'announcement-'.$announcement->id,
@@ -140,6 +143,7 @@ class PublicController extends Controller
         }
 
         return view('public.home', [
+            'officials' => $officials,
             'currentRoute' => 'public.home',
             'announcements' => $announcements,
             'events' => $events,
