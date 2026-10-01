@@ -23,7 +23,7 @@
 
       @if(!$blotter->case)
         <button class="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#openCaseModal">
-          <i class="bi bi-folder-plus me-1"></i> Open Case (Ongoing)
+          <i class="bi bi-folder-plus me-1"></i> File Case
         </button>
       @else
         <a class="btn btn-warning text-dark" href="{{ route('admin.cases.show', $blotter->case) }}">
@@ -178,7 +178,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            <i class="bi bi-folder-plus me-2"></i>Open Case
+            <i class="bi bi-folder-plus me-2"></i>File Case
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
@@ -209,7 +209,7 @@
           <form method="POST" action="{{ route('admin.blotters.openCase', $blotter) }}">
             @csrf
             <button type="submit" class="btn btn-primary">
-              <i class="bi bi-folder-plus me-1"></i> Open Case
+              <i class="bi bi-folder-plus me-1"></i> File Case
             </button>
           </form>
         </div>
