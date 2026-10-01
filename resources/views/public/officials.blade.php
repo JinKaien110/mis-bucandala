@@ -108,10 +108,10 @@
 <div class="row g-4" id="officialsList">
   <div class="col-md-4 col-lg-3" data-position="captain">
     <div class="official-card glass">
-      <div class="captain-badge">Barangay Captain</div>
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Barangay Captain" class="official-avatar">
+      <div class="captain-badge">Punong Barangay</div>
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.315 0-6 1.79-6 4v1h12v-1c0-2.21-2.685-4-6-4z' fill='%23ffffff'/%3E%3C/svg%3E" alt="Punong Barangay" class="official-avatar">
       <h4 class="official-name">Hon. Juan Dela Cruz</h4>
-      <p class="official-position">Barangay Captain</p>
+      <p class="official-position">Punong Barangay</p>
       <p class="official-contact"><i class="bi bi-telephone me-2"></i>(046) 123-4567</p>
     </div>
   </div>

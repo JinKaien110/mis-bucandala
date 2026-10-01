@@ -128,7 +128,7 @@ return [
     | Captain Email
     |--------------------------------------------------------------------------
     |
-    | This is the email address of the barangay captain. This user will have
+    | This is the email address of the Punong Barangay. This user will have
     | access to the Reports section of the admin panel.
     |
     */

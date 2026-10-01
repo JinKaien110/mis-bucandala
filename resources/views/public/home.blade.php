@@ -2268,7 +2268,7 @@
             @foreach ($officials as $official)
                 @php
                     $positionFilter = match (strtolower($official->position)) {
-                        'punong barangay', 'barangay captain' => 'captain',
+                        'punong barangay', 'Punong Barangay' => 'captain',
                         'barangay councilor', 'councilor' => 'councilor',
                         'barangay secretary' => 'secretary',
                         'tanod', 'tanod chief' => 'tanod',

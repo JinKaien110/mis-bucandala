@@ -818,7 +818,7 @@
                     <div class="col-md-12">
                         <div class="chart-card">
         <h6 class="section-title"><i class="bi bi-graph-up"></i>Executive Summary</h6>
-            <p>This section provides a high-level overview for Barangay Captain and Secretary.</p>
+            <p>This section provides a high-level overview for Punong Barangay and Secretary.</p>
                             <!-- Placeholder for executive dashboard content -->
                             <div class="row executive-stats-row justify-content-between align-items-stretch">
 

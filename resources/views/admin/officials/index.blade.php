@@ -183,7 +183,7 @@
               <label class="form-label fw-semibold">Position <span class="text-danger">*</span></label>
               <select name="position" class="form-select border-0 shadow-sm" required>
                 <option value="">-- Select Position --</option>
-                <option value="Barangay Captain">Barangay Captain</option>
+                <option value="Punong Barangay">Punong Barangay</option>
                 <option value="Barangay Councilor">Barangay Councilor</option>
                 <option value="SK Chairman">SK Chairman</option>
                 <option value="Secretary">Secretary</option>
@@ -262,7 +262,7 @@
               <label class="form-label fw-semibold">Position <span class="text-danger">*</span></label>
               <select name="position" id="edit_position" class="form-select border-0 shadow-sm" required>
                 <option value="">-- Select Position --</option>
-                <option value="Barangay Captain">Barangay Captain</option>
+                <option value="Punong Barangay">Punong Barangay</option>
                 <option value="Barangay Councilor">Barangay Councilor</option>
                 <option value="SK Chairman">SK Chairman</option>
                 <option value="Secretary">Secretary</option>

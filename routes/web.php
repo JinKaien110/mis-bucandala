@@ -92,7 +92,7 @@ Route::get('/auth/login', function () {
         if($user->resident) {
             return redirect()->route('resident.dashboard') ?: redirect('/resident/dashboard');
         }
-        if (in_array($user->admin->position, ['Barangay Captain', 'Barangay Secretary', 'Barangay Clerk'])) {
+        if (in_array($user->admin->position, ['Punong Barangay', 'Barangay Secretary', 'Barangay Clerk'])) {
             // Always send admins to analytics; avoid crashing if a named route isn't registered
             return redirect('/admin/analytics');
         }

@@ -747,7 +747,7 @@
   $adminPosition = $currentUser?->admin?->position ?? '';
 
 
-  $isCaptain = ($userRole === 'admin' && $adminPosition === 'Barangay Captain'
+  $isCaptain = ($userRole === 'admin' && $adminPosition === 'Punong Barangay'
   );
 
   $isSecretary = ($userRole === 'staff' && $adminPosition === 'Barangay Secretary');

@@ -28,7 +28,7 @@ class AbilityMiddleware
 
             'view-dashboard' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                     'Barangay Clerk'
                 ]),
@@ -41,21 +41,21 @@ class AbilityMiddleware
 
             'manage-users' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                     'Barangay Clerk'
                 ]),
 
             'create-users' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                     'Barangay Clerk'
                 ]),
 
             'view-users' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                     'Barangay Clerk'
                 ]),
@@ -68,7 +68,7 @@ class AbilityMiddleware
 
             'view-reports' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                     'Barangay Clerk'
                 ]),
@@ -81,7 +81,7 @@ class AbilityMiddleware
 
             'view-core-records' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                     'Barangay Clerk'
                 ]),
@@ -94,7 +94,7 @@ class AbilityMiddleware
 
             'view-households' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                     'Barangay Clerk'
                 ]),
@@ -107,7 +107,7 @@ class AbilityMiddleware
 
             'view-documents' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                     'Barangay Clerk'
                 ]),
@@ -120,7 +120,7 @@ class AbilityMiddleware
 
             'view-payments' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Treasurer',
                     'Barangay Clerk'
                 ]),
@@ -133,7 +133,7 @@ class AbilityMiddleware
 
             'view-blotters' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Lupon Member',
                 ]),
 
@@ -145,7 +145,7 @@ class AbilityMiddleware
 
             'view-community' =>
                 in_array($position, [
-                    'Barangay Captain',
+                    'Punong Barangay',
                     'Barangay Secretary',
                 ]),
 

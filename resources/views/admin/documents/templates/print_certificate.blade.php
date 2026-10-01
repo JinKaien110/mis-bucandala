@@ -122,7 +122,7 @@
 
       <div class="sigblock">
         <div class="sigline"></div>
-        <div><strong>Barangay Captain</strong></div>
+        <div><strong>Punong Barangay</strong></div>
       </div>
     </div>
   </div>

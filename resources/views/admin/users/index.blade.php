@@ -173,7 +173,7 @@
                                             $roleColor = 'primary';
                                         };
 
-                                        if (($user->role ?? null) === 'admin' && ($user->admin->position ?? null) === 'Barangay Captain') {
+                                        if (($user->role ?? null) === 'admin' && ($user->admin->position ?? null) === 'Punong Barangay') {
                                             $roleColor = 'danger';
                                         };
                                     @endphp
@@ -291,7 +291,7 @@
                                 <label class="form-label">Role <span class="text-danger">*</span></label>
                                 <select name="role" class="form-select" required>
                                     <option value="">Select Role</option>
-                                    <option value="admin">Admin (Barangay Captain)</option>
+                                    <option value="admin">Admin (Punong Barangay)</option>
                                     <option value="staff" default selected>Staff</option>
                                 </select>
                             </div>
@@ -300,7 +300,7 @@
                                 <label class="form-label">Position <span class="text-danger">*</span></label>
                                 <select id="official_position" name="position" class="form-select" required>
                                     <option value="">Select Position</option>
-                                    <option value="Barangay Captain">Barangay Captain</option>
+                                    <option value="Punong Barangay">Punong Barangay</option>
                                     <option value="Barangay Kagawad">Barangay Kagawad</option>
                                     <option value="Barangay Secretary">Barangay Secretary</option>
                                     <option value="Barangay Treasurer">Barangay Treasurer</option>

@@ -584,7 +584,7 @@ class DemoDataSeeder extends Seeder
             $officialsData = [
                 [
                     'name' => 'Sherlyn Quider',
-                    'position' => 'Barangay Captain',
+                    'position' => 'Punong Barangay',
                     'committee' => 'Leadership',
                     'contact_no' => '091235467890',
                     'email' => 'captain@barangay.test',

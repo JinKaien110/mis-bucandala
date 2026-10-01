@@ -42,7 +42,7 @@ class DemoDataSeeder extends Seeder
                 [
                     'first_name' => 'Sherlyn',
                     'last_name' => 'Quider',
-                    'position' => 'Barangay Captain',
+                    'position' => 'Punong Barangay',
                     'timestamp' => now(),
                 ]
             );
@@ -934,7 +934,7 @@ class DemoDataSeeder extends Seeder
             $officialsData = [
                 [
                     'name' => 'Sherlyn Quider',
-                    'position' => 'Barangay Captain',
+                    'position' => 'Punong Barangay',
                     'committee' => 'Leadership',
                     'contact_no' => '091235467890',
                     'email' => 'captain@barangay.test',

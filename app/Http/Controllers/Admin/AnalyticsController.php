@@ -434,19 +434,19 @@ if (in_array('users-audit', $selectedSections, true)) {
         $role = $user?->getAnalyticsRoleAttribute();
 
         // Granular analytics permissions (RBAC)
-        // Required by: role.users: admin, staff, and admins.position: Barangay Captain, Barangay Secretary
+        // Required by: role.users: admin, staff, and admins.position: Punong Barangay, Barangay Secretary
         return [
-            'viewExecutiveDashboard' => in_array($role, ['captain', 'secretary'], true),
+            'viewExecutiveDashboard' => in_array($role, ['punong', 'secretary'], true),
             // (no-op)
-            'viewResidentAnalytics' => in_array($role, ['captain', 'secretary', 'clerk'], true),
-            'viewHouseholdAnalytics' => in_array($role, ['captain', 'secretary'], true),
-            'viewDocumentRequestAnalytics' => in_array($role, ['captain', 'secretary', 'clerk'], true),
-            'viewPaymentAnalytics' => in_array($role, ['captain', 'secretary', 'treasurer'], true),
-            'viewBlotterAnalytics' => in_array($role, ['captain', 'secretary', 'lupon'], true),
-            'viewCaseAnalytics' => in_array($role, ['captain', 'secretary', 'lupon'], true),
-            'viewOfficialAnalytics' => in_array($role, ['captain', 'secretary'], true),
-            'viewAnnouncementEventAnalytics' => in_array($role, ['captain', 'secretary', 'clerk'], true),
-            'viewAdminSystemAnalytics' => in_array($role, ['captain', 'secretary'], true),
+            'viewResidentAnalytics' => in_array($role, ['punong', 'secretary', 'clerk'], true),
+            'viewHouseholdAnalytics' => in_array($role, ['punong', 'secretary'], true),
+            'viewDocumentRequestAnalytics' => in_array($role, ['punong', 'secretary', 'clerk'], true),
+            'viewPaymentAnalytics' => in_array($role, ['punong', 'secretary', 'treasurer'], true),
+            'viewBlotterAnalytics' => in_array($role, ['punong', 'secretary', 'lupon'], true),
+            'viewCaseAnalytics' => in_array($role, ['punong', 'secretary', 'lupon'], true),
+            'viewOfficialAnalytics' => in_array($role, ['punong', 'secretary'], true),
+            'viewAnnouncementEventAnalytics' => in_array($role, ['punong', 'secretary', 'clerk'], true),
+            'viewAdminSystemAnalytics' => in_array($role, ['punong', 'secretary'], true),
         ];
     }
 

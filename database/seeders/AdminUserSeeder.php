@@ -26,7 +26,7 @@ class AdminUserSeeder extends Seeder
             [
                 'first_name' => 'Sherlyn',
                 'last_name' => 'Quider',
-                'position' => 'Barangay Captain',
+                'position' => 'Punong Barangay',
                 'timestamp' => now(),
             ]
         );
