@@ -725,6 +725,268 @@
       border-radius: 12px !important;
       min-width: 50px;
     }
+
+    /* ===============================
+   RESPONSIVE MOBILE DESIGN
+   =============================== */
+
+/* Prevent horizontal overflow */
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.app {
+    width: 100%;
+    min-width: 0;
+}
+
+.content {
+    min-width: 0;
+    width: 100%;
+}
+
+/* Tablet and mobile */
+@media (max-width: 991.98px) {
+    .app {
+        display: block;
+        width: 100%;
+    }
+
+    /* Sidebar drawer */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(295px, 85vw);
+        height: 100dvh;
+        max-height: 100dvh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 1050;
+        padding: 16px 14px;
+        box-shadow: 8px 0 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(3px);
+        z-index: 1040;
+    }
+
+    .sidebar-backdrop.show {
+        display: block;
+    }
+
+    /* Main content */
+    .content {
+        padding: 14px;
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    .content .page-surface {
+        padding: 14px;
+        border-radius: 14px;
+    }
+
+    /* Brand */
+    .brand-title .name {
+        font-size: 0.95rem;
+    }
+
+    .brand-title .sub {
+        font-size: 0.75rem;
+    }
+
+    /* Sidebar links */
+    .side-link,
+    .section-btn {
+        min-height: 44px;
+    }
+
+    /* Top navigation */
+    .topbar {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .page-title {
+        font-size: 1rem;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Mobile phones */
+@media (max-width: 575.98px) {
+    /* Content spacing */
+    .content {
+        padding: 10px;
+    }
+
+    .content .page-surface {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    /* Headings */
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    h3 {
+        font-size: 1.15rem;
+    }
+
+    .page-title {
+        font-size: 0.95rem;
+    }
+
+    .crumb {
+        font-size: 0.75rem;
+        overflow-wrap: anywhere;
+    }
+
+    /* Brand */
+    .brand {
+        gap: 8px;
+        padding: 8px 6px 12px;
+    }
+
+    .brand-badge {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+    }
+
+    .brand-title .name {
+        font-size: 0.88rem;
+    }
+
+    .brand-title .sub {
+        font-size: 0.7rem;
+    }
+
+    /* Buttons */
+    .btn {
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .btn-sm {
+        padding: 6px 10px;
+    }
+
+    .btn-lg {
+        padding: 10px 16px;
+        font-size: 1rem;
+    }
+
+    /* Forms and inputs */
+    .form-control,
+    .form-select,
+    .select2-container {
+        max-width: 100%;
+    }
+
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+
+    /* Tables: allow horizontal scrolling */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-responsive table {
+        min-width: 600px;
+    }
+
+    /* Modal sizing */
+    .modal-dialog {
+        margin: 0.5rem;
+        width: auto;
+        max-width: none;
+    }
+
+    .modal-content {
+        border-radius: 14px;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 12px;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .modal-footer .btn {
+        margin: 0;
+    }
+
+    /* Pagination */
+    .pagination {
+        gap: 4px;
+        margin: 18px 0;
+    }
+
+    .pagination .page-item .page-link {
+        min-width: 36px;
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Images */
+    img {
+        max-width: 100%;
+    }
+
+    /* Avoid long text breaking the layout */
+    td,
+    th,
+    .card,
+    .alert {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
   </style>
 
 </head>
@@ -787,8 +1049,7 @@
 @endphp
 
 <div class="app">
-
-  <div id="sbBackdrop" class="sidebar-backdrop"></div>
+<div id="sbBackdrop" class="sidebar-backdrop"></div>
 
   <aside id="sidebar" class="sidebar">
     <div class="brand">
@@ -974,7 +1235,15 @@
   </aside>
 
 <main class="content">
-
+ <button
+        type="button"
+        id="btnSidebar"
+        class="btn btn-primary d-lg-none mb-3"
+        aria-label="Open navigation menu"
+        aria-controls="sidebar"
+        aria-expanded="false">
+        <i class="bi bi-list"></i> Menu
+    </button>
 
     @yield('content')
   </main>
@@ -989,20 +1258,61 @@
 @stack('scripts')
 
 <script>
-  // mobile sidebar toggle
-  (function () {
-    const sb = document.getElementById('sidebar');
-    const btn = document.getElementById('btnSidebar');
-    const bd = document.getElementById('sbBackdrop');
+document.addEventListener('DOMContentLoaded', function () {
+    const sidebar = document.getElementById('sidebar');
+    const button = document.getElementById('btnSidebar');
+    const backdrop = document.getElementById('sbBackdrop');
 
-    if (!sb || !btn || !bd) return;
+    if (!sidebar || !button || !backdrop) {
+        return;
+    }
 
-    function open() { sb.classList.add('show'); bd.classList.add('show'); }
-    function close() { sb.classList.remove('show'); bd.classList.remove('show'); }
+    function openSidebar() {
+        sidebar.classList.add('show');
+        backdrop.classList.add('show');
+        button.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
 
-    btn.addEventListener('click', open);
-    bd.addEventListener('click', close);
-  })();
+    function closeSidebar() {
+        sidebar.classList.remove('show');
+        backdrop.classList.remove('show');
+        button.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+
+    button.addEventListener('click', function (event) {
+        event.stopPropagation();
+
+        if (sidebar.classList.contains('show')) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
+
+    backdrop.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeSidebar();
+        }
+    });
+
+    sidebar.querySelectorAll('a.side-link').forEach(function (link) {
+        link.addEventListener('click', function () {
+            if (window.innerWidth < 992) {
+                closeSidebar();
+            }
+        });
+    });
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth >= 992) {
+            closeSidebar();
+        }
+    });
+});
 </script>
 </body>
 </html>
