@@ -189,9 +189,15 @@ class DocumentRequestController extends Controller
                     });
             })
             ->orderBy('id','desc')
-            ->get();
+            ->paginate(15);
 
-        return response()->json(['document_requests' => $items]);
+        return response()->json([
+            'document_requests' => $items->items(),
+            'pagination' => [
+                'current_page' => $items->currentPage(),
+                'last_page' => $items->lastPage(),
+            ],
+        ]);
     }
 
     public function apiShow(DocumentRequest $documentRequest)

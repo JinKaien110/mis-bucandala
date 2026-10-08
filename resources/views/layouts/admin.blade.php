@@ -18,6 +18,31 @@
   @yield('styles')
 
   <style>
+    .pagination-modern .page-link {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px !important;
+      color: #6b7280;
+      font-weight: 700;
+      padding: 0.5rem 0.75rem;
+      background: #fff;
+    }
+    .pagination-modern .page-item.active .page-link {
+      background: #1055C9;
+      border-color: #1055C9;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(16, 85, 201, 0.18);
+    }
+    .pagination-modern .page-item:not(.disabled) .page-link:hover {
+      border-color: #1055C9;
+      color: #1055C9;
+    }
+    .pagination-modern .page-item.disabled .page-link {
+      background: #f9fafb;
+      color: #9ca3af;
+    }
+  </style>
+
+  <style>
     html, body {
       margin: 0;
       padding: 0;

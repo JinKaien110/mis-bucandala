@@ -36,7 +36,14 @@
                 <i class="bi bi-credit-card opacity-75"></i>
                 <span class="opacity-75">Account No</span>
               </div>
-              <span class="fw-medium">{{ $resident->account_no ?? 'Not set' }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <span class="fw-medium" id="accountNoValue" data-account-number="{{ $resident->account_no }}">{{ $resident->account_no ? str_repeat('*', strlen((string) $resident->account_no)) : 'Not set' }}</span>
+                @if($resident->account_no)
+                  <button type="button" class="btn btn-link text-white p-0 border-0" id="toggleAccountNoVisibility" aria-label="Show account number" aria-pressed="false">
+                    <i class="bi bi-eye-slash" aria-hidden="true"></i>
+                  </button>
+                @endif
+              </div>
             </div>
 
             <div class="profile-info-item">
@@ -196,6 +203,21 @@
 
  @push('scripts')
  <script>
+ const accountNoToggle = document.getElementById('toggleAccountNoVisibility');
+ if (accountNoToggle) {
+   const accountNoValue = document.getElementById('accountNoValue');
+   const accountNumber = accountNoValue.dataset.accountNumber;
+   let accountNoVisible = false;
+
+   accountNoToggle.addEventListener('click', function() {
+     accountNoVisible = !accountNoVisible;
+     accountNoValue.textContent = accountNoVisible ? accountNumber : '*'.repeat(accountNumber.length);
+     accountNoToggle.setAttribute('aria-label', accountNoVisible ? 'Hide account number' : 'Show account number');
+     accountNoToggle.setAttribute('aria-pressed', String(accountNoVisible));
+     accountNoToggle.innerHTML = `<i class="bi ${accountNoVisible ? 'bi-eye' : 'bi-eye-slash'}" aria-hidden="true"></i>`;
+   });
+ }
+
  function filterDocs(status) {
    const search = document.getElementById('docSearch').value.toLowerCase();
    const statusFilter = status || document.getElementById('docStatusFilter').value;

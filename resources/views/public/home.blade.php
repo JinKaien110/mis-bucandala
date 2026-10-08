@@ -1606,6 +1606,10 @@
       color: #ffffff;
       border-color: #FFD700;
     }
+    .service-step-card {
+    height: 90%;
+
+} 
   </style>
 </head>
 <body>
@@ -1912,7 +1916,7 @@
           <h5 class="mb-3" style="color: #ffffff;"><i class="bi bi-signpost me-2"></i>How to Access Onsite Services</h5>
           <div class="row g-3">
             <div class="col-md-3">
-              <div class="glass" style="padding: 20px; display: flex; gap: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px;">
+              <div class="glass service-step-card" style="padding: 20px; display: flex; gap: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px;">
                 <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #1055C9; flex-shrink: 0;">1</div>
                 <div>
                   <strong style="color: #ffffff;">Visit the Hall</strong>
@@ -1921,7 +1925,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="glass" style="padding: 20px; display: flex; gap: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px;">
+              <div class="glass service-step-card" style="padding: 20px; display: flex; gap: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px;">
                 <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #1055C9; flex-shrink: 0;">2</div>
                 <div>
                   <strong style="color: #ffffff;">Get a Number</strong>
@@ -1930,7 +1934,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="glass" style="padding: 20px; display: flex; gap: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px;">
+              <div class="glass service-step-card" style="padding: 20px; display: flex; gap: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px;">
                 <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #1055C9; flex-shrink: 0;">3</div>
                 <div>
                   <strong style="color: #ffffff;">Submit Requirements</strong>
@@ -1939,7 +1943,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="glass" style="padding: 20px; display: flex; gap: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px;">
+              <div class="glass service-step-card" style="padding: 20px; display: flex; gap: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px;">
                 <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #1055C9; flex-shrink: 0;">4</div>
                 <div>
                   <strong style="color: #ffffff;">Pay & Receive</strong>
@@ -2021,10 +2025,10 @@
   </section>
 
   <!-- News & Announcements Section -->
-  <section id="news" class="section" data-section="news" style="background: rgba(16, 85, 201, 0.08); border-radius: 20px; margin: 20px;">
+  <section id="announcements" class="section" data-section="news" style="background: rgba(16, 85, 201, 0.08); border-radius: 20px; margin: 20px;">
     <div class="container">
       <div class="text-center mb-5">
-        <h2 class="section-title mb-4" style="justify-content: center;"><i class="bi bi-newspaper"></i> News & Events</h2>
+        <h2 class="section-title mb-4" style="justify-content: center;"><i class="bi bi-newspaper"></i> Announcements & Events</h2>
         <p style="color: rgba(255,255,255,0.8);">Stay updated with the latest announcements and events from Barangay Bucandala 1</p>
       </div>
 
@@ -2617,201 +2621,10 @@
   </script>
 
   <!-- Contact Section -->
-  <section id="contact" class="section">
-    <div class="container">
-      <h2 class="section-title mb-4">
-        <i class="bi bi-telephone"></i>
-        Contact Us
-      </h2>
-      <p style="margin-bottom: 24px; color: rgba(255,255,255,0.8);">Get in touch with the barangay office</p>
 
-      <div class="row g-4">
-        <div class="col-lg-7">
-          <!-- Contact Form -->
-          <div class="glass p-4 mb-4">
-            <h5 class="mb-3" style="color: #ffffff;"><i class="bi bi-envelope me-2"></i>Send us a Message</h5>
-            <p class="small mb-4" style="color: rgba(255,255,255,0.8);">Have a question or feedback? Fill out the form below.</p>
-            <form id="homeContactForm">
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" id="fullName" placeholder="Your full name" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Email <span class="text-danger">*</span></label>
-                  <input type="email" class="form-control" id="email" placeholder="your@email.com" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Phone</label>
-                  <input type="tel" class="form-control" id="phone" placeholder="09xxxxxxxxx">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Subject <span class="text-danger">*</span></label>
-                  <select class="form-select" id="subject" required>
-                    <option value="">Select a subject</option>
-                    <option value="general">General Inquiry</option>
-                    <option value="document">Document Request</option>
-                    <option value="complaint">File a Complaint</option>
-                    <option value="suggestion">Suggestion</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div class="col-12">
-                  <label class="form-label">Message <span class="text-danger">*</span></label>
-                  <textarea class="form-control" id="message" rows="4" placeholder="Your message here..." required></textarea>
-                </div>
-                <div class="col-12">
-                  <button type="submit" class="btn btn-glass px-4">
-                    <i class="bi bi-send me-2"></i>Send Message
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-
-          <div class="row g-3">
-            <div class="col-md-6">
-              <div class="glass p-4">
-                <h6 class="mb-3"><i class="bi bi-clock me-2"></i>Office Hours</h6>
-                <div class="d-flex justify-content-between py-2 border-bottom">
-                  <span>Monday - Friday</span>
-                  <span class="fw-medium">8:00 AM - 5:00 PM</span>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-bottom">
-                  <span>Saturday</span>
-                  <span class="fw-medium">8:00 AM - 12:00 PM</span>
-                </div>
-                <div class="d-flex justify-content-between py-2">
-                  <span>Sunday</span>
-                  <span class="opacity-75">Closed</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="glass p-4">
-                <h6 class="mb-3"><i class="bi bi-geo-alt me-2"></i>Location</h6>
-                <p class="small mb-2 opacity-75">Barangay Hall, Bucandala 1<br>City of Imus, Cavite</p>
-                <a href="https://www.google.com/maps/dir//Barangay+Bucandala+1,+Imus,+Cavite" target="_blank" class="btn btn-glass btn-sm">
-                  <i class="bi bi-sign-turn-right me-1"></i>Get Directions
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-5">
-          <!-- Contact Info -->
-          <div class="glass p-4 mb-4">
-            <h5 class="mb-4"><i class="bi bi-building me-2"></i>Barangay Hall</h5>
-            <div class="contact-card" style="padding: 16px; display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; border-radius: 12px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.15);">
-              <div style="width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,215,0,0.2);">
-                <i class="bi bi-geo-alt"></i>
-              </div>
-              <div>
-                <h6 class="mb-1">Address</h6>
-                <p class="small mb-0 opacity-75">Barangay Bucandala 1, City of Imus, Cavite</p>
-              </div>
-            </div>
-            <div class="contact-card" style="padding: 16px; display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; border-radius: 12px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.15);">
-              <div style="width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,215,0,0.2);">
-                <i class="bi bi-telephone"></i>
-              </div>
-              <div>
-                <h6 class="mb-1">Phone</h6>
-                <p class="small mb-0 opacity-75">(046) 123-4567</p>
-              </div>
-            </div>
-            <div class="contact-card" style="padding: 16px; display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; border-radius: 12px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.15);">
-              <div style="width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,215,0,0.2);">
-                <i class="bi bi-envelope"></i>
-              </div>
-              <div>
-                <h6 class="mb-1">Email</h6>
-                <p class="small mb-0 opacity-75">info@bucandala1.gov.ph</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Map -->
-          <div class="glass p-4">
-            <h5 class="mb-4"><i class="bi bi-map me-2"></i>Map</h5>
-            <div class="rounded-4 overflow-hidden" style="height: 200px; background: rgba(255,215,0,0.1);">
-              <iframe src="https://www.google.com/maps/embed?pb=!4v1775935144663!6m8!1m7!1s5ELMSmwBEJaGsFpnyHf-OQ!2m2!1d14.40819065824641!2d120.9306048943416!3f296.27!4f0.9500000000000028!5f0.7820865974627469" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- Footer -->
-  <footer class="footer-glass">
-    <div class="container">
-      <div class="row g-4">
-        <div class="col-lg-4">
-          <div class="d-flex align-items-center gap-3 mb-3">
-            <img src="{{ asset('storage/branding/barangay-logo.jpg') }}" alt="Logo" width="50" height="50" class="rounded-circle" onerror="this.src='https://via./50?text=BRGY'">
-            <div>
-              <h5 class="mb-0">Barangay Bucandala 1</h5>
-              <small class="text-white-50">City of Imus, Cavite</small>
-            </div>
-          </div>
-          <p class="small text-white-50">Your partner in building a safer, more connected community. Serving the residents of Bucandala 1 with dedication and integrity.</p>
-        </div>
-
-        <div class="col-lg-2 col-md-4">
-          <div class="footer-links">
-            <h5>Services</h5>
-            <ul>
-              <li><a href="{{ route('public.services.documents') }}">Clearance</a></li>
-              <li><a href="{{ route('public.services.documents') }}">Certification</a></li>
-              <li><a href="#services">Permits</a></li>
-              <li><a href="{{ route('public.services.blotter') }}">Blotter</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-2 col-md-4">
-          <div class="footer-links">
-            <h5>Quick Links</h5>
-            <ul>
-              <li><a href="#home">Home</a></li>
-              <li><a href="#news">News</a></li>
-              <li><a href="#events">Events</a></li>
-              <li><a href="#contact">Contact</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-2 col-md-4">
-          <div class="footer-links">
-            <h5>Account</h5>
-            <ul>
-              <li><a href="#contact">Login</a></li>
-              <li><a href="{{ route('public.residents.register') }}">Register</a></li>
-              <li><a href="#faqs">Help</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-2">
-          <div class="footer-links">
-            <h5>Follow Us</h5>
-            <div class="d-flex gap-3">
-              <a href="#" class="fs-5"><i class="bi bi-facebook"></i></a>
-              <a href="#" class="fs-5"><i class="bi bi-twitter-x"></i></a>
-              <a href="#" class="fs-5"><i class="bi bi-instagram"></i></a>
-              <a href="#" class="fs-5"><i class="bi bi-youtube"></i></a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; {{ date('Y') }} Barangay Bucandala 1. All rights reserved. | Developed with love for our community</p>
-      </div>
-    </div>
-  </footer>
+  @include('components.resident.footer')
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>

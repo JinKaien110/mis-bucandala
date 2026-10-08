@@ -96,7 +96,7 @@ $isResident = $isAuthenticated && ($user->role === 'resident');
           <a class="nav-link" href="/#services" style="color: rgba(255,255,255,0.9);">Services</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/#news" style="color: rgba(255,255,255,0.9);">News</a>
+          <a class="nav-link" href="/#announcements" style="color: rgba(255,255,255,0.9);">Announcements</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/#officials" style="color: rgba(255,255,255,0.9);"> Officials</a>
@@ -105,7 +105,7 @@ $isResident = $isAuthenticated && ($user->role === 'resident');
           <a class="nav-link" href="/#faqs" style="color: rgba(255,255,255,0.9);">FAQs</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/#contact" style="color: rgba(255,255,255,0.9);">Contact</a>
+          <a class="nav-link" href="{{ route('public.contact') }}" style="color: rgba(255,255,255,0.9);">Contact</a>
         </li>
 
         @if($isAuthenticated && ($isAdmin || $isResident))

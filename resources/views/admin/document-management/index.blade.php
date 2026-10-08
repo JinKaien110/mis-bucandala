@@ -73,6 +73,13 @@
         </table>
       </div>
     </div>
+    <div class="card-footer bg-white border-top-0 py-3">
+      <div class="d-flex justify-content-end">
+        <nav aria-label="Document types pagination">
+          <ul id="document-types-pagination" class="pagination pagination-modern mb-0"></ul>
+        </nav>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -160,6 +167,7 @@
 <script>
   const tbody = document.getElementById('tbody');
   const msgBox = document.getElementById('message');
+  const pagination = document.getElementById('document-types-pagination');
 
   // Initialize Bootstrap Modals
   const createModal = new bootstrap.Modal(document.getElementById('createModal'));
@@ -208,22 +216,56 @@
     return { res, data };
   }
 
-  async function loadDocumentTypes() {
+  function renderPagination(paging) {
+    const current = paging?.current_page ?? 1;
+    const last = paging?.last_page ?? 1;
+    if (last <= 1) {
+      pagination.innerHTML = '';
+      return;
+    }
+
+    let html = `<li class="page-item ${current <= 1 ? 'disabled' : ''}">`;
+    html += current <= 1
+      ? '<span class="page-link">‹</span>'
+      : `<a class="page-link" href="#" data-page="${current - 1}">‹</a>`;
+    html += '</li>';
+
+    for (let page = 1; page <= last; page++) {
+      html += `<li class="page-item ${page === current ? 'active' : ''}">`;
+      html += page === current
+        ? `<span class="page-link">${page}</span>`
+        : `<a class="page-link" href="#" data-page="${page}">${page}</a>`;
+      html += '</li>';
+    }
+
+    html += `<li class="page-item ${current >= last ? 'disabled' : ''}">`;
+    html += current >= last
+      ? '<span class="page-link">›</span>'
+      : `<a class="page-link" href="#" data-page="${current + 1}">›</a>`;
+    html += '</li>';
+    pagination.innerHTML = html;
+  }
+
+  async function loadDocumentTypes(page = 1) {
     hideMsg();
     tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><div class="spinner-border text-primary mb-2" role="status"></div><div class="small">Loading...</div></td></tr>`;
 
     const q = document.getElementById('search').value.trim();
-    const url = q ? `/api/v1/document-types?q=${encodeURIComponent(q)}` : `/api/v1/document-types`;
+    const params = new URLSearchParams({ page });
+    if (q) params.set('q', q);
+    const url = `/api/v1/document-types?${params}`;
 
     const { res, data } = await apiGet(url);
 
     if (!res.ok) {
       showMsg({ status: res.status, data });
       tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-danger">Failed to load document types</td></tr>`;
+      pagination.innerHTML = '';
       return;
     }
 
     const docs = data.types || [];
+    renderPagination(data.pagination);
     if (!docs.length) {
       tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-file-earmark-x fs-1 d-block mb-2 opacity-25"></i>No document types found.</td></tr>`;
       return;
@@ -276,6 +318,13 @@
       `;
     }).join('');
   }
+
+  pagination.addEventListener('click', (event) => {
+    const link = event.target.closest('a[data-page]');
+    if (!link) return;
+    event.preventDefault();
+    loadDocumentTypes(Number(link.dataset.page));
+  });
 
   tbody.addEventListener('click', async (e) => {
     const btn = e.target.closest('button[data-action="edit"]');

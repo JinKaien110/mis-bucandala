@@ -1311,7 +1311,7 @@
     </div>
   </div>
 
-  @include('components.public.footer')
+  @include('components.resident.footer')
 
   @stack('modals')
 

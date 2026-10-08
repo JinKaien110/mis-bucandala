@@ -164,14 +164,7 @@
                 Showing {{ $households->firstItem() ?? 0 }} to {{ $households->lastItem() ?? 0 }} of {{ $households->total() }} results
               </div>
               <div>
-                {{-- Copy exact pagination UI/behavior from /admin/residents --}}
                 <x-admin-pagination :paginator="$households->appends(request()->query())" />
-                <div class="text-muted small mt-2">
-                    Page {{ $households->currentPage() }} of {{ $households->lastPage() }} • perPage {{ $households->perPage() }} • total {{ $households->total() }}
-                </div>
-                <div class="text-muted small mt-2">
-                    <i class="bi bi-list-check me-1"></i> Showing {{ $households->firstItem() ?? 0 }} to {{ $households->lastItem() ?? 0 }} of {{ $households->total() }} results
-                </div>
               </div>
             </div>
           </div>

@@ -22,9 +22,15 @@ class DocumentTypeController extends Controller
                       ->orWhere('description', 'like', "%{$q}%")
             )
             ->orderBy('id', 'desc')
-            ->get(['id','name','description', 'template_path','fee','status','created_at', 'file_name']);
+            ->paginate(15, ['id','name','description', 'template_path','fee','status','created_at', 'file_name']);
 
-        return response()->json(['types' => $types]);
+        return response()->json([
+            'types' => $types->items(),
+            'pagination' => [
+                'current_page' => $types->currentPage(),
+                'last_page' => $types->lastPage(),
+            ],
+        ]);
     }
 
     // Update the store method
