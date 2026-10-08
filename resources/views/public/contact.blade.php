@@ -123,7 +123,7 @@
               </div>
             </div>
             <div class="col-md-6">
-              <div class="glass p-4">
+              <div class="glass p-4" style="height: 100%;">
                 <h6 class="mb-3"><i class="bi bi-geo-alt me-2"></i>Location</h6>
                 <p class="small mb-2 opacity-75">Barangay Hall, Bucandala 1<br>City of Imus, Cavite</p>
                 <a href="https://www.google.com/maps/dir//Barangay+Bucandala+1,+Imus,+Cavite" target="_blank" class="btn btn-glass btn-sm">
@@ -168,10 +168,10 @@
           </div>
 
           <!-- Map -->
-          <div class="glass p-4">
+          <div class="glass p-4" style="height: 50%;">
             <h5 class="mb-4"><i class="bi bi-map me-2"></i>Map</h5>
-            <div class="rounded-4 overflow-hidden" style="height: 200px; background: rgba(255,215,0,0.1);">
-              <iframe src="https://www.google.com/maps/embed?pb=!4v1775935144663!6m8!1m7!1s5ELMSmwBEJaGsFpnyHf-OQ!2m2!1d14.40819065824641!2d120.9306048943416!3f296.27!4f0.9500000000000028!5f0.7820865974627469" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <div class="rounded-4 overflow-hidden" style="height: 80%; background: rgba(255,215,0,0.1);">
+              <iframe style="height: 100%;" src="https://www.google.com/maps/embed?pb=!4v1775935144663!6m8!1m7!1s5ELMSmwBEJaGsFpnyHf-OQ!2m2!1d14.40819065824641!2d120.9306048943416!3f296.27!4f0.9500000000000028!5f0.7820865974627469" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
           </div>
         </div>

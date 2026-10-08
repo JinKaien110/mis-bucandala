@@ -500,6 +500,7 @@
         </form>
         
         <div class="footer-links">
+          <div class="mb-2"><a href="{{ route('password.request') }}">Forgot your password?</a></div>
           <a href="{{ route('public.residents.register') }}"><i class="bi bi-person-plus"></i> Resident Registration</a>
         </div>
       </div>
@@ -535,6 +536,10 @@
     if (urlParams.get('registered') === 'true') {
       showAlert('<i class="bi bi-check-circle-fill me-2"></i>Registration successful! Please log in with your credentials.', 'success');
       // Clean the URL
+      window.history.replaceState({}, document.title, '/auth/login');
+    }
+    if (urlParams.get('password_reset') === 'true') {
+      showAlert('<i class="bi bi-check-circle-fill me-2"></i>Password reset successful! Please sign in with your new password.', 'success');
       window.history.replaceState({}, document.title, '/auth/login');
     }
     

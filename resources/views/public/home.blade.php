@@ -1961,7 +1961,7 @@
           <i class="bi bi-laptop me-2"></i>Online Services (From Home)
         </div>
         <div class="row g-4">
-          <div class="col-md-4">
+          <div class="col-md-6">
             <a href="{{ Auth::check() && Auth::user()->role === 'resident' ? route('resident.dashboard') : route('public.residents.register') }}" class="service-card glass" style="padding: 32px; display: block; text-decoration: none; color: inherit; transition: all 0.3s;">
               <div style="width: 72px; height: 72px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #86efac;">
                 <i class="bi bi-person-plus"></i>
@@ -1971,17 +1971,8 @@
               <span style="font-weight: 600; color: #FEEE91; display: flex; align-items: center; gap: 8px;">{{ Auth::check() && Auth::user()->role === 'resident' ? 'Go to Dashboard' : 'Register now' }} <i class="bi bi-arrow-right"></i></span>
             </a>
           </div>
-          <div class="col-md-4">
-            <a href="{{ Auth::check() && Auth::user()->role === 'resident' ? route('resident.pets') : route('login') }}" class="service-card glass" style="padding: 32px; display: block; text-decoration: none; color: #ffffff; transition: all 0.3s; opacity: {{ (Auth::check() && Auth::user()->role === 'resident') ? '1' : '0.7' }};">
-              <div style="width: 72px; height: 72px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #d8b4fe;">
-                <i class="bi bi-heart-pulse"></i>
-              </div>
-              <h4 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 8px; color: #ffffff;">Pet Registration</h4>
-              <p style="font-size: 0.9rem; margin-bottom: 16px; color: rgba(255,255,255,0.9);">Register your pets, upload vaccination records, and get QR codes.</p>
-              <span style="font-weight: 600; color: #FEEE91; display: flex; align-items: center; gap: 8px;">{{ (Auth::check() && Auth::user()->role === 'resident') ? 'Manage Pets' : 'Login to Access' }} <i class="bi bi-arrow-right"></i></span>
-            </a>
-          </div>
-          <div class="col-md-4">
+       
+          <div class="col-md-6">
             <a href="{{ Auth::check() && Auth::user()->role === 'resident' ? route('resident.household') : route('login') }}" class="service-card glass" style="padding: 32px; display: block; text-decoration: none; color: #ffffff; transition: all 0.3s; opacity: {{ (Auth::check() && Auth::user()->role === 'resident') ? '1' : '0.7' }};">
               <div style="width: 72px; height: 72px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fbbf24;">
                 <i class="bi bi-people"></i>
@@ -1997,7 +1988,7 @@
       <!-- Info Cards -->
       <div class="row g-4">
         <div class="col-md-6">
-          <div class="glass p-4">
+          <div class="glass p-4" >
             <h5 class="mb-3" style="color: #ffffff;"><i class="bi bi-clock me-2"></i>Office Hours</h5>
             <div class="d-flex justify-content-between mb-2" style="color: rgba(255,255,255,0.85);">
               <span>Monday - Friday</span>

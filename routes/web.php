@@ -77,6 +77,7 @@ use App\Http\Controllers\Admin\ResidentController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Public\OtpController;
+use App\Http\Controllers\Public\PasswordResetController;
 use App\Http\Controllers\Public\ResidentRegistrationController;
 
 /*
@@ -115,6 +116,8 @@ Route::get('/auth/login', function () {
 
     return view('auth.login');
 })->name('login');
+
+Route::view('/auth/forgot-password', 'auth.forgot-password')->name('password.request');
 
 Route::middleware(['auth', 'role:resident'])->group(function () {
     // Dashboard & Profile
@@ -163,6 +166,9 @@ Route::get('/logout', function () {
 })->name('logout');
 
 Route::post('/api/v1/auth/login', [AuthController::class, 'login']);
+Route::post('/api/v1/auth/password/forgot', [PasswordResetController::class, 'send']);
+Route::post('/api/v1/auth/password/verify', [PasswordResetController::class, 'verify']);
+Route::post('/api/v1/auth/password/reset', [PasswordResetController::class, 'reset']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/api/v1/auth/me', [AuthController::class, 'me']);
@@ -601,5 +607,4 @@ Route::prefix('api/v1/public')->group(function () {
     Route::post('/otp/verify', [OtpController::class, 'verify']);
     Route::post('/residents/register', [ResidentRegistrationController::class, 'register']);
 })->middleware('blockAdmin');
-
 
