@@ -79,16 +79,13 @@
       <!-- Welcome Header -->
       <div class="glass p-4 mb-4" style="background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-          <div>
+          <div>   
             <h2 class="mb-2">Welcome back, {{ $resident->first_name ?: 'Resident' }}!</h2>
             <p class="opacity-75 mb-0">Here's your resident dashboard overview.</p>
           </div>
           <div class="d-flex gap-3">
             <button class="btn btn-glass btn-sm" data-bs-toggle="modal" data-bs-target="#docsModal">
               <i class="bi bi-file-earmark-text me-2"></i>View Documents
-            </button>
-            <button class="btn btn-glass-primary btn-sm" data-bs-toggle="modal" data-bs-target="#profileModal">
-              <i class="bi bi-pencil-square me-2"></i>Edit Profile
             </button>
           </div>
         </div>

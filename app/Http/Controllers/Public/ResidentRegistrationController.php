@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rules\Password;
 
 class ResidentRegistrationController extends Controller
 {
@@ -252,7 +253,11 @@ class ResidentRegistrationController extends Controller
         try {
             $data = $request->validate([
                 'verification_token' => ['required', 'string', 'min:10'],
-                'password' => ['required', 'string', 'min:8'],
+                'password' => ['required', 'string', Password::min(8)
+            ->letters()          // Requires at least one letter
+            ->mixedCase()        // Requires both uppercase and lowercase letters
+            ->numbers()          // Requires at least one number
+            ->symbols(),  ],
                 'password_confirmation' => ['required', 'same:password'],
 
                 // Resident fields

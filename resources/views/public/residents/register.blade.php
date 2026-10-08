@@ -682,6 +682,30 @@
                     <option value="female">Female</option>
                   </select>
                 </div>
+                  <div class="col-12" id="guardianSection" style="display:none;">
+                  <div class="p-3 rounded-3" style="background:#fef3c7;border:1px solid #fcd34d;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <div class="fw-bold">Guardian Details (Minor)</div>
+                      <span class="badge bg-warning text-dark">Required</span>
+                    </div>
+                    <div class="row g-2">
+                      <div class="col-4">
+                        <input class="form-control" name="guardian_full_name" id="guardian_full_name" placeholder="Full name" />
+                      </div>
+                      <div class="col-4">
+                        <select class="form-select" name="guardian_relationship" id="guardian_relationship">
+                          <option value="">Relationship</option>
+                          <option value="mother">Mother</option>
+                          <option value="father">Father</option>
+                          <option value="guardian">Guardian</option>
+                        </select>
+                      </div>
+                      <div class="col-4">
+                        <input class="form-control" name="guardian_contact_no" id="guardian_contact_no" placeholder="Contact no" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <div class="col-12">
                   <div class="section-divider"><span>Contact & Address</span></div>
@@ -849,7 +873,7 @@
                       <i class="bi bi-eye" aria-hidden="true"></i>
                     </button>
                   </div>
-                  <div class="hint">Minimum 8 characters.</div>
+                  <div class="hint">Minimum 8 characters, with atleast 1 special characters, and 1 uppercase character.</div>
                 </div>
 
                 <div class="col-md-6">
@@ -862,30 +886,7 @@
                   </div>
                 </div>
 
-                <div class="col-12" id="guardianSection" style="display:none;">
-                  <div class="p-3 rounded-3" style="background:#fef3c7;border:1px solid #fcd34d;">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                      <div class="fw-bold">Guardian Details (Minor)</div>
-                      <span class="badge bg-warning text-dark">Required</span>
-                    </div>
-                    <div class="row g-2">
-                      <div class="col-4">
-                        <input class="form-control" name="guardian_full_name" id="guardian_full_name" placeholder="Full name" />
-                      </div>
-                      <div class="col-4">
-                        <select class="form-select" name="guardian_relationship" id="guardian_relationship">
-                          <option value="">Relationship</option>
-                          <option value="mother">Mother</option>
-                          <option value="father">Father</option>
-                          <option value="guardian">Guardian</option>
-                        </select>
-                      </div>
-                      <div class="col-4">
-                        <input class="form-control" name="guardian_contact_no" id="guardian_contact_no" placeholder="Contact no" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              
               </div>
             </form>
             </div>
@@ -1114,6 +1115,7 @@
   }
 
   function showMsg(text, type = 'info') {
+    console.log(typeof text, typeof type)
     let alertClass = 'alert-success';
     if (type === 'error') alertClass = 'alert-danger';
     else if (type === 'info') alertClass = 'alert-secondary';
@@ -1123,6 +1125,43 @@
     msgBox.style.fontSize = '0.9rem';
     msgBox.style.padding = '10px 15px';
 
+    console.log()
+
+if (typeof text === 'string' && type === "error") {
+    const trimmed = text.trim();
+
+    if (trimmed.startsWith('{')) {
+        try {
+            const data = JSON.parse(trimmed);
+
+            if (data.errors) {
+                // 1. Ensure errors is treated as an array of messages
+                let errorList = [];
+
+                if (typeof data.errors === 'string') {
+                    // Handle case where data.errors is just a plain string
+                    errorList = [data.errors];
+                } else if (typeof data.errors === 'object' && data.errors !== null) {
+                    // Handle case where data.errors is an Object or an Array
+                    errorList = Object.values(data.errors).flat();
+                }
+
+                // 2. Format the bullet points
+                text = errorList
+                    .map(error => `• ${error}`)
+                    .join('\n');
+                    
+            } else {
+                // Fallback to data.message, or data.error, or the original text
+                text = data.message || data.error || text;
+            }
+
+        } catch (e) {
+            // Keep original text if JSON parsing fails
+        }
+    }
+}
+
     let message = 'An unexpected error occurred. Please try again.';
 
     if (typeof text === 'string') {
@@ -1130,7 +1169,7 @@
     } else if (typeof text === 'object' && text !== null) {
       if (text.errors) {
         // Collect and display all validation errors from Laravel
-        message = Object.values(text.errors).flat().join('\n');
+        message = Object.values(text.errors).flat().map(error => `• ${error}`).join('\n');
       } else {
         message = text.message || text.error?.message || message;
       }
@@ -1608,11 +1647,19 @@ if (proofOfBillingEl) {
   btnSubmit.addEventListener('click', async () => {
     hideMsg();
 
-    if (!verificationToken) return showMsg('Confirm OTP first.', 'error');
+
 
     // Validate password match
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('password_confirmation');
+
+    function passValidator(str) {
+      const regex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+={}\[\]|\\:;"'<>,.?/-]).{8,}$/;
+      return regex.test(str);
+    }
+
+    if(!passValidator(password.value)) showMsg("Password did not meet requirements.", 'error');
+
     if (password.value !== confirmPassword.value) {
       return showMsg('Passwords do not match.', 'error');
     }

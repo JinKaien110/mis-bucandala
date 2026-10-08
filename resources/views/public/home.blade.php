@@ -1679,7 +1679,7 @@
           <div class="action-desc">Clearance, certification</div>
         </a>
 
-        <a href="{{ route('public.services.blotter') }}" class="action-card glass">
+        <a href="" class="action-card glass">
           <div class="action-icon">
             <i class="bi bi-exclamation-triangle"></i>
           </div>
@@ -1687,7 +1687,7 @@
           <div class="action-desc">Report an incident</div>
         </a>
 
-        <a href="#contact" class="action-card glass">
+        <a href="{{ route('public.contact') }}" class="action-card glass">
           <div class="action-icon">
             <i class="bi bi-envelope"></i>
           </div>
@@ -2014,8 +2014,8 @@
           </div>
         </div>
         <div class="col-md-6">
-          <div class="glass p-4">
-            <h5 class="mb-3" style="color: #ffffff;"><i class="bi bi-telephone me-2"></i>Contact for Appointments</h5>
+          <div class="glass p-4"  style="height: 100% ;">
+            <h5 class="mb-3 mt-3" style="color: #ffffff;"><i class="bi bi-telephone me-2"></i>Contact for Appointments</h5>
             <p class="mb-2" style="color: rgba(255,255,255,0.85);"><i class="bi bi-phone me-2"></i>(046) 123-4567</p>
             <p class="mb-0" style="color: rgba(255,255,255,0.85);"><i class="bi bi-envelope me-2"></i>info@bucandala1.gov.ph</p>
           </div>
@@ -2184,14 +2184,14 @@
                 @endphp
                 
                 @if($eventPrev)
-                  <a href="{{ $eventPrev }}#news" style="padding: 8px 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,215,0,0.35); border-radius: 8px; color: #ffffff; text-decoration: none; font-size: 13px;">« Prev</a>
+                  <a href="{{ $eventPrev }}#announcements" style="padding: 8px 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,215,0,0.35); border-radius: 8px; color: #ffffff; text-decoration: none; font-size: 13px;">« Prev</a>
                 @endif
                 
                 @for($i = 1; $i <= $eventLast; $i++)
                   @if($i == $eventCurrent)
                     <span style="padding: 8px 12px; background: #FFD700; border: 1px solid #FFD700; border-radius: 8px; color: #1f2937; font-weight: 600; font-size: 13px;">{{ $i }}</span>
                   @else
-                    <a href="{{ $events->url($i) }}#news" style="padding: 8px 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,215,0,0.35); border-radius: 8px; color: #ffffff; text-decoration: none; font-size: 13px;">{{ $i }}</a>
+                    <a href="{{ $events->url($i) }}#announcements" style="padding: 8px 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,215,0,0.35); border-radius: 8px; color: #ffffff; text-decoration: none; font-size: 13px;">{{ $i }}</a>
                   @endif
                 @endfor
                 
@@ -2293,7 +2293,7 @@
                 <div class="col-md-4 col-lg-3"
                     data-position="{{ $positionFilter }}">
 
-                    <div class="official-card glass">
+                    <div class="official-card glass"  style="height: 100%;">
 
 
 
