@@ -20,6 +20,10 @@ class OfficialController extends Controller
             $officials = BarangayOfficial::with('term')
                 ->notArchived()
                 ->where('barangay_term_id', $termId)
+                ->orderByRaw(
+                    'CASE position WHEN ? THEN 1 WHEN ? THEN 2 WHEN ? THEN 3 WHEN ? THEN 4 ELSE 5 END',
+                    ['Punong Barangay', 'Barangay Secretary', 'Treasurer', 'Barangay Councilor']
+                )
                 ->orderBy('position')
                 ->paginate(15);
         } else {
@@ -29,6 +33,10 @@ class OfficialController extends Controller
                 ->whereHas('term', function($q) {
                     $q->where('is_active', true)->where('is_archived', false);
                 })
+                ->orderByRaw(
+                    'CASE position WHEN ? THEN 1 WHEN ? THEN 2 WHEN ? THEN 3 WHEN ? THEN 4 ELSE 5 END',
+                    ['Punong Barangay', 'Barangay Secretary', 'Treasurer', 'Barangay Councilor']
+                )
                 ->orderBy('position')
                 ->paginate(15);
         }

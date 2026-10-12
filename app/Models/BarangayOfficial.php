@@ -12,7 +12,8 @@ class BarangayOfficial extends Model
     protected $table = 'barangay_officials';
 
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'position',
         'committee',
         'contact_no',

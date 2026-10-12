@@ -1,2 +1,12 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Keep authenticated and administrative areas out of crawling.
+Disallow: /admin/
+Disallow: /resident/
+Disallow: /api/
+Disallow: /auth/login
+Disallow: /auth/forgot-password
+Disallow: /logout
+
+Sitemap: https://mis-bucandala-production-ffba.up.railway.app/sitemap.xml
