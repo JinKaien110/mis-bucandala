@@ -79,6 +79,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Public\OtpController;
 use App\Http\Controllers\Public\PasswordResetController;
 use App\Http\Controllers\Public\ResidentRegistrationController;
+use App\Http\Controllers\Resident\PortalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -124,6 +125,14 @@ Route::middleware(['auth', 'role:resident'])->group(function () {
     Route::get('/resident/dashboard', [App\Http\Controllers\Resident\DashboardController::class, 'index'])->name('resident.dashboard');
     Route::post('/resident/profile/update', [App\Http\Controllers\Resident\ProfileController::class, 'update'])->name('resident.profile.update');
     Route::get('/resident/profile', [App\Http\Controllers\Resident\ProfileController::class, 'edit'])->name('resident.profile');
+
+    // Resident services
+    Route::get('/resident/blotters/create', [PortalController::class, 'createBlotter'])->name('resident.blotters.create');
+    Route::post('/resident/blotters', [PortalController::class, 'storeBlotter'])->name('resident.blotters.store');
+    Route::get('/resident/blotters/{blotter}', [PortalController::class, 'showBlotter'])->whereNumber('blotter')->name('resident.blotters.show');
+    Route::get('/resident/cases', [PortalController::class, 'cases'])->name('resident.cases');
+    Route::get('/resident/document-requests', [PortalController::class, 'documentRequests'])->name('resident.document-requests');
+    Route::post('/resident/document-requests', [PortalController::class, 'storeDocumentRequest'])->name('resident.document-requests.store');
 
     // Pets
     Route::get('/resident/pets', [App\Http\Controllers\Resident\PetController::class, 'index'])->name('resident.pets');
@@ -413,6 +422,10 @@ Route::middleware([
         Route::delete('/document-requests/{documentRequest}', [DocumentRequestController::class, 'destroy'])
             ->name('document-requests.destroy');
 
+        Route::post('/document-requests/{documentRequest}/release-download',
+            [DocumentRequestPrintController::class, 'releaseAndDownload']
+        )->name('document-requests.release-download');
+
          Route::get('/admin/document-requests/{documentRequest}/patawag',
              [DocumentRequestPrintController::class, 'patawagComplainant']
          )->name('admin.document-requests.patawag');
@@ -479,6 +492,7 @@ Route::middleware([
         Route::get('/blotters/create', [BlotterController::class, 'create'])->name('blotters.create');
         Route::post('/blotters', [BlotterController::class, 'store'])->name('blotters.store');
         Route::get('/blotters/{blotter}', [BlotterController::class, 'show'])->name('blotters.show');
+        Route::put('/blotters/{blotter}/respondent-meeting', [BlotterController::class, 'updateRespondentAndMeeting'])->name('blotters.respondent-meeting.update');
         Route::put('/blotters/{blotter}', [BlotterController::class, 'update'])->name('blotters.update');
 
         // Convert blotter -> case (ongoing)
@@ -607,4 +621,3 @@ Route::prefix('api/v1/public')->group(function () {
     Route::post('/otp/verify', [OtpController::class, 'verify']);
     Route::post('/residents/register', [ResidentRegistrationController::class, 'register']);
 })->middleware('blockAdmin');
-

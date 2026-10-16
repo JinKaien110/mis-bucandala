@@ -1983,6 +1983,32 @@
             </a>
           </div>
         </div>
+        <div class="row g-4 mt-1">
+          <div class="col-md-4">
+            <a href="{{ route('resident.blotters.create') }}" class="service-card glass h-100" style="padding: 28px; display: block; text-decoration: none; color: #ffffff;">
+              <div style="font-size: 30px; color: #86efac; margin-bottom: 14px;"><i class="bi bi-journal-plus"></i></div>
+              <h4 style="font-size: 1.2rem; font-weight: 600;">Online E-Blotter</h4>
+              <p style="font-size: 0.9rem; opacity: 0.8;">Submit an incident report or complaint online.</p>
+              <span style="font-weight: 600; color: #FEEE91;">{{ Auth::check() && Auth::user()->role === 'resident' ? 'File a Report' : 'Login to File a Report' }} <i class="bi bi-arrow-right"></i></span>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a href="{{ route('resident.cases') }}" class="service-card glass h-100" style="padding: 28px; display: block; text-decoration: none; color: #ffffff;">
+              <div style="font-size: 30px; color: #fbbf24; margin-bottom: 14px;"><i class="bi bi-folder2-open"></i></div>
+              <h4 style="font-size: 1.2rem; font-weight: 600;">Case Tracking</h4>
+              <p style="font-size: 0.9rem; opacity: 0.8;">Review your unresolved cases and hearing schedules.</p>
+              <span style="font-weight: 600; color: #FEEE91;">{{ Auth::check() && Auth::user()->role === 'resident' ? 'View My Cases' : 'Login to Track Cases' }} <i class="bi bi-arrow-right"></i></span>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a href="{{ route('resident.document-requests') }}" class="service-card glass h-100" style="padding: 28px; display: block; text-decoration: none; color: #ffffff;">
+              <div style="font-size: 30px; color: #93c5fd; margin-bottom: 14px;"><i class="bi bi-file-earmark-text"></i></div>
+              <h4 style="font-size: 1.2rem; font-weight: 600;">Document Requests</h4>
+              <p style="font-size: 0.9rem; opacity: 0.8;">Request a Certificate of Residency or Barangay Clearance.</p>
+              <span style="font-weight: 600; color: #FEEE91;">{{ Auth::check() && Auth::user()->role === 'resident' ? 'Request a Document' : 'Login to Request' }} <i class="bi bi-arrow-right"></i></span>
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Info Cards -->

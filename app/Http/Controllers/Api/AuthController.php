@@ -26,8 +26,24 @@ public function login(\Illuminate\Http\Request $request)
 
     $request->session()->regenerate();
 
+    $intended = $request->session()->pull('url.intended');
+    $redirectTo = '/auth/login';
+    if ($request->user()->role === 'resident') {
+        $redirectTo = route('resident.dashboard');
+        if (is_string($intended)) {
+            $path = parse_url($intended, PHP_URL_PATH);
+            $query = parse_url($intended, PHP_URL_QUERY);
+            if (is_string($path) && str_starts_with($path, '/resident/')) {
+                $redirectTo = url($path . ($query ? '?' . $query : ''));
+            }
+        }
+    } else {
+        $request->session()->forget('url.intended');
+    }
+
     return response()->json([
         'message' => 'Logged in',
+        'redirect' => $redirectTo,
         'user' => [
             'id' => $request->user()->id,
             'email' => $request->user()->email,

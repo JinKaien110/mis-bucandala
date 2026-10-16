@@ -134,8 +134,94 @@
     </div>
 </div>
 
-    <!-- Incident Details -->
-    <div class="col-md-12">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-person-gear me-2"></i>Respondent &amp; Initial Meeting</h6>
+                </div>
+                <div class="card-body">
+                    @if($errors->any())
+                        <div class="alert alert-danger" role="alert">
+                            <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('admin.blotters.respondent-meeting.update', $blotter) }}" id="respondentMeetingForm">
+                        @csrf
+                        @method('PUT')
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small text-muted fw-bold d-block">Respondent Entry</label>
+                                @php
+                                    $respondentMode = old('respondent_mode', $blotter->respondent_resident_id ? 'resident' : 'manual');
+                                @endphp
+                                <div class="d-flex gap-4 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input respondent-mode" type="radio" name="respondent_mode" id="respondentModeResident" value="resident" @checked($respondentMode === 'resident')>
+                                        <label class="form-check-label" for="respondentModeResident">Registered Resident</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input respondent-mode" type="radio" name="respondent_mode" id="respondentModeManual" value="manual" @checked($respondentMode === 'manual')>
+                                        <label class="form-check-label" for="respondentModeManual">Enter Manually</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6" id="respondentResidentWrap">
+                                <label for="respondentResidentSelect" class="form-label small text-muted fw-bold">Search Resident</label>
+                                <select id="respondentResidentSelect" name="respondent_resident_id" class="form-select">
+                                    <option value=""></option>
+                                    @foreach($residents as $resident)
+                                        <option
+                                            value="{{ $resident->id }}"
+                                            data-name="{{ trim($resident->last_name . ', ' . $resident->first_name) }}"
+                                            data-contact="{{ $resident->contact_no }}"
+                                            data-email="{{ $resident->email }}"
+                                            data-address="{{ $resident->address_line }}"
+                                            @selected((string) old('respondent_resident_id', $blotter->respondent_resident_id) === (string) $resident->id)
+                                        >{{ $resident->last_name }}, {{ $resident->first_name }}{{ $resident->middle_name ? ' ' . $resident->middle_name : '' }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="respondentManualWrap">
+                                <label for="respondentName" class="form-label small text-muted fw-bold">Respondent Name</label>
+                                <input id="respondentName" name="respondent_name" class="form-control" maxlength="255" value="{{ old('respondent_name', $blotter->respondent_name) }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="respondentContact" class="form-label small text-muted fw-bold">Contact No.</label>
+                                <input id="respondentContact" name="respondent_contact" class="form-control" maxlength="50" value="{{ old('respondent_contact', $blotter->respondent_contact) }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="respondentEmail" class="form-label small text-muted fw-bold">Email</label>
+                                <input id="respondentEmail" name="respondent_email" type="email" class="form-control" maxlength="255" value="{{ old('respondent_email', $blotter->respondent_email) }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="respondentAddress" class="form-label small text-muted fw-bold">Address / Known Location</label>
+                                <input id="respondentAddress" name="respondent_address_line" class="form-control" maxlength="255" value="{{ old('respondent_address_line', $blotter->respondent_address_line) }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="initialMeeting" class="form-label small text-muted fw-bold">Initial Meeting Date &amp; Time</label>
+                                <input id="initialMeeting" name="initial_meeting" type="datetime-local" class="form-control" value="{{ old('initial_meeting', $blotter->initial_meeting?->format('Y-m-d\\TH:i')) }}">
+                                <div class="form-text">The Patawag Complainant document uses the Barangay Hall as its default location.</div>
+                            </div>
+                            <div class="col-12 d-flex flex-wrap justify-content-end gap-2">
+                                <button type="submit" name="_action" value="save" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i>Save Details
+                                </button>
+                                <button type="submit" name="_action" value="download_patawag" class="btn btn-warning">
+                                    <i class="bi bi-file-earmark-word me-1"></i>Save &amp; Download Patawag
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incident Details -->
+        <div class="col-md-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3">
                 <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-file-text-fill me-2"></i>Incident Details</h6>
@@ -311,4 +397,48 @@
   box-shadow: 0 6px 20px rgba(16, 85, 201, 0.4);
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+  $(function () {
+    const $residentSelect = $('#respondentResidentSelect');
+    const $residentWrap = $('#respondentResidentWrap');
+    const $manualWrap = $('#respondentManualWrap');
+    const $name = $('#respondentName');
+    const $modeInputs = $('.respondent-mode');
+
+    $residentSelect.select2({
+      theme: 'bootstrap-5',
+      width: '100%',
+      placeholder: 'Search Registered Resident',
+      allowClear: true
+    });
+
+    const syncRespondentMode = () => {
+      const isResident = $('#respondentModeResident').is(':checked');
+      $residentWrap.toggle(isResident);
+      $manualWrap.toggle(!isResident);
+      $residentSelect.prop('disabled', !isResident).prop('required', isResident);
+      $name.prop('required', !isResident);
+
+      if (!isResident && $residentSelect.val()) {
+        $residentSelect.val(null).trigger('change');
+      }
+    };
+
+    $residentSelect.on('change', function () {
+      const resident = this.selectedOptions[0];
+      if (!resident || !resident.value) return;
+
+      $name.val(resident.dataset.name || '');
+      $('#respondentContact').val(resident.dataset.contact || '');
+      $('#respondentEmail').val(resident.dataset.email || '');
+      $('#respondentAddress').val(resident.dataset.address || '');
+    });
+
+    $modeInputs.on('change', syncRespondentMode);
+    syncRespondentMode();
+  });
+</script>
 @endpush

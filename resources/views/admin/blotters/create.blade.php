@@ -45,50 +45,7 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-exclamation-triangle-fill text-warning"></i></span>
                         <select name="incident_type" class="form-select border-start-0" required style="cursor: pointer;">
                           <option value="" selected disabled>-- Select Incident Type --</option>
-                          <optgroup label="Personal Offenses">
-                            <option value="Threats / Harassment">⚠️ Threats / Harassment</option>
-                            <option value="Physical Injury / Assault">👊 Physical Injury / Assault</option>
-                            <option value="Domestic Dispute">🏠 Domestic Dispute</option>
-                            <option value="Verbal Altercation">🗣️ Verbal Altercation</option>
-                            <option value="Child Abuse">👶 Child Abuse</option>
-                            <option value="Violence Against Women">👩 Violence Against Women</option>
-                          </optgroup>
-                          <optgroup label="Property Crimes">
-                            <option value="Theft / Robbery">💰 Theft / Robbery</option>
-                            <option value="Property Damage">🏗️ Property Damage</option>
-                            <option value="Trespassing">🚫 Trespassing</option>
-                          </optgroup>
-                          <optgroup label="Public Nuisance">
-                            <option value="Noise Disturbance">🔊 Noise Disturbance</option>
-                            <option value="Illegal Gambling">🎰 Illegal Gambling</option>
-                            <option value="Drunk in Public">🍺 Drunk in Public</option>
-                            <option value="Stray Animal">🐕 Stray Animal</option>
-                            <option value="Public Hazard">⚡ Public Hazard</option>
-                          </optgroup>
-                          <optgroup label="Disputes">
-                            <option value="Traffic Accident">🚗 Traffic Accident</option>
-                            <option value="Land / Boundary Dispute">🏞️ Land / Boundary Dispute</option>
-                            <option value="Scam / Estafa">💳 Scam / Estafa</option>
-                          </optgroup>
-                          <optgroup label="Environmental">
-                            <option value="Illegal Logging">🌲 Illegal Logging</option>
-                            <option value="Illegal Fishing">🎣 Illegal Fishing</option>
-                            <option value="Water Pollution">💧 Water Pollution</option>
-                            <option value="Illegal Dumping">🗑️ Illegal Dumping</option>
-                            <option value="Unsanitary Premises">🧹 Unsanitary Premises</option>
-                          </optgroup>
-                          <optgroup label="Health & Safety">
-                            <option value="Animal Bite">🦇 Animal Bite</option>
-                            <option value="Health Code Violation">🏥 Health Code Violation</option>
-                            <option value="Business Permit Violation">📜 Business Permit Violation</option>
-                          </optgroup>
-                          <optgroup label="Other">
-                            <option value="Cybercrime">💻 Cybercrime</option>
-                            <option value="Squatters / Illegal Settlers">🏚️ Squatters / Illegal Settlers</option>
-                            <option value="Missing Person">🔍 Missing Person</option>
-                            <option value="Found Property">📦 Found Property</option>
-                            <option value="Other">❓ Other</option>
-                          </optgroup>
+                          @include('components.incident-type-options')
                         </select>
                       </div>
                     </div>

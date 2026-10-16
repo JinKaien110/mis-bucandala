@@ -14,13 +14,16 @@ class Blotter extends Model
         'incident_location',
         'narrative',
         'remarks',
+        'status',
 
         'complainant_resident_id',
         'respondent_resident_id',
         'complainant_name',
         'respondent_name',
+        'initial_meeting',
         'complainant_contact',
         'respondent_contact',
+        'respondent_address_line',
         'complainant_email',
         'respondent_email',
         'recorded_by',
@@ -29,6 +32,7 @@ class Blotter extends Model
 
     protected $casts = [
         'incident_date' => 'datetime',
+        'initial_meeting' => 'datetime',
         'archived_at' => 'datetime',
     ];
 

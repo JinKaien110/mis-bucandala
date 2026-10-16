@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blotter;
+use App\Models\DocumentType;
 use App\Models\Resident;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\CaseFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class BlotterController extends Controller
 {
@@ -94,11 +98,104 @@ public function create()
 {
     $blotter->load(['case', 'complainantResident', 'respondentResident']);
 
-    return view('admin.blotters.show', compact('blotter'));
-}
+        $residents = Resident::query()
+            ->with('user:id,email')
+            ->select('id', 'user_id', 'first_name', 'middle_name', 'last_name', 'contact_no', 'address_line')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        return view('admin.blotters.show', compact('blotter', 'residents'));
+    }
+
+    public function updateRespondentAndMeeting(Request $request, Blotter $blotter)
+    {
+        $validated = $request->validate([
+            'respondent_mode' => ['required', 'in:resident,manual'],
+            'respondent_resident_id' => ['nullable', 'required_if:respondent_mode,resident', 'integer', 'exists:residents,id'],
+            'respondent_name' => ['nullable', 'required_if:respondent_mode,manual', 'string', 'max:255'],
+            'respondent_contact' => ['nullable', 'string', 'max:50'],
+            'respondent_email' => ['nullable', 'email', 'max:255'],
+            'respondent_address_line' => ['nullable', 'string', 'max:255'],
+            'initial_meeting' => ['nullable', 'required_if:_action,download_patawag', 'date'],
+            '_action' => ['required', 'in:save,download_patawag'],
+        ]);
+
+        if ($validated['respondent_mode'] === 'resident') {
+            $resident = Resident::with('user')->findOrFail($validated['respondent_resident_id']);
+            $blotter->respondent_resident_id = $resident->id;
+            $blotter->respondent_name = trim($resident->last_name . ', ' . $resident->first_name);
+            $blotter->respondent_contact = $resident->contact_no;
+            $blotter->respondent_email = $resident->email;
+            $blotter->respondent_address_line = $resident->address_line;
+        } else {
+            $blotter->respondent_resident_id = null;
+            $blotter->respondent_name = $validated['respondent_name'];
+            $blotter->respondent_contact = $validated['respondent_contact'] ?? null;
+            $blotter->respondent_email = $validated['respondent_email'] ?? null;
+            $blotter->respondent_address_line = $validated['respondent_address_line'] ?? null;
+        }
+
+        $blotter->initial_meeting = $validated['initial_meeting'] ?? null;
+        $blotter->save();
+
+        if ($validated['_action'] === 'download_patawag') {
+            return $this->downloadPatawagComplainant($blotter);
+        }
+
+        return redirect()
+            ->route('admin.blotters.show', $blotter)
+            ->with('success', 'Respondent and initial meeting details updated.');
+    }
+
+    private function downloadPatawagComplainant(Blotter $blotter)
+    {
+        $documentType = DocumentType::query()
+            ->notArchived()
+            ->whereRaw('LOWER(TRIM(name)) = ?', ['patawag complainant'])
+            ->first();
+
+        if (!$documentType || !$documentType->template_path) {
+            return redirect()
+                ->route('admin.blotters.show', $blotter)
+                ->with('error', 'The Patawag Complainant document type or its DOCX template is not available. The blotter details were saved.');
+        }
+
+        $templatePath = storage_path('app/public/' . $documentType->template_path);
+        if (!is_file($templatePath)) {
+            return redirect()
+                ->route('admin.blotters.show', $blotter)
+                ->with('error', 'The Patawag Complainant DOCX template file is missing. The blotter details were saved.');
+        }
+
+        $scheduledAt = $blotter->initial_meeting;
+        if (!$scheduledAt) {
+            return redirect()
+                ->route('admin.blotters.show', $blotter)
+                ->with('error', 'Set an initial meeting date and time before downloading the Patawag Complainant document.');
+        }
+
+        $blotter->loadMissing('respondentResident');
+        $respondentName = $blotter->respondent_name ?: $blotter->respondentResident?->full_name;
+        $processor = new TemplateProcessor($templatePath);
+        $processor->setValue('respondent_full_name', trim($respondentName ?? ''));
+        $processor->setValue('location', 'Bucandala 1, Imus, Barangay Hall');
+        $processor->setValue('scheduled_at', $scheduledAt->format('F d, Y'));
+        $processor->setValue('time', $scheduledAt->format('h:i A'));
+        $processor->setValue('buwan', $scheduledAt->format('F'));
+        $processor->setValue('araw', $scheduledAt->format('d'));
+
+        $tempDirectory = storage_path('app/temp');
+        File::ensureDirectoryExists($tempDirectory);
+        $filename = 'patawag_complainant_' . Str::slug($blotter->blotter_no) . '_' . Str::random(8) . '.docx';
+        $outputPath = $tempDirectory . DIRECTORY_SEPARATOR . $filename;
+        $processor->saveAs($outputPath);
+
+        return response()->download($outputPath, $filename)->deleteFileAfterSend(true);
+    }
 
 
-    public function store(Request $request)
+        public function store(Request $request)
 {
     // 1. Validate basic incident info + the hidden mode fields
     $validated = $request->validate([

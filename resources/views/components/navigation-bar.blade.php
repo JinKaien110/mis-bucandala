@@ -123,6 +123,11 @@ $isResident = $isAuthenticated && ($user->role === 'resident');
               <li><a class="dropdown-item" href="{{ route('resident.profile') }}" style="color: #fff;">My Profile</a></li>
 
               <li><a class="dropdown-item" href="{{ route('resident.household') }}" style="color: #fff;">Household Registry</a></li>
+              @if($isResident)
+                <li><a class="dropdown-item" href="{{ route('resident.blotters.create') }}" style="color: #fff;"><i class="bi bi-journal-plus me-1"></i>Online E-Blotter</a></li>
+                <li><a class="dropdown-item" href="{{ route('resident.cases') }}" style="color: #fff;"><i class="bi bi-folder2-open me-1"></i>My Cases</a></li>
+                <li><a class="dropdown-item" href="{{ route('resident.document-requests') }}" style="color: #fff;"><i class="bi bi-file-earmark-text me-1"></i>Document Requests</a></li>
+              @endif
               <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.2);"></li>
               <li><a class="dropdown-item" href="{{ route('logout') }}" style="color: #fca5a5;"><i class="bi bi-box-arrow-right me-1"></i>Logout</a></li>
             </ul>

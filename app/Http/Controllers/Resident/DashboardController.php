@@ -27,6 +27,7 @@ class DashboardController extends Controller
         
         if ($resident) {
             $documentRequests = DocumentRequest::where('resident_id', $resident->id)
+                ->with(['documentType:id,name', 'payment:id,document_request_id,status'])
                 ->orderBy('created_at', 'desc')
                 ->limit(10)
                 ->get();

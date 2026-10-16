@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\DocumentRequest;
+use App\Models\Payment;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
@@ -59,7 +63,72 @@ class DocumentRequestPrintController extends Controller
 
     public function download(DocumentRequest $documentRequest)
     {
+        if ($documentRequest->status === 'pending') {
+            return redirect()
+                ->route('admin.document-requests.index')
+                ->with('error', 'Confirm the document release from the request list before downloading.');
+        }
 
+        if ($documentRequest->status !== 'released') {
+            return redirect()
+                ->route('admin.document-requests.index')
+                ->with('error', 'Only released document requests can be downloaded.');
+        }
+
+        return $this->generateDocx($documentRequest);
+    }
+
+    public function releaseAndDownload(Request $request, DocumentRequest $documentRequest)
+    {
+        if (!in_array($documentRequest->status, ['pending', 'released'], true)) {
+            return redirect()
+                ->route('admin.document-requests.index')
+                ->with('error', 'Only pending or released document requests can be downloaded.');
+        }
+
+        $download = $this->generateDocx($documentRequest);
+        if ($download instanceof RedirectResponse) {
+            return $download;
+        }
+
+        DB::transaction(function () use ($request, $documentRequest) {
+            $lockedRequest = DocumentRequest::query()
+                ->lockForUpdate()
+                ->findOrFail($documentRequest->id);
+
+            if (!in_array($lockedRequest->status, ['pending', 'released'], true)) {
+                abort(409, 'Only pending or released document requests can be downloaded.');
+            }
+
+            if ($lockedRequest->status === 'pending') {
+                $lockedRequest->update([
+                    'status' => 'released',
+                    'released_by' => $request->user()->id,
+                    'released_at' => now(),
+                ]);
+            }
+
+            $payment = $lockedRequest->payment()->lockForUpdate()->first();
+            if ($payment) {
+                $payment->update([
+                    'status' => 'success',
+                    'paid_at' => now(),
+                ]);
+            } elseif ((float) $lockedRequest->fee_amount > 0) {
+                Payment::create([
+                    'document_request_id' => $lockedRequest->id,
+                    'amount' => $lockedRequest->fee_amount,
+                    'status' => 'success',
+                    'paid_at' => now(),
+                ]);
+            }
+        });
+
+        return $download;
+    }
+
+    private function generateDocx(DocumentRequest $documentRequest)
+    {
         $documentRequest->load(['resident', 'documentType']);
         $templatePath = $documentRequest->documentType->template_path ?? null;
         

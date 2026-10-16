@@ -580,10 +580,10 @@
           const userRole = data.user?.role || data.role;
           if (userRole === 'admin' || userRole === 'staff') {
             showAlert('Login successful! Redirecting to admin...', 'success');
-            setTimeout(() => window.location.reload(), 1000);
+            setTimeout(() => window.location.assign(data.redirect || '/auth/login'), 1000);
           } else {
             showAlert('Login successful! Redirecting...', 'success');
-            setTimeout(() => window.location.reload(), 1000);
+            setTimeout(() => window.location.assign(data.redirect || '/auth/login'), 1000);
           }
 } else {
             showAlert(data.message || 'Login failed. Please check your credentials.', 'danger');

@@ -22,6 +22,12 @@
         <div>{{ session('success') }}</div>
     </div>
   @endif
+  @if(session('error'))
+    <div class="alert alert-danger d-flex align-items-center shadow-sm border-0 mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+        <div>{{ session('error') }}</div>
+    </div>
+  @endif
 
   @if($errors->any())
     <div class="alert alert-danger shadow-sm border-0 mb-4">
@@ -63,11 +69,12 @@
               <th class="py-3 border-0">Document</th>
               <th class="py-3 border-0">Fee</th>
               <th class="py-3 border-0">Request At</th>
+              <th class="py-3 border-0">Status</th>
               <th class="py-3 border-0 text-end pe-4">Action</th>
             </tr>
           </thead>
           <tbody id="tbody">
-            <tr><td colspan="6" class="text-center py-5 text-muted">Loading...</td></tr>
+            <tr><td colspan="7" class="text-center py-5 text-muted">Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -185,10 +192,10 @@
 
   function escapeHtml(s) {
     return String(s ?? '')
-      .replaceAll('&','&')
-      .replaceAll('<','<')
-      .replaceAll('>','>')
-      .replaceAll('"','"')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
       .replaceAll("'","&#039;");
   }
 
@@ -285,7 +292,7 @@
   }
 
   async function loadRequests(page = 1) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><div class="spinner-border text-primary mb-2" role="status"></div><div class="small">Loading...</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><div class="spinner-border text-primary mb-2" role="status"></div><div class="small">Loading...</div></td></tr>`;
 
     const q = document.getElementById('search').value.trim();
     const params = new URLSearchParams({ page });
@@ -295,7 +302,7 @@
     const { res, data } = await apiGet(url);
     if (!res.ok) {
       showMsg({ status: res.status, data });
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-danger">Failed to load requests</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-danger">Failed to load requests</td></tr>`;
       pagination.innerHTML = '';
       return;
     }
@@ -303,7 +310,7 @@
     const items = data.document_requests || [];
     renderPagination(data.pagination);
     if (!items.length) {
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><i class="bi bi-file-earmark-x fs-1 d-block mb-2 opacity-25"></i>No requests found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-file-earmark-x fs-1 d-block mb-2 opacity-25"></i>No requests found.</td></tr>`;
       return;
     }
 
@@ -317,6 +324,26 @@
 
       const feeNum = Number(x.fee ?? (x.document_type?.fee ?? 0));
       const fee = (!feeNum || Number.isNaN(feeNum)) ? 'Free' : '₱' + feeNum.toFixed(2);
+      const status = String(x.status || 'pending').toLowerCase();
+      const statusClass = status === 'released'
+        ? 'bg-success-subtle text-success border border-success-subtle'
+        : status === 'pending'
+          ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'
+          : 'bg-secondary-subtle text-secondary border border-secondary-subtle';
+      const downloadAction = status === 'pending'
+        ? `<form method="POST" action="/admin/document-requests/${encodeURIComponent(x.id)}/release-download" class="release-download-form">
+             <input type="hidden" name="_token" value="{{ csrf_token() }}">
+             <button class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" type="submit" title="Download DOCX and release request">
+               <i class="bi bi-file-earmark-word"></i>
+             </button>
+           </form>`
+        : status === 'released'
+          ? `<a class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${encodeURIComponent(x.id)}/download" title="Download DOCX">
+             <i class="bi bi-file-earmark-word"></i>
+           </a>`
+          : `<button class="btn btn-sm btn-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" type="button" title="Only pending or released requests can be downloaded" disabled>
+               <i class="bi bi-file-earmark-word"></i>
+             </button>`;
 
       return `
         <tr>
@@ -328,11 +355,10 @@
           <td><span class="badge bg-light text-dark border">${escapeHtml(doc)}</span></td>
           <td>${fee}</td>
           <td class="text-muted small">${escapeHtml(String(x.created_at ?? '').replace('T',' ').slice(0,19))}</td>
+          <td><span class="badge rounded-pill ${statusClass}">${escapeHtml(status.charAt(0).toUpperCase() + status.slice(1))}</span></td>
             <td class="text-end pe-4">
               <div class="d-flex justify-content-end gap-2">
-                  <a class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${x.id}/download" title="Download DOCX">
-                      <i class="bi bi-file-earmark-word"></i>
-                  </a>
+                  ${downloadAction}
                   <a class="btn btn-sm btn-success rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${x.id}/print" title="Print">
                       <i class="bi bi-printer"></i>
                   </a>
@@ -394,6 +420,54 @@
     if (e.key === 'Enter') {
       hideMsg();
       loadRequests(1);
+    }
+  });
+
+  tbody.addEventListener('submit', async (e) => {
+    const form = e.target.closest('.release-download-form');
+    if (!form) return;
+
+    e.preventDefault();
+    if (!confirm('Confirm releasing this document request? Its status will be updated to Released and the related payment will be marked successful.')) return;
+
+    const button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRF-TOKEN': formData.get('_token'),
+          'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        },
+        credentials: 'same-origin'
+      });
+      const contentType = response.headers.get('Content-Type') || '';
+
+      if (!response.ok || !contentType.includes('wordprocessingml')) {
+        throw new Error('The document could not be downloaded. Check the request template and try again.');
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] || 'document-request.docx';
+      const downloadUrl = URL.createObjectURL(blob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = downloadUrl;
+      downloadLink.download = filename;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      URL.revokeObjectURL(downloadUrl);
+
+      await loadRequests();
+      showMsg({ success: true, message: 'Document released and downloaded successfully.' });
+      setTimeout(hideMsg, 3000);
+    } catch (error) {
+      button.disabled = false;
+      showMsg({ success: false, message: error.message });
     }
   });
 

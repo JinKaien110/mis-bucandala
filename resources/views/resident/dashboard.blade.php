@@ -84,9 +84,9 @@
             <p class="opacity-75 mb-0">Here's your resident dashboard overview.</p>
           </div>
           <div class="d-flex gap-3">
-            <button class="btn btn-glass btn-sm" data-bs-toggle="modal" data-bs-target="#docsModal">
-              <i class="bi bi-file-earmark-text me-2"></i>View Documents
-            </button>
+            <a class="btn btn-glass btn-sm" href="{{ route('resident.document-requests') }}">
+              <i class="bi bi-file-earmark-text me-2"></i>Document Requests
+            </a>
           </div>
         </div>
       </div>
@@ -94,13 +94,13 @@
       <!-- Stats Row -->
       <div class="row g-3 mb-4 align-items-stretch">
         <div class="col-md-4 d-flex align-items-stretch">
-          <div class="stat-card w-100 h-100" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#docsModal">
+          <a href="{{ route('resident.document-requests') }}" class="stat-card w-100 h-100 text-white text-decoration-none" style="display: block;">
             <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
               <i class="bi bi-file-earmark-text"></i>
             </div>
             <div class="stat-value">{{ $documentRequests->count() }}</div>
             <div class="stat-label">Document Requests</div>
-          </div>
+          </a>
         </div>
 
         <div class="col-md-4 d-flex align-items-stretch">
@@ -119,12 +119,36 @@
               <i class="bi bi-info-circle"></i>
             </div>
             <div class="stat-label" style="font-size: 0.95rem; opacity: 0.95; color: rgba(255,255,255,0.95);">
-              Notice
+              Resident Services
             </div>
             <p class="small opacity-75 mb-0" style="margin-top: 4px;">
-              For blotter reports, please visit the Barangay Hall in person. Blotter filing is a walk-in process.
+              Submit reports, track active cases, and request documents online.
             </p>
           </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <a href="{{ route('resident.blotters.create') }}" class="stat-card h-100 text-white text-decoration-none d-block">
+            <div class="stat-icon" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;"><i class="bi bi-journal-plus"></i></div>
+            <div class="stat-label">Online E-Blotter</div>
+            <p class="small opacity-75 mb-0">Submit an incident report or complaint.</p>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a href="{{ route('resident.cases') }}" class="stat-card h-100 text-white text-decoration-none d-block">
+            <div class="stat-icon" style="background: rgba(254, 238, 145, 0.16); color: #FEEE91;"><i class="bi bi-folder2-open"></i></div>
+            <div class="stat-label">My Cases</div>
+            <p class="small opacity-75 mb-0">View active cases and hearing schedules.</p>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a href="{{ route('resident.document-requests') }}" class="stat-card h-100 text-white text-decoration-none d-block">
+            <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;"><i class="bi bi-file-earmark-text"></i></div>
+            <div class="stat-label">Document Requests</div>
+            <p class="small opacity-75 mb-0">Request certificates and check request status.</p>
+          </a>
         </div>
       </div>
 
@@ -132,7 +156,7 @@
       <div class="glass p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Document Requests</h5>
-          <button class="btn btn-glass btn-sm" data-bs-toggle="modal" data-bs-target="#docsModal">View All</button>
+          <a class="btn btn-glass btn-sm" href="{{ route('resident.document-requests') }}">View All</a>
         </div>
 
         <div class="activity-list">
@@ -144,14 +168,14 @@
                   <i class="bi bi-file-earmark-text opacity-75"></i>
                 </div>
                 <div>
-                  <div class="small fw-bold">{{ $request->document_type ?? 'Document Request' }}</div>
+                  <div class="small fw-bold">{{ $request->documentType?->name ?? 'Document Request' }}</div>
                   <small class="opacity-50" style="font-size: 0.75rem;">{{ $request->created_at->format('M d, Y') }}</small>
                 </div>
               </div>
               <span class="badge-glass 
-                @if($request->status === 'completed') badge-glass-success
+                @if($request->status === 'released') badge-glass-success
                 @elseif($request->status === 'pending') badge-glass-warning
-                @elseif($request->status === 'processing') badge-glass-info
+                @elseif($request->status === 'cancelled') badge-glass-secondary
                 @else badge-glass-secondary @endif">
                 {{ ucfirst($request->status ?? 'pending') }}
               </span>
@@ -161,9 +185,9 @@
             <div class="text-center py-5">
               <i class="bi bi-inbox fs-1 opacity-25 mb-3"></i>
               <p class="opacity-75 mb-0">No document requests yet.</p>
-              <div class="btn btn-glass-primary btn-sm mt-3" style="pointer-events: none; opacity: 0.8;">
-                <i class="bi bi-geo-alt me-1"></i>Visit Barangay Hall to request documents
-              </div>
+              <a href="{{ route('resident.document-requests') }}" class="btn btn-glass-primary btn-sm mt-3">
+                <i class="bi bi-file-earmark-plus me-1"></i>Request a document online
+              </a>
             </div>
           @endif
         </div>
@@ -296,9 +320,8 @@ document.getElementById('saveProfileBtn').addEventListener('click', async functi
             <select class="glass-select form-select" id="docStatusFilter" onchange="filterDocs()">
               <option value="">All Status</option>
               <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="completed">Completed</option>
-              <option value="rejected">Rejected</option>
+              <option value="released">Released</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
           <div class="col-md-2">
@@ -319,20 +342,19 @@ document.getElementById('saveProfileBtn').addEventListener('click', async functi
             </thead>
             <tbody id="docsTableBody">
               @forelse($documentRequests as $doc)
-              <tr class="doc-row" data-status="{{ $doc->status }}" data-type="{{ strtolower($doc->document_type ?? '') }}">
+              <tr class="doc-row" data-status="{{ $doc->status }}" data-type="{{ strtolower($doc->documentType?->name ?? '') }}">
                 <td>
                   <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-file-earmark-text text-primary"></i>
-                    {{ $doc->document_type ?? 'Document Request' }}
+                    {{ $doc->documentType?->name ?? 'Document Request' }}
                   </div>
                 </td>
                 <td>{{ $doc->created_at->format('M d, Y') }}</td>
                 <td>
                   <span class="badge-glass 
-                    @if($doc->status === 'completed') badge-glass-success
+                    @if($doc->status === 'released') badge-glass-success
                     @elseif($doc->status === 'pending') badge-glass-warning
-                    @elseif($doc->status === 'processing') badge-glass-info
-                    @elseif($doc->status === 'rejected') badge-glass-danger
+                    @elseif($doc->status === 'cancelled') badge-glass-secondary
                     @else badge-glass-secondary @endif">
                     {{ ucfirst($doc->status ?? 'pending') }}
                   </span>
