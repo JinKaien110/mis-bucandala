@@ -102,7 +102,7 @@
             @csrf
             <div class="mb-3">
                 <label class="form-label small text-muted fw-bold">Resident <span class="text-danger">*</span></label>
-                <select name="resident_id" id="c_resident" class="form-select" required></select>
+                <select name="resident_id" id="c_resident" class="form-select" data-placeholder="Search resident by first or last name" required></select>
             </div>
             <div class="mb-3">
                 <label class="form-label small text-muted fw-bold">Document Type <span class="text-danger">*</span></label>
@@ -169,6 +169,7 @@
          if (document.activeElement) document.activeElement.blur();
          createModal.hide();
          form.reset();
+         $('#c_resident').val(null).trigger('change');
          loadRequests();
          setTimeout(() => hideMsg(), 3000);
        }
@@ -216,11 +217,24 @@
 
     const residents = r1.data.residents || [];
     const cResident = document.getElementById('c_resident');
-    cResident.innerHTML = residents.map(r => {
+    cResident.innerHTML = '<option value=""></option>' + residents.map(r => {
       const name = `${r.last_name}, ${r.first_name} ${r.middle_name ? r.middle_name : ''}`.trim();
       const address = r.address_line ? ` — ${r.address_line}` : '';
       return `<option value="${r.id}">${escapeHtml(name + address)}</option>`;
-    }).join('') || `<option value="">No residents found</option>`;
+    }).join('');
+    if (!residents.length) {
+      cResident.innerHTML = '<option value=""></option>';
+    }
+    $('#c_resident').select2({
+      theme: 'bootstrap-5',
+      placeholder: $('#c_resident').data('placeholder'),
+      allowClear: true,
+      width: '100%',
+      dropdownParent: $('#createModal'),
+      language: {
+        noResults: () => 'No residents found'
+      }
+    });
 
     // document types
     const r2 = await apiGet('/api/v1/document-types/options');

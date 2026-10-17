@@ -46,4 +46,10 @@ class HouseholdMember extends Model
     {
         return $this->belongsTo(Resident::class);
     }
+
+    public function countMembers() 
+    {
+        
+
+    }
 }

@@ -150,6 +150,7 @@ Route::middleware(['auth', 'role:resident'])->group(function () {
 
      // Add Member by Account No (for household head)
      Route::post('/resident/household/add-member', [App\Http\Controllers\Resident\HouseholdController::class, 'addMemberByAccount'])->name('resident.household.add-member');
+     Route::post('/resident/household/add-member-manual', [App\Http\Controllers\Resident\HouseholdController::class, 'addMemberManually'])->name('resident.household.add-member-manual');
 
      // Toggle PWD status for member
      Route::post('/resident/household/member/{member}/toggle-pwd', [App\Http\Controllers\Resident\HouseholdController::class, 'togglePWD'])->name('resident.household.member.toggle-pwd');

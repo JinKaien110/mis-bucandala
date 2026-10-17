@@ -9,6 +9,7 @@ use App\Models\Pet;
 use App\Models\Household;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -38,7 +39,10 @@ class DashboardController extends Controller
             // Get household members
             if ($resident->household_id) {
                 $household = Household::find($resident->household_id);
-                $householdMembers = Resident::where('household_id', $resident->household_id)->get();
+    
+                $householdMembers = DB::table('household_members')
+                ->where('household_id', $resident->household_id)
+                ->get();
             }
         }
         

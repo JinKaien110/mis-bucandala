@@ -108,7 +108,7 @@
             <div class="stat-icon" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;">
               <i class="bi bi-people"></i>
             </div>
-            <div class="stat-value">{{ count($householdMembers) }}</div>
+            <div class="stat-value">{{ count($householdMembers)   }}</div>
             <div class="stat-label">Household Members</div>
           </a>
         </div>

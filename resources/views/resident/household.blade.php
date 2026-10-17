@@ -52,9 +52,12 @@
         }
       @endphp
       @if($isHead)
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
           <button type="button" class="btn btn-glass btn-sm" id="addMemberBtnModal">
-            <i class="bi bi-plus-lg me-1"></i> Add Member
+            <i class="bi bi-person-plus me-1"></i> Add Member by Account
+          </button>
+          <button type="button" class="btn btn-glass btn-sm" id="addManualMemberBtn">
+            <i class="bi bi-person-vcard me-1"></i> Add Member Manually
           </button>
           <button type="button" class="btn btn-glass-primary btn-sm" onclick="openBulkEditModal()">
             <i class="bi bi-pencil-square me-1"></i> Edit Members
@@ -88,8 +91,8 @@
                 </span>
               </td>
               <td class="align-middle">
-                <div class="small fw-medium">{{ $member->resident->user->email ?? $member->email ?? '-' }}</div>
-                <small class="opacity-75"><i class="bi bi-telephone me-1"></i>+63 {{ $member->resident->contact_no ?? '-' }}</small>
+                <div class="small fw-medium">{{ ($member->resident?->user?->email ?? $member->email) ?: '-' }}</div>
+                <small class="opacity-75"><i class="bi bi-telephone me-1"></i> {{ $member->resident->contact_no ?? '-' }}</small>
               </td>
               <td class="align-middle">
                 {{ is_numeric($member->resident->monthly_income ?? null) ? '₱' . number_format($member->resident->monthly_income, 2) : ($member->resident->monthly_income ?? '-') }}
@@ -99,10 +102,25 @@
                   @if($member->resident && $member->resident->solo_parent)
                     <span class="badge badge-glass-info" style="font-size:0.65rem; padding:3px 8px;">Solo Parent</span>
                   @endif
-                  @if($member->resident && $member->resident->pwd)
+                  @if($member->resident?->pwd || $member->is_pwd)
                     <span class="badge badge-glass-warning" style="font-size:0.65rem; padding:3px 8px;">PWD</span>
                   @endif
-                  @if(!($member->resident && ($member->resident->solo_parent || $member->resident->pwd)))
+                  @if($member->resident?->four_ps_beneficiary || $member->is_4ps_beneficiary)
+                    <span class="badge badge-glass-info" style="font-size:0.65rem; padding:3px 8px;">4Ps</span>
+                  @endif
+                  @if($member->is_indigent || $member->resident?->indigent)
+                    <span class="badge badge-glass-info" style="font-size:0.65rem; padding:3px 8px;">Indigent</span>
+                  @endif
+                  @if($member->has_pregnant_member)
+                    <span class="badge badge-glass-warning" style="font-size:0.65rem; padding:3px 8px;">Pregnant</span>
+                  @endif
+                  @if($member->has_senior_citizen)
+                    <span class="badge badge-glass-info" style="font-size:0.65rem; padding:3px 8px;">Senior</span>
+                  @endif
+                  @if($member->has_chronic_illness)
+                    <span class="badge badge-glass-warning" style="font-size:0.65rem; padding:3px 8px;">Chronic Illness</span>
+                  @endif
+                  @if(!($member->resident?->solo_parent || $member->resident?->pwd || $member->is_pwd || $member->resident?->four_ps_beneficiary || $member->is_4ps_beneficiary || $member->resident?->indigent || $member->is_indigent || $member->has_pregnant_member || $member->has_senior_citizen || $member->has_chronic_illness))
                     <span class="text-muted opacity-50" style="font-size:0.85rem;">None</span>
                   @endif
                 </div>
@@ -371,26 +389,6 @@
               <h6 class="mb-3 mt-2 fs-6"><i class="bi bi-house me-2"></i>Basic Information</h6>
             </div>
             <div class="col-md-6">
-              <label class="form-label-glass">Address / Blk & Lot <span class="text-danger">*</span></label>
-              <input type="text" name="address_line" class="glass-input form-control" value="{{ $household->address_line ?? '' }}" placeholder="e.g., Blk 1 Lot 2" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">Phase</label>
-              <select name="phase" class="glass-select form-select">
-                <option value="" {{ empty($household->phase) ? 'selected' : '' }}>None</option>
-                <option value="A" {{ ($household->phase ?? '') === 'A' ? 'selected' : '' }}>A</option>
-                <option value="B" {{ ($household->phase ?? '') === 'B' ? 'selected' : '' }}>B</option>
-                <option value="C" {{ ($household->phase ?? '') === 'C' ? 'selected' : '' }}>C</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label-glass">Contact No.</label>
-              <div class="input-group">
-                <span class="input-group-text">+63</span>
-                <input type="text" name="contact_no" class="glass-input form-control" value="{{ $household->contact_no ?? '' }}" placeholder="917 123 4567" maxlength="12">
-              </div>
-            </div>
-            <div class="col-md-6">
               <label class="form-label-glass">Homeownership Type</label>
               <select name="homeownership_type" class="glass-select form-select">
                 <option value="">-- Select --</option>
@@ -449,13 +447,12 @@
                 <option value="30,000 - 50,000" {{ ($household->monthly_income_range ?? '') === '30,000 - 50,000' ? 'selected' : '' }}>₱30,000 - ₱50,000</option>
                 <option value="Above 50,000" {{ ($household->monthly_income_range ?? '') === 'Above 50,000' ? 'selected' : '' }}>Above ₱50,000</option>
               </select>
-            </div>
 
-            <div class="col-md-12">
               <label class="form-label-glass">Primary Income Source</label>
 
               <input type="text" name="primary_income_source" class="glass-input form-control" value="{{ $household->primary_income_source ?? '' }}" placeholder="e.g., Salary, Business, Remittance">
             </div>
+
 
             <div class="col-12">
               <h6 class="mb-3 mt-4 fs-6"><i class="bi bi-people me-2"></i>Community Participation</h6>
@@ -539,6 +536,74 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-glass-primary" onclick="addMemberByAccount()">Add Member</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Member Manually Modal -->
+<div class="modal fade" id="addManualMemberModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content glass-modal">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-vcard me-2"></i>Add Household Member Manually</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small opacity-75">Use this form for a household member who does not have a resident account. This does not create or link a resident account.</p>
+        <div id="manualMemberError" class="alert alert-danger d-none" role="alert"></div>
+        <form id="addManualMemberForm">
+          @csrf
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="manualMemberFirstName" class="form-label-glass">First Name <span class="text-danger">*</span></label>
+              <input id="manualMemberFirstName" name="first_name" class="glass-input form-control" maxlength="255" required>
+            </div>
+            <div class="col-md-6">
+              <label for="manualMemberLastName" class="form-label-glass">Last Name <span class="text-danger">*</span></label>
+              <input id="manualMemberLastName" name="last_name" class="glass-input form-control" maxlength="255" required>
+            </div>
+            <div class="col-md-6">
+              <label for="manualMemberEmail" class="form-label-glass">Email <span class="opacity-75">(optional)</span></label>
+              <input id="manualMemberEmail" name="email" type="email" class="glass-input form-control" maxlength="255">
+            </div>
+            <div class="col-md-6">
+              <label for="manualMemberBirthDate" class="form-label-glass">Birth Date <span class="text-danger">*</span></label>
+              <input id="manualMemberBirthDate" name="birth_date" type="date" class="glass-input form-control" max="{{ now()->toDateString() }}" required>
+            </div>
+            <div class="col-md-6">
+              <label for="manualMemberRelationship" class="form-label-glass">Relationship <span class="text-danger">*</span></label>
+              <select id="manualMemberRelationship" name="relationship" class="glass-select form-select" required>
+                <option value="">Select relationship</option>
+                <option value="Spouse">Spouse</option>
+                <option value="Child">Child</option>
+                <option value="Parent">Parent</option>
+                <option value="Sibling">Sibling</option>
+                <option value="Grandparent">Grandparent</option>
+                <option value="Grandchild">Grandchild</option>
+                <option value="Relative">Other Relative</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <div class="form-label-glass mb-2">Household Information</div>
+              <div class="row g-2">
+                <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" name="is_pwd" value="1"><span class="form-check-label">Person with Disability (PWD)</span></label></div>
+                <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" name="is_4ps_beneficiary" value="1"><span class="form-check-label">4Ps Beneficiary</span></label></div>
+                <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" name="is_indigent" value="1"><span class="form-check-label">Indigent</span></label></div>
+                <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" name="has_pregnant_member" value="1"><span class="form-check-label">Pregnant Member</span></label></div>
+                <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" name="has_senior_citizen" value="1"><span class="form-check-label">Senior Citizen</span></label></div>
+                <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" name="has_chronic_illness" value="1"><span class="form-check-label">Chronic Illness</span></label></div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-glass-primary" id="saveManualMemberBtn" form="addManualMemberForm">
+          <i class="bi bi-person-plus me-1"></i>Add Member
+        </button>
       </div>
     </div>
   </div>
@@ -926,8 +991,58 @@ if (addMemberBtnModal) {
   });
 }
 
+const addManualMemberBtn = document.getElementById('addManualMemberBtn');
+if (addManualMemberBtn) {
+  addManualMemberBtn.addEventListener('click', () => {
+    new bootstrap.Modal(document.getElementById('addManualMemberModal')).show();
+  });
+}
+
 /* Resident household change handlers removed to resolve script syntax issues in the Blade file.
    PWD toggle and relationship update are handled elsewhere in this page. */
+
+const addManualMemberForm = document.getElementById('addManualMemberForm');
+if (addManualMemberForm) {
+  addManualMemberForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const button = document.getElementById('saveManualMemberBtn');
+    const errorBox = document.getElementById('manualMemberError');
+    const originalButton = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Adding...';
+    errorBox.classList.add('d-none');
+    errorBox.textContent = '';
+
+    try {
+      const formData = new FormData(addManualMemberForm);
+      const response = await fetch('{{ route("resident.household.add-member-manual") }}', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': formData.get('_token'),
+          'Accept': 'application/json'
+        },
+        body: formData
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        const validationErrors = Object.values(data.errors || {}).flat();
+        throw new Error(validationErrors.join(' ') || data.message || 'Failed to add household member.');
+      }
+
+      bootstrap.Modal.getInstance(document.getElementById('addManualMemberModal')).hide();
+      addManualMemberForm.reset();
+      showToast(data.message || 'Household member added successfully!');
+      setTimeout(() => location.reload(), 1500);
+    } catch (error) {
+      errorBox.textContent = error.message;
+      errorBox.classList.remove('d-none');
+      showToast(error.message, 'danger');
+      button.disabled = false;
+      button.innerHTML = originalButton;
+    }
+  });
+}
 
 // Add member by account
 function addMemberByAccount() {

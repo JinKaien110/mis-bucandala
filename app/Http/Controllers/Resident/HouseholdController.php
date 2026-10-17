@@ -93,7 +93,6 @@ class HouseholdController extends Controller
         }
 
         $validated = $request->validate([
-            'address_line' => 'required|string|max:255',
             'phase' => 'nullable|in:A,B,C',
             'contact_no' => 'nullable|string|max:20',
             'household_type' => 'nullable|string|max:50',
@@ -130,10 +129,10 @@ class HouseholdController extends Controller
 
         $household = Household::create([
             'household_code' => $householdCode,
-            'address_line' => $validated['address_line'],
-            'phase' => $validated['phase'],
-            'street' => $validated['street'] ?? null,
-            'contact_no' => $validated['contact_no'],
+            'address_line' => $resident->address_line,
+            'phase' => $resident->phase,
+            'street' => $resident->street ?? null,
+            'contact_no' => $resident->contact_no,
             'homeownership_type' => $validated['homeownership_type'],
             'has_toilet' => $request->boolean('has_toilet'),
             'has_bathroom' => $request->boolean('has_bathroom'),
@@ -150,6 +149,22 @@ class HouseholdController extends Controller
             'has_pwd' => $validated['has_pwd'] ?? false,
             'has_chronic_illness' => $validated['has_chronic_illness'] ?? false,
             'barangay_program_participation' => $barangayParticipationSerialized,
+        ]);
+
+        $household->members()->create([
+            'household_id' => $household->id,
+            'resident_id' => $resident->id,
+            'first_name' => $resident->first_name,
+            'last_name' => $resident->last_name,
+            'email' => $user->email,
+            'birth_date' => $resident->birth_date,
+            'relationship' => "Head",
+            'is_pwd' => $resident->pwd ? 1 : 0,
+            'is_4ps_beneficiary' => $resident->four_ps_beneficiary ? 1 : 0,
+            'is_indigent' => $resident->indigent ? 1 : 0,
+            'has_pregnant_member' => 0,
+            'has_senior_citizen' => 0,
+            'has_chronic_illness' => 0,
         ]);
 
         // Link resident to household as head
@@ -398,13 +413,13 @@ class HouseholdController extends Controller
             ->where('relationship', 'Head')
             ->exists();
 
-        if (! $household) {
+        if (! $isHead) {
             return response()->json(['message' => 'Only household head can add members.'], 403);
         }
 
         $validated = $request->validate([
             'account_no' => 'required|string|exists:residents,account_no',
-            'relationship' => 'required|string|max:100',
+            'relationship' => 'required|in:Spouse,Child,Parent,Sibling,Grandparent,Grandchild,Relative,Other',
         ]);
 
         $memberResident = Resident::where('account_no', $validated['account_no'])->first();
@@ -429,6 +444,55 @@ class HouseholdController extends Controller
             'relationship' => $validated['relationship'],
             'birth_date' => $memberResident->birth_date,
         ]);
+
+        return response()->json(['message' => 'Member added successfully.', 'success' => true]);
+    }
+
+    public function addMemberManually(Request $request)
+    {
+        $resident = Resident::where('user_id', Auth::id())->first();
+        $household = $resident?->household_id
+            ? Household::find($resident->household_id)
+            : null;
+
+        if (! $household || ! $household->members()
+            ->where('resident_id', $resident->id)
+            ->where('relationship', 'Head')
+            ->exists()) {
+            return response()->json(['message' => 'Only the household head can add members.'], 403);
+        }
+
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'birth_date' => ['required', 'date', 'before_or_equal:today'],
+            'relationship' => ['required', 'in:Spouse,Child,Parent,Sibling,Grandparent,Grandchild,Relative,Other'],
+            'is_pwd' => ['nullable', 'boolean'],
+            'is_4ps_beneficiary' => ['nullable', 'boolean'],
+            'is_indigent' => ['nullable', 'boolean'],
+            'has_pregnant_member' => ['nullable', 'boolean'],
+            'has_senior_citizen' => ['nullable', 'boolean'],
+            'has_chronic_illness' => ['nullable', 'boolean'],
+        ]);
+
+        $household->members()->create([
+            'resident_id' => null,
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            // The current household_members migration makes email non-nullable.
+            'email' => $validated['email'] ?? '',
+            'birth_date' => $validated['birth_date'],
+            'relationship' => $validated['relationship'],
+            'is_pwd' => $request->boolean('is_pwd'),
+            'is_4ps_beneficiary' => $request->boolean('is_4ps_beneficiary'),
+            'is_indigent' => $request->boolean('is_indigent'),
+            'has_pregnant_member' => $request->boolean('has_pregnant_member'),
+            'has_senior_citizen' => $request->boolean('has_senior_citizen'),
+            'has_chronic_illness' => $request->boolean('has_chronic_illness'),
+        ]);
+
+        return response()->json(['message' => 'Household member added successfully.', 'success' => true]);
     }
 
     /**
@@ -558,4 +622,3 @@ class HouseholdController extends Controller
         return response()->json($residents);
     }
 }
-

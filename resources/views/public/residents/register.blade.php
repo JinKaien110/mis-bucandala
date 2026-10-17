@@ -545,8 +545,8 @@
         <div class="step" id="step3">
           <div class="dot">3</div>
           <div>
-            <div class="step-title">Confirm OTP</div>
-            <div class="step-subtitle">Unlock submit</div>
+            <div class="step-title">Submit Registration</div>
+            <div class="step-subtitle">After OTP confirmation</div>
           </div>
         </div>
       </div>
@@ -644,7 +644,17 @@
                 <div class="col-12">
                   <label class="form-label mb-1">Name <span class="req">*</span></label>
                   <div class="row g-2 align-items-end">
-                    <div class="col-2" style="max-width: 10.5%; flex: 0 0 10.5%;">
+                   
+                    <div class="col">
+                      <input class="form-control" name="first_name" placeholder="First" required style="padding-left: 16px; padding-right: 16px; width: 100%;" />
+                    </div>
+                    <div class="col">
+                      <input class="form-control" name="middle_name" placeholder="Middle" style="padding-left: 16px; padding-right: 16px; width: 100%;" />
+                    </div>
+                    <div class="col">
+                      <input class="form-control" name="last_name" placeholder="Last" required style="padding-left: 16px; padding-right: 16px; width: 100%;" />
+                    </div>
+                     <div class="col-2" style="max-width: 10.5%; flex: 0 0 10.5%;">
                       <select class="form-select" name="suffix" aria-label="Suffix" style="font-size:1rem; padding-top:14px; padding-bottom:14px; padding-left:12px; padding-right:12px; width: 100%; height: 100%;">
 
                         <option value="">Sfx</option>
@@ -656,15 +666,6 @@
                         <option value="IV">IV</option>
                         <option value="V">V</option>
                       </select>
-                    </div>
-                    <div class="col">
-                      <input class="form-control" name="first_name" placeholder="First" required style="padding-left: 16px; padding-right: 16px; width: 100%;" />
-                    </div>
-                    <div class="col">
-                      <input class="form-control" name="middle_name" placeholder="Middle" style="padding-left: 16px; padding-right: 16px; width: 100%;" />
-                    </div>
-                    <div class="col">
-                      <input class="form-control" name="last_name" placeholder="Last" required style="padding-left: 16px; padding-right: 16px; width: 100%;" />
                     </div>
                   </div>
                 </div>
@@ -708,16 +709,41 @@
                 </div>
 
                 <div class="col-12">
-                  <div class="section-divider"><span>Contact & Address</span></div>
+                  <div class="section-divider"><span>Login Credential</span></div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <label class="form-label mb-1" id="email_label">Email <span class="req">*</span></label>
-                  <input class="form-control" name="email" id="email" type="email" placeholder="Used for OTP" />
+                  <input class="form-control" name="email" id="email" type="email" placeholder="example@gmail.com" />
                   <div class="hint" id="email_hint">OTP will be sent to this email.</div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
+                  <label class="form-label mb-1">Password <span class="req">*</span></label>
+                  <div class="input-group">
+                    <input class="form-control" name="password" id="password" type="password" placeholder="Create a password" />
+                    <button class="btn btn-outline-secondary" type="button" data-password-toggle="password" aria-label="Show password" title="Show password">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div class="hint">Minimum 8 characters, with atleast 1 special characters, and 1 uppercase character.</div>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label mb-1">Confirm Password <span class="req">*</span></label>
+                  <div class="input-group">
+                    <input class="form-control" name="password_confirmation" id="password_confirmation" type="password" placeholder="Confirm password" />
+                    <button class="btn btn-outline-secondary" type="button" data-password-toggle="password_confirmation" aria-label="Show password" title="Show password">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="section-divider"><span>Contact & Address</span></div>
+                </div>
+
+                <div class="col-md-4">
                   <label class="form-label mb-1">Contact no</label>
                   <div class="input-group">
                     <span class="input-group-text" style="background: white; border-color: #ced4da;">+63</span>
@@ -725,12 +751,12 @@
                   </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <label class="form-label mb-1">Address Line <span class="req">*</span></label>
                   <input class="form-control" name="address_line" required placeholder="Block and Lot" />
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <label class="form-label mb-1">Phase</label>
                   <select class="form-select" name="phase">
                     <option value="">Select (optional)</option>
@@ -744,10 +770,10 @@
                   <div class="section-divider"><span>Socioeconomic Information</span></div>
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label mb-1">Monthly Income</label>
-                  <select class="form-select" name="monthly_income">
-                    <option value="">Select (optional)</option>
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Monthly Income <span class="req">*</span></label>
+                  <select class="form-select" name="monthly_income" required>
+                    <option value="">Select</option>
                     <option value="below_10k">Below ₱10,000</option>
                     <option value="10k_20k">₱10,000 - ₱20,000</option>
                     <option value="20k_30k">₱20,000 - ₱30,000</option>
@@ -756,10 +782,10 @@
                   </select>
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label mb-1">Occupation</label>
-                  <select class="form-select" name="occupation">
-                    <option value="">Select (optional)</option>
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Occupation <span class="req">*</span></label>
+                  <select class="form-select" name="occupation" required>
+                    <option value="">Select</option>
                     <option value="student">Student</option>
                     <option value="employed">Employed (Regular)</option>
                     <option value="contractual">Contractual/Temporary</option>
@@ -795,10 +821,10 @@
                   </select>
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label mb-1">Civil Status</label>
-                  <select class="form-select" name="civil_status">
-                    <option value="">Select (optional)</option>
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Civil Status <span class="req">*</span></label>
+                  <select class="form-select" name="civil_status" required>
+                    <option value="">Select</option>
                     <option value="single">Single</option>
                     <option value="married">Married</option>
                     <option value="widowed">Widowed</option>
@@ -807,10 +833,10 @@
                   </select>
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label mb-1">Educational Attainment</label>
-                  <select class="form-select" name="educational_attainment">
-                    <option value="">Select (optional)</option>
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Educational <span class="req">*</span></label>
+                  <select class="form-select" name="educational_attainment" required >
+                    <option value="">Select</option>
                     <option value="no_formal">No Formal Education</option>
                     <option value="elementary">Elementary</option>
                     <option value="junior_high">Junior High School</option>
@@ -822,6 +848,11 @@
                 </div>
 
                 <div class="col-12">
+                  <div class="section-divider"><span>Special Sector</span></div>
+                </div>
+
+                <div class="col-12">
+                  
                   <div class="row g-3">
                     <div class="col-md-6">
                       <div class="form-check">
@@ -852,37 +883,13 @@
 
                     <div class="col-md-6">
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="indigent_status" id="indigent_status" value="1" />
-                        <label class="form-check-label" for="indigent_status">
-                          Certified Indigent
+                        <input class="form-check-input" type="checkbox" name="senior_citizen_status" id="senior_citizen_status" value="1" />
+                        <label class="form-check-label" for="senior_citizen_status">
+                          Senior Citizen
                         </label>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div class="col-12">
-                  <div class="section-divider"><span>Account</span></div>
-                </div>
-
-                <div class="col-md-6">
-                  <label class="form-label mb-1">Password <span class="req">*</span></label>
-                  <div class="input-group">
-                    <input class="form-control" name="password" id="password" type="password" placeholder="Create a password" />
-                    <button class="btn btn-outline-secondary" type="button" data-password-toggle="password" aria-label="Show password" title="Show password">
-                      <i class="bi bi-eye" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                  <div class="hint">Minimum 8 characters, with atleast 1 special characters, and 1 uppercase character.</div>
-                </div>
-
-                <div class="col-md-6">
-                  <label class="form-label mb-1">Confirm Password <span class="req">*</span></label>
-                  <div class="input-group">
-                    <input class="form-control" name="password_confirmation" id="password_confirmation" type="password" placeholder="Confirm password" />
-                    <button class="btn btn-outline-secondary" type="button" data-password-toggle="password_confirmation" aria-label="Show password" title="Show password">
-                      <i class="bi bi-eye" aria-hidden="true"></i>
-                    </button>
                   </div>
                 </div>
 
@@ -966,20 +973,22 @@
             <div class="cardx-body" style="padding: 24px;">
               <div class="flex-grow-1">
                 <div class="section-title mb-3" style="font-size: 1.1rem;">
-                  <i class="bi bi-envelope-check me-2"></i>Email Verification (OTP)
+                  <i class="bi bi-envelope-check me-2"></i>Submit Application and Verify Email
                   <span style="font-size: 0.75rem; font-weight: 400; color: #9ca3af; margin-left: 6px;">(OTP expires in 5 minutes)</span>
                 </div>
+                <p class="sub mb-3">First save your application details on this device, then send and confirm the OTP. Your application is sent to the barangay only after the OTP is confirmed. Passwords and uploaded files are not saved in browser storage.</p>
 
                 <div id="message" class="alert alertbox mb-3" role="alert" style="display:none;font-size: 0.85rem;padding: 10px;"></div>
+                <div id="registrationDraftStatus" class="hint mb-3" role="status"></div>
 
                 <div class="row g-3">
                   <div class="col-12">
                     <label class="form-label mb-2" style="font-size: 0.9rem;">OTP Code <span class="req">*</span></label>
-                    <input id="otp_code" class="form-control" inputmode="numeric" placeholder="Enter 6-digit OTP" style="padding: 12px 16px;font-size: 0.95rem;" />
+                    <input id="otp_code" class="form-control" inputmode="numeric" placeholder="Enter 6-digit OTP" disabled style="padding: 12px 16px;font-size: 0.95rem;" />
                   </div>
 
                   <div class="col-6">
-                    <button class="btn btn-outline-secondary btnx w-100" type="button" id="btnSendOtp" style="padding: 12px 16px;font-size: 0.9rem;">
+                    <button class="btn btn-outline-secondary btnx w-100" type="button" id="btnSendOtp" disabled style="padding: 12px 16px;font-size: 0.9rem;">
                       <i class="bi bi-send me-2"></i>Send OTP
                     </button>
                   </div>
@@ -992,8 +1001,8 @@
               </div>
 
               <div class="mt-3">
-                <button class="btn btn-dark btnx btnx-primary w-100" type="button" id="btnSubmit" disabled style="padding: 14px 20px;font-size: 1rem;">
-                  Submit Registration
+                <button class="btn btn-dark btnx btnx-primary w-100" type="button" id="btnSubmit" style="padding: 14px 20px;font-size: 1rem;">
+                  Submit Application Details
                 </button>
               </div>
             </div>
@@ -1007,6 +1016,13 @@
 <script>
   const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   const msgBox = document.getElementById('message');
+  const registrationDraftStatus = document.getElementById('registrationDraftStatus');
+  const registrationDraftKey = 'resident_registration_draft_v1';
+  const registrationDraftLifetime = 30 * 60 * 1000;
+  const registrationForm = document.getElementById('regForm');
+  const registrationControlDisabledState = new Map();
+  let stagedRegistration = null;
+  let registrationSubmitting = false;
 
   let otpId = null;
   let verificationToken = null;
@@ -1095,22 +1111,19 @@
       step0.classList.add('done');
       step1.classList.add('active');
       btnVerifyOtp.disabled = true;
-      btnSubmit.disabled = true;
     }
     if (state === 2) {
       step0.classList.add('done');
       step1.classList.add('done');
       step2.classList.add('active');
       btnVerifyOtp.disabled = false;
-      btnSubmit.disabled = true;
     }
     if (state === 3) {
       step0.classList.add('done');
       step1.classList.add('done');
       step2.classList.add('done');
       step3.classList.add('active');
-      btnVerifyOtp.disabled = false;
-      btnSubmit.disabled = false;
+      btnVerifyOtp.disabled = true;
     }
   }
 
@@ -1246,10 +1259,6 @@ if (typeof text === 'string' && type === "error") {
     return age;
   }
 
-  function getOtpEmail() {
-    return (emailInput.value || '').trim();
-  }
-
   function setGuardianRequired(required) {
     if (guardianNameInput) guardianNameInput.required = required;
     if (guardianRelInput) guardianRelInput.required = required;
@@ -1261,9 +1270,222 @@ if (typeof text === 'string' && type === "error") {
     verificationToken = null;
     document.getElementById('otp_code').value = '';
     btnVerifyOtp.disabled = true;
-    btnSubmit.disabled = true;
+    btnVerifyOtp.textContent = 'Confirm OTP';
+    document.getElementById('otp_code').disabled = true;
     setStep(1);
     refreshSendOtpEnabled();
+  }
+
+  function getRegistrationControls() {
+    return [
+      ...registrationForm.querySelectorAll('input, select, textarea'),
+      ...document.querySelectorAll('#verification_type, #photo_path, #id_image_path, #selfie_image_path, #proof_of_billing_path, #child_doc')
+    ];
+  }
+
+  function setRegistrationControlsDisabled(disabled) {
+    getRegistrationControls().forEach((control) => {
+      if (disabled) {
+        if (!registrationControlDisabledState.has(control)) {
+          registrationControlDisabledState.set(control, control.disabled);
+        }
+        control.disabled = true;
+      } else {
+        control.disabled = registrationControlDisabledState.get(control) || false;
+        registrationControlDisabledState.delete(control);
+      }
+    });
+  }
+
+  function saveRegistrationDraft() {
+    const values = {};
+    const controls = [
+      ...registrationForm.querySelectorAll('[name]'),
+      ...document.querySelectorAll('#verification_type')
+    ];
+
+    controls.forEach((control) => {
+      if (control.type === 'password' || control.type === 'file') return;
+      if ((control.type === 'checkbox' || control.type === 'radio') && !control.checked) return;
+      if (!values[control.name]) values[control.name] = [];
+      values[control.name].push(control.value);
+    });
+
+    localStorage.setItem(registrationDraftKey, JSON.stringify({
+      expiresAt: Date.now() + registrationDraftLifetime,
+      values
+    }));
+  }
+
+  function clearRegistrationDraft() {
+    try {
+      localStorage.removeItem(registrationDraftKey);
+      return true;
+    } catch (error) {
+      showMsg('The saved application details could not be cleared from browser storage.', 'error');
+      return false;
+    }
+  }
+
+  function restoreRegistrationDraft() {
+    let rawDraft;
+    try {
+      rawDraft = localStorage.getItem(registrationDraftKey);
+      if (!rawDraft) return;
+    } catch (error) {
+      registrationDraftStatus.textContent = 'Browser storage is unavailable, so a saved application cannot be restored.';
+      return;
+    }
+
+    let saved;
+    try {
+      saved = JSON.parse(rawDraft);
+    } catch (error) {
+      clearRegistrationDraft();
+      return;
+    }
+
+    if (
+      !saved ||
+      !Number.isFinite(saved.expiresAt) ||
+      saved.expiresAt <= Date.now() ||
+      !saved.values ||
+      typeof saved.values !== 'object' ||
+      Array.isArray(saved.values)
+    ) {
+      clearRegistrationDraft();
+      return;
+    }
+
+    const controls = [
+      ...registrationForm.querySelectorAll('[name]'),
+      ...document.querySelectorAll('#verification_type')
+    ];
+    controls.forEach((control) => {
+      if (control.type === 'password' || control.type === 'file') return;
+      const values = Array.isArray(saved.values[control.name]) ? saved.values[control.name] : [];
+      if (control.type === 'checkbox' || control.type === 'radio') {
+        control.checked = values.includes(control.value);
+      } else if (control.multiple) {
+        Array.from(control.options).forEach((option) => {
+          option.selected = values.includes(option.value);
+        });
+      } else if (values.length) {
+        control.value = values[0];
+      }
+    });
+
+    onDobChange();
+    if (verificationTypeEl) verificationTypeEl.dispatchEvent(new Event('change'));
+    registrationDraftStatus.textContent = 'Your saved application details were restored. Re-enter your password and select the required files before saving the details again.';
+  }
+
+  function buildRegistrationFormData() {
+    if (!registrationForm.reportValidity()) return null;
+
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('password_confirmation');
+    const passwordPattern = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+={}\[\]|\\:;"'<>,.?/-]).{8,}$/;
+    if (!passwordPattern.test(password.value)) {
+      showMsg('Password did not meet requirements.', 'error');
+      return null;
+    }
+    if (password.value !== confirmPassword.value) {
+      showMsg('Passwords do not match.', 'error');
+      return null;
+    }
+
+    const photoInput = document.getElementById('photo_path');
+    const idInput = document.getElementById('id_image_path');
+    const selfieInput = document.getElementById('selfie_image_path');
+    const proofInput = document.getElementById('proof_of_billing_path');
+    const childDocInput = document.getElementById('child_doc');
+    const hasValidIdType = verificationTypeEl && verificationTypeEl.value.trim() !== '';
+
+    if (hasValidIdType) {
+      if (!idInput.files.length) {
+        showMsg('Please upload your Government ID when a valid ID type is selected.', 'error');
+        return null;
+      }
+      if (!selfieInput.files.length) {
+        showMsg('Please upload your selfie holding your ID.', 'error');
+        return null;
+      }
+    } else if (!proofInput.files.length) {
+      showMsg('Please upload proof of billing when no valid ID type is selected.', 'error');
+      return null;
+    }
+
+    const formData = new FormData(registrationForm);
+    const contactNo = formData.get('contact_no');
+    if (contactNo && !contactNo.startsWith('+63')) {
+      formData.set('contact_no', '+63 ' + contactNo);
+    }
+    if (verificationTypeEl) formData.set('verification_type', verificationTypeEl.value);
+
+    [
+      ['photo_path', photoInput],
+      ['id_image_path', idInput],
+      ['selfie_image_path', selfieInput],
+      ['proof_of_billing_path', proofInput],
+      ['child_doc', childDocInput]
+    ].forEach(([name, input]) => {
+      if (input && input.files.length) formData.set(name, input.files[0]);
+    });
+
+    formData.set('household_mode', 'new');
+    return formData;
+  }
+
+  async function submitStagedRegistration() {
+    if (!stagedRegistration || !verificationToken || registrationSubmitting) return;
+
+    registrationSubmitting = true;
+    stagedRegistration.set('verification_token', verificationToken);
+    btnSubmit.disabled = true;
+    btnVerifyOtp.disabled = true;
+    btnSendOtp.disabled = true;
+    btnSubmit.textContent = 'Submitting Registration...';
+    setStep(3);
+    btnVerifyOtp.disabled = true;
+    showMsg('OTP confirmed. Submitting your registration now...', 'info');
+
+    try {
+      const { res, data } = await apiForm('{{ url("/api/v1/public/residents/register") }}', 'POST', stagedRegistration);
+      if (!res.ok) {
+        const message = res.status === 405
+          ? 'Error 405: Method Not Allowed. Please ensure you are accessing the site via the correct protocol (HTTP vs HTTPS).'
+          : data;
+        showMsg(message, 'error');
+        btnVerifyOtp.textContent = verificationToken ? 'Retry Registration' : 'Confirm OTP';
+        btnVerifyOtp.disabled = !verificationToken;
+        return;
+      }
+
+      clearRegistrationDraft();
+      stagedRegistration = null;
+      registrationForm.reset();
+      document.querySelectorAll('.dropzone').forEach((dropzone) => {
+        dropzone.classList.remove('has-file');
+        dropzone.querySelectorAll('.dropzone-preview').forEach((preview) => preview.remove());
+      });
+      otpId = null;
+      verificationToken = null;
+      otpCooldownUntil = 0;
+      updateCooldownUI();
+
+      const params = new URLSearchParams();
+      params.set('registered', 'true');
+      window.location.href = '/auth/login?' + params.toString();
+    } catch (error) {
+      showMsg('Unable to submit your registration. Check your connection and retry.', 'error');
+      btnVerifyOtp.textContent = 'Retry Registration';
+      btnVerifyOtp.disabled = false;
+    } finally {
+      registrationSubmitting = false;
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Edit Registration Details';
+    }
   }
 
   function updateOtpPreview() {
@@ -1320,7 +1542,7 @@ if (typeof text === 'string' && type === "error") {
     const remainMs = otpCooldownUntil - Date.now();
 
     if (remainMs <= 0) {
-      btnSendOtp.disabled = !getOtpEmail();
+      btnSendOtp.disabled = !stagedRegistration;
       btnSendOtp.textContent = 'Send OTP';
       return;
     }
@@ -1333,7 +1555,7 @@ if (typeof text === 'string' && type === "error") {
 
   function refreshSendOtpEnabled() {
     if (Date.now() < otpCooldownUntil) return;
-    btnSendOtp.disabled = !getOtpEmail();
+    btnSendOtp.disabled = !stagedRegistration;
   }
 
   function bytes(n) {
@@ -1559,6 +1781,7 @@ if (proofOfBillingEl) {
     updateOtpPreview();
     resetOtpState();
   });
+  restoreRegistrationDraft();
 
   // -------------------------
   // Send OTP
@@ -1566,7 +1789,11 @@ if (proofOfBillingEl) {
   btnSendOtp.addEventListener('click', async () => {
     hideMsg();
 
-    const email = getOtpEmail();
+    if (!stagedRegistration) {
+      return showMsg('Submit and save your application details before requesting an OTP.', 'error');
+    }
+
+    const email = String(stagedRegistration.get('email') || '').trim();
     if (!email) {
       return showMsg(
         isMinor
@@ -1584,183 +1811,111 @@ if (proofOfBillingEl) {
     btnSendOtp.disabled = true;
     btnSendOtp.textContent = 'Sending...';
 
-    const { res, data } = await apiJson('{{ url("/api/v1/public/otp/send") }}', 'POST', {
-      purpose: 'resident_registration',
-      email
-    });
+    try {
+      const { res, data } = await apiJson('{{ url("/api/v1/public/otp/send") }}', 'POST', {
+        purpose: 'resident_registration',
+        email
+      });
 
-    if (!res.ok) {
-      if (res.status === 429 && data.retry_after_seconds) {
-        setCooldown(Number(data.retry_after_seconds));
-        showMsg(`Please wait ${data.retry_after_seconds}s before requesting another OTP.`, 'error');
-        return;
+      if (!res.ok) {
+        if (res.status === 429 && data.retry_after_seconds) {
+          setCooldown(Number(data.retry_after_seconds));
+          showMsg(`Please wait ${data.retry_after_seconds}s before requesting another OTP.`, 'error');
+          return;
+        }
+        btnSendOtp.textContent = 'Send OTP';
+        refreshSendOtpEnabled();
+        return showMsg(data, 'error');
       }
 
+      otpId = data.otp_id;
+      verificationToken = null;
+      document.getElementById('otp_code').value = '';
+      document.getElementById('otp_code').disabled = false;
+      btnVerifyOtp.textContent = 'Confirm OTP';
+      setCooldown(Number(data.retry_after_seconds ?? 60));
+
+      showMsg('OTP sent. Check your email.', 'success');
+      setStep(2);
+    } catch (error) {
       btnSendOtp.textContent = 'Send OTP';
       refreshSendOtpEnabled();
-      return showMsg(data, 'error');
+      showMsg('Unable to send the OTP. Check your connection and try again.', 'error');
     }
-
-    otpId = data.otp_id;
-    setCooldown(Number(data.retry_after_seconds ?? 60));
-
-    showMsg('OTP sent. Check your email.', 'success');
-    setStep(2);
   });
 
   // -------------------------
-  // Verify OTP
+  // Verify OTP and submit
   // -------------------------
   btnVerifyOtp.addEventListener('click', async () => {
     hideMsg();
 
+    if (verificationToken) {
+      return submitStagedRegistration();
+    }
+
     const otp = document.getElementById('otp_code').value.trim();
+    if (!stagedRegistration) return showMsg('Save your application details first.', 'error');
     if (!otpId) return showMsg('Send OTP first.', 'error');
     if (!otp) return showMsg('Enter OTP.', 'error');
 
     btnVerifyOtp.disabled = true;
     btnVerifyOtp.textContent = 'Verifying...';
 
-    const { res, data } = await apiJson('{{ url("/api/v1/public/otp/verify") }}', 'POST', {
-      otp_id: otpId,
-      otp
-    });
+    try {
+      const { res, data } = await apiJson('{{ url("/api/v1/public/otp/verify") }}', 'POST', {
+        otp_id: otpId,
+        otp
+      });
 
-    btnVerifyOtp.textContent = 'Confirm OTP';
+      if (!res.ok) {
+        btnVerifyOtp.disabled = false;
+        btnVerifyOtp.textContent = 'Confirm OTP';
+        return showMsg(data.message || 'Verification failed. Please try again.', 'error');
+      }
 
-    if (!res.ok) {
+      verificationToken = data.verification_token;
+      await submitStagedRegistration();
+    } catch (error) {
       btnVerifyOtp.disabled = false;
-      console.log('OTP verify error:', res, data);
-      let errorMsg = data.message || 'Verification failed. Please try again.';
-      return showMsg(errorMsg, 'error');
+      btnVerifyOtp.textContent = 'Confirm OTP';
+      showMsg('Unable to verify the OTP. Check your connection and try again.', 'error');
     }
-
-    verificationToken = data.verification_token;
-
-    showMsg('OTP verified. You can now submit registration.', 'success');
-    setStep(3);
   });
 
   // -------------------------
-  // Submit Registration
+  // Stage application details locally, or allow the applicant to edit them
   // -------------------------
-  btnSubmit.addEventListener('click', async () => {
+  btnSubmit.addEventListener('click', () => {
     hideMsg();
 
-
-
-    // Validate password match
-    const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('password_confirmation');
-
-    function passValidator(str) {
-      const regex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+={}\[\]|\\:;"'<>,.?/-]).{8,}$/;
-      return regex.test(str);
+    if (stagedRegistration) {
+      stagedRegistration = null;
+      verificationToken = null;
+      otpId = null;
+      clearRegistrationDraft();
+      setRegistrationControlsDisabled(false);
+      resetOtpState();
+      btnSubmit.textContent = 'Submit Application Details';
+      registrationDraftStatus.textContent = 'Edit your application details, then save them again before requesting an OTP.';
+      return;
     }
 
-    if(!passValidator(password.value)) showMsg("Password did not meet requirements.", 'error');
+    const formData = buildRegistrationFormData();
+    if (!formData) return;
 
-    if (password.value !== confirmPassword.value) {
-      return showMsg('Passwords do not match.', 'error');
+    try {
+      saveRegistrationDraft();
+    } catch (error) {
+      return showMsg('Your application could not be saved in this browser. Enable browser storage and try again.', 'error');
     }
 
-    const photoPathEl = document.getElementById('photo_path');
-    const idImagePathEl = document.getElementById('id_image_path');
-    const selfiePathEl = document.getElementById('selfie_image_path');
-    const proofOfBillingEl = document.getElementById('proof_of_billing_path');
-    const verificationTypeEl = document.getElementById('verification_type');
-    const childDocEl = document.getElementById('child_doc');
-
-    const hasValidIdType = verificationTypeEl && verificationTypeEl.value.trim() !== '';
-    const hasIdFile = idImagePathEl ? idImagePathEl.files.length > 0 : false;
-    const hasSelfieFile = selfiePathEl ? selfiePathEl.files.length > 0 : false;
-    const hasProofFile = proofOfBillingEl ? proofOfBillingEl.files.length > 0 : false;
-
-    if (hasValidIdType) {
-      if (!hasIdFile) return showMsg('Please upload your Government ID when a valid ID type is selected.', 'error');
-      if (!hasSelfieFile) return showMsg('Please upload your selfie holding your ID.', 'error');
-    } else {
-      if (!hasProofFile) return showMsg('Please upload proof of billing when no valid ID type is selected.', 'error');
-    }
-
-    const form = document.getElementById('regForm');
-    const fd = new FormData(form);
-    
-    // Prepend +63 to contact number
-    const contactNo = fd.get('contact_no');
-    if (contactNo && !contactNo.startsWith('+63')) {
-      fd.set('contact_no', '+63 ' + contactNo);
-    }
-    
-    // Append files manually since they are outside the form
-    if (photoPathEl && photoPathEl.files.length > 0) {
-      fd.append('photo_path', photoPathEl.files[0]);
-    }
-    if (idImagePathEl && idImagePathEl.files.length > 0) {
-      fd.append('id_image_path', idImagePathEl.files[0]);
-    }
-    if (selfiePathEl && selfiePathEl.files.length > 0) {
-      fd.append('selfie_image_path', selfiePathEl.files[0]);
-    }
-    if (proofOfBillingEl && proofOfBillingEl.files.length > 0) {
-      fd.append('proof_of_billing_path', proofOfBillingEl.files[0]);
-    }
-    if (childDocEl && childDocEl.files.length > 0) {
-      fd.append('child_doc', childDocEl.files[0]);
-    }
-    
-    fd.append('verification_token', verificationToken);
-    fd.append('household_mode', 'new');
-    
-    // Debug: Log email and password
-    console.log('=== Registration Debug ===');
-    console.log('Email:', fd.get('email'));
-    console.log('Password:', fd.get('password') ? 'Password provided (length: ' + fd.get('password').length + ')' : 'No password');
-    console.log('Registered Via: public_form');
-
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = 'Submitting...';
-
-    const { res, data } = await apiForm('{{ url("/api/v1/public/residents/register") }}', 'POST', fd);
-
-    if (res.status === 405) {
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Submit Registration';
-      return showMsg('Error 405: Method Not Allowed. This is usually caused by a server redirect. Please ensure you are accessing the site via the correct protocol (HTTP vs HTTPS).', 'error');
-    }
-
-    console.log(data)
-    console.log(res)
-    btnSubmit.disabled = false;
-    btnSubmit.textContent = 'Submit Registration';
-
-    if (!res.ok) {
-      // Show raw response payload for debugging
-      let debugText = '';
-      try {
-        debugText = JSON.stringify(data, null, 2);
-      } catch (e) {
-        debugText = String(data);
-      }
-      return showMsg(debugText, 'error');
-    }
-
-    // Show success message
-    form.reset();
-    document.getElementById('dz_id').classList.remove('has-file');
-    document.getElementById('dz_selfie').classList.remove('has-file');
-    document.getElementById('dz_id').querySelectorAll('.dropzone-preview').forEach(el => el.remove());
-    document.getElementById('dz_selfie').querySelectorAll('.dropzone-preview').forEach(el => el.remove());
-
-    otpId = null;
-    verificationToken = null;
-    otpCooldownUntil = 0;
-    updateCooldownUI();
-
-    // Success - redirect to login with success message
-    const params = new URLSearchParams();
-    params.set('registered', 'true');
-    window.location.href = '/auth/login?' + params.toString();
+    stagedRegistration = formData;
+    setRegistrationControlsDisabled(true);
+    registrationDraftStatus.textContent = 'Application details saved on this device for 30 minutes. Your password and uploaded files remain only in this page until registration is submitted.';
+    btnSubmit.textContent = 'Edit Registration Details';
+    refreshSendOtpEnabled();
+    showMsg('Application details saved. Send the OTP to continue.', 'success');
   });
   
   // Navbar scroll effect
