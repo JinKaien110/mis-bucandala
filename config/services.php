@@ -24,6 +24,14 @@ return [
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],
+    'libreoffice' => [
+        'binary' => env(
+            'LIBREOFFICE_BINARY',
+            PHP_OS_FAMILY === 'Windows'
+            ? 'C:\\Program Files\\LibreOffice\\program\\soffice.com'
+                : 'soffice'
+        ),
+    ],
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),

@@ -39,11 +39,11 @@
         <div class="row">
           <div class="col-md-6 mb-3">
             <label class="form-label">Publish Date</label>
-            <input type="date" name="publish_date" class="form-control">
+            <input type="date" name="publish_date" class="form-control" min="{{ now()->toDateString() }}">
           </div>
           <div class="col-md-6 mb-3">
             <label class="form-label">Expire Date</label>
-            <input type="date" name="expire_date" class="form-control">
+            <input type="date" name="expire_date" class="form-control" min="{{ now()->toDateString() }}">
           </div>
         </div>
         <div class="mb-3">

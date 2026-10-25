@@ -16,7 +16,23 @@ class CaseController extends Controller
     {
         $cases = CaseFile::with('blotter')
             ->notArchived()
-            ->orderByDesc('opened_at')
+            ->orderByRaw("CASE
+                WHEN LOWER(status) IN ('ongoing', 'open', 'scheduled') THEN 0
+                WHEN LOWER(status) IN ('referred', 'settled', 'dismissed') THEN 1
+                ELSE 2
+            END")
+            ->orderByRaw("CASE
+                WHEN LOWER(status) IN ('ongoing', 'open', 'scheduled') THEN opened_at
+            END ASC")
+            ->orderByRaw("CASE
+                WHEN LOWER(status) NOT IN ('ongoing', 'open', 'scheduled') THEN opened_at
+            END DESC")
+            ->orderByRaw("CASE
+                WHEN LOWER(status) IN ('ongoing', 'open', 'scheduled') THEN id
+            END ASC")
+            ->orderByRaw("CASE
+                WHEN LOWER(status) NOT IN ('ongoing', 'open', 'scheduled') THEN id
+            END DESC")
             ->paginate(15);
 
         return view('admin.cases.index', compact('cases'));

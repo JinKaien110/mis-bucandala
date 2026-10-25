@@ -338,24 +338,28 @@
 
       const feeNum = Number(x.fee ?? (x.document_type?.fee ?? 0));
       const fee = (!feeNum || Number.isNaN(feeNum)) ? 'Free' : '₱' + feeNum.toFixed(2);
-      const status = String(x.status || 'pending').toLowerCase();
-      const statusClass = status === 'released'
+      const storedStatus = String(x.status || 'pending').toLowerCase();
+      const status = storedStatus === 'released' ? 'completed' : storedStatus;
+      const statusClass = status === 'completed'
         ? 'bg-success-subtle text-success border border-success-subtle'
         : status === 'pending'
           ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'
-          : 'bg-secondary-subtle text-secondary border border-secondary-subtle';
-      const downloadAction = status === 'pending'
-        ? `<form method="POST" action="/admin/document-requests/${encodeURIComponent(x.id)}/release-download" class="release-download-form">
-             <input type="hidden" name="_token" value="{{ csrf_token() }}">
-             <button class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" type="submit" title="Download DOCX and release request">
-               <i class="bi bi-file-earmark-word"></i>
-             </button>
-           </form>`
-        : status === 'released'
+          : status === 'pickup'
+            ? 'bg-info-subtle text-info border border-info-subtle'
+            : 'bg-secondary-subtle text-secondary border border-secondary-subtle';
+      const statusLabel = status === 'pickup' ? 'For Pickup' : status.charAt(0).toUpperCase() + status.slice(1);
+      const downloadAction = status === 'pending' || status === 'pickup'
+        ? `<button class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center print-pdf-button" style="width: 32px; height: 32px;" type="button" data-url="/admin/document-requests/${encodeURIComponent(x.id)}/print-complete" title="Download and print PDF" aria-label="Download and print PDF">
+             <i class="bi bi-file-earmark-pdf"></i>
+           </button>
+           ${status === 'pending' ? `<button class="btn btn-sm btn-outline-primary rounded-circle d-flex align-items-center justify-content-center set-pickup-button" style="width: 32px; height: 32px;" type="button" data-url="/admin/document-requests/${encodeURIComponent(x.id)}/pickup" title="Set for pickup" aria-label="Set for pickup">
+             <i class="bi bi-bag-check"></i>
+           </button>` : ''}`
+        : status === 'completed'
           ? `<a class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${encodeURIComponent(x.id)}/download" title="Download DOCX">
              <i class="bi bi-file-earmark-word"></i>
            </a>`
-          : `<button class="btn btn-sm btn-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" type="button" title="Only pending or released requests can be downloaded" disabled>
+          : `<button class="btn btn-sm btn-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" type="button" title="This request cannot be downloaded" disabled>
                <i class="bi bi-file-earmark-word"></i>
              </button>`;
 
@@ -369,19 +373,14 @@
           <td><span class="badge bg-light text-dark border">${escapeHtml(doc)}</span></td>
           <td>${fee}</td>
           <td class="text-muted small">${escapeHtml(String(x.created_at ?? '').replace('T',' ').slice(0,19))}</td>
-          <td><span class="badge rounded-pill ${statusClass}">${escapeHtml(status.charAt(0).toUpperCase() + status.slice(1))}</span></td>
+          <td><span class="badge rounded-pill ${statusClass}">${escapeHtml(statusLabel)}</span></td>
             <td class="text-end pe-4">
               <div class="d-flex justify-content-end gap-2">
                   ${downloadAction}
-                  <a class="btn btn-sm btn-success rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${x.id}/print" title="Print">
-                      <i class="bi bi-printer"></i>
-                  </a>
                   <form method="POST" action="/admin/document/requests/${x.id}" style="display:inline;" class="archive-form">
                   <input type="hidden" name="_token" value="{{ csrf_token() }}">
                   <input type="hidden" name="_method" value="DELETE">
-                  <button class="btn btn-sm btn-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" type="submit" title="Archive">
-                      <i class="bi bi-archive fs-6"></i>
-                  </button>
+
                   </form>
               </div>
             </td>
@@ -437,49 +436,81 @@
     }
   });
 
-  tbody.addEventListener('submit', async (e) => {
-    const form = e.target.closest('.release-download-form');
-    if (!form) return;
+  tbody.addEventListener('click', async (event) => {
+    const printButton = event.target.closest('.print-pdf-button');
+    const pickupButton = event.target.closest('.set-pickup-button');
+    if (!printButton && !pickupButton) return;
 
-    e.preventDefault();
-    if (!confirm('Confirm releasing this document request? Its status will be updated to Released and the related payment will be marked successful.')) return;
+    const button = printButton || pickupButton;
+    if (printButton && !confirm('Generate, download, and print the PDF? This will set the request for pickup and create a pending payment entry.')) return;
+    if (pickupButton && !confirm('Set this document request for pickup?')) return;
 
-    const button = form.querySelector('button[type="submit"]');
+    const printWindow = printButton ? window.open('', '_blank') : null;
+    if (printButton && !printWindow) {
+      showMsg({ success: false, message: 'Allow pop-ups to open the PDF print window, then try again.' });
+      return;
+    }
     button.disabled = true;
-
     try {
-      const formData = new FormData(form);
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: formData,
+      const response = await fetch(button.dataset.url, {
+        method: printButton ? 'POST' : 'PATCH',
         headers: {
-          'X-CSRF-TOKEN': formData.get('_token'),
-          'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Accept': printButton ? 'application/pdf' : 'application/json'
         },
         credentials: 'same-origin'
       });
-      const contentType = response.headers.get('Content-Type') || '';
 
-      if (!response.ok || !contentType.includes('wordprocessingml')) {
-        throw new Error('The document could not be downloaded. Check the request template and try again.');
+      if (!response.ok) {
+        const responseText = await response.text();
+        let errorMessage = '';
+        try {
+          errorMessage = JSON.parse(responseText).message || '';
+        } catch {
+          errorMessage = responseText.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+        throw new Error(errorMessage || `The requested action failed (HTTP ${response.status}).`);
       }
 
-      const blob = await response.blob();
-      const disposition = response.headers.get('Content-Disposition') || '';
-      const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] || 'document-request.docx';
-      const downloadUrl = URL.createObjectURL(blob);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = downloadUrl;
-      downloadLink.download = filename;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      downloadLink.remove();
-      URL.revokeObjectURL(downloadUrl);
+      if (printButton) {
+        const contentType = response.headers.get('Content-Type') || '';
+        if (!contentType.includes('application/pdf')) {
+          throw new Error('The generated document was not a PDF.');
+        }
+        const blob = await response.blob();
+        const pdfUrl = URL.createObjectURL(blob);
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] || 'document-request.pdf';
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pdfUrl;
+        downloadLink.download = filename;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+
+        if (printWindow) {
+          const iframe = printWindow.document.createElement('iframe');
+          iframe.title = 'Document PDF';
+          iframe.src = pdfUrl;
+          iframe.style.cssText = 'width:100%;height:100%;border:0';
+          printWindow.document.body.style.margin = '0';
+          printWindow.document.body.appendChild(iframe);
+          iframe.addEventListener('load', () => {
+            printWindow.focus();
+            setTimeout(() => printWindow.print(), 500);
+          }, { once: true });
+          printWindow.addEventListener('afterprint', () => URL.revokeObjectURL(pdfUrl), { once: true });
+        }
+        showMsg({ success: true, message: 'PDF downloaded; the print dialog was opened. Request marked completed.' });
+      } else {
+        const data = await response.json();
+        showMsg({ success: true, message: data.message || 'Document request set for pickup.' });
+      }
 
       await loadRequests();
-      showMsg({ success: true, message: 'Document released and downloaded successfully.' });
-      setTimeout(hideMsg, 3000);
+      setTimeout(hideMsg, 3500);
     } catch (error) {
+      if (printWindow && !printWindow.closed) printWindow.close();
       button.disabled = false;
       showMsg({ success: false, message: error.message });
     }

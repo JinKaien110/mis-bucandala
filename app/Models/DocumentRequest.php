@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DocumentRequestStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -29,6 +30,11 @@ class DocumentRequest extends Model
         'released_at' => 'datetime',
         'archived_at' => 'datetime',
     ];
+
+    public function statusEnum(): DocumentRequestStatus
+    {
+        return DocumentRequestStatus::fromStoredValue($this->status);
+    }
 
     public function resident()
     {

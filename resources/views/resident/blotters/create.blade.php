@@ -47,7 +47,7 @@
             @error('incident_location')<div class="small text-warning mt-1">{{ $message }}</div>@enderror
           </div>
           <div class="mb-3">
-            <label for="narrative" class="form-label">Narrative <span class="text-warning">*</span></label>
+            <label for="narrative" class="form-label">Statement <span class="text-warning">*</span></label>
             <textarea id="narrative" name="narrative" rows="7" class="form-control" placeholder="Describe what happened, including relevant details." required>{{ old('narrative') }}</textarea>
             @error('narrative')<div class="small text-warning mt-1">{{ $message }}</div>@enderror
           </div>
@@ -63,6 +63,7 @@
             <input id="respondent_name" name="respondent_name" class="form-control" value="{{ old('respondent_name') }}" maxlength="255">
             @error('respondent_name')<div class="small text-warning mt-1">{{ $message }}</div>@enderror
           </div>
+          {{--
           <div class="mb-3">
             <label for="respondent_contact" class="form-label">Contact Number</label>
             <input id="respondent_contact" name="respondent_contact" class="form-control" value="{{ old('respondent_contact') }}" maxlength="50">
@@ -73,9 +74,10 @@
             <input id="respondent_email" type="email" name="respondent_email" class="form-control" value="{{ old('respondent_email') }}" maxlength="255">
             @error('respondent_email')<div class="small text-warning mt-1">{{ $message }}</div>@enderror
           </div>
+          --}}
           <div class="mb-3">
-            <label for="respondent_address_line" class="form-label">Address Line</label>
-            <textarea id="respondent_address_line" name="respondent_address_line" class="form-control" rows="2" maxlength="255">{{ old('respondent_address_line') }}</textarea>
+            <label for="respondent_address_line" class="form-label">Location</label>
+            <textarea id="respondent_address_line" name="respondent_address_line" class="form-control" rows="4" maxlength="255" placeholder="Add a location guide, such as a street, landmark, nearby store, or recognizable building.">{{ old('respondent_address_line') }}</textarea>
             @error('respondent_address_line')<div class="small text-warning mt-1">{{ $message }}</div>@enderror
           </div>
           <div class="glass p-3 small mb-0" style="background: rgba(13, 71, 161, 0.78); border-color: rgba(255, 215, 0, 0.3); color: #ffffff;">

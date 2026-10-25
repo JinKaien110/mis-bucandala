@@ -883,6 +883,15 @@
 
                     <div class="col-md-6">
                       <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="indigent" id="indigent" value="1" />
+                        <label class="form-check-label" for="indigent">
+                          Indigent
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="senior_citizen_status" id="senior_citizen_status" value="1" />
                         <label class="form-check-label" for="senior_citizen_status">
                           Senior Citizen

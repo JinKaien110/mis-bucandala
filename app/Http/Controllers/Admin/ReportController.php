@@ -147,7 +147,7 @@ class ReportController extends Controller
         $validated = $request->validate([
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date'],
-            'status' => ['nullable', 'in:pending,ready,released'],
+            'status' => ['nullable', 'in:pending,pickup,cancelled,rejected,completed'],
         ]);
 
         $q = DocumentRequest::query()
@@ -163,7 +163,11 @@ class ReportController extends Controller
         }
 
         if (!empty($validated['status'])) {
-            $q->where('status', $validated['status']);
+            if ($validated['status'] === 'completed') {
+                $q->whereIn('status', ['completed', 'released']);
+            } else {
+                $q->where('status', $validated['status']);
+            }
         }
 
         $documents = $q->paginate(20)->withQueryString();
@@ -171,8 +175,8 @@ class ReportController extends Controller
         $summary = [
             'total_requests' => DocumentRequest::count(),
             'pending' => DocumentRequest::where('status', 'pending')->count(),
-            'ready' => DocumentRequest::where('status', 'ready')->count(),
-            'released' => DocumentRequest::where('status', 'released')->count(),
+            'cancelled_or_rejected' => DocumentRequest::whereIn('status', ['cancelled', 'rejected'])->count(),
+            'completed' => DocumentRequest::whereIn('status', ['completed', 'released'])->count(),
         ];
 
         return view('admin.reports.documents', compact('documents', 'summary'));

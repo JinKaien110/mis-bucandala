@@ -54,7 +54,15 @@
 
   @if($case)
     <section class="glass p-4">
-      <h4 class="mb-3">Case Tracking <span class="small opacity-75">({{ $case->case_no }})</span></h4>
+      <div class="case-tracking-header">
+        <h4 class="mb-0">Case Tracking <span class="small opacity-75">({{ $case->case_no }})</span></h4>
+        @if($case->resolution_summary)
+          <div class="verdict-summary">
+            <strong><i class="bi bi-check2-circle me-1"></i>Verdict</strong>
+            <div class="mt-1" style="white-space: pre-wrap;">{{ $case->resolution_summary }}</div>
+          </div>
+        @endif
+      </div>
       <p class="small opacity-75">Hearing schedules are recorded below; a separate summon date is not stored in the current system.</p>
       @if($case->hearings->isNotEmpty())
         <div class="list-group list-group-flush">
@@ -84,6 +92,34 @@
 
 @push('styles')
 <style>
+  .case-tracking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .verdict-summary {
+    flex: 0 1 48%;
+    padding: 1rem 1.25rem;
+    background: rgba(13, 71, 161, 0.72);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-left: 4px solid #fbbf24;
+    border-radius: 0.75rem;
+  }
+
+  @media (max-width: 767.98px) {
+    .case-tracking-header {
+      flex-direction: column;
+    }
+
+    .verdict-summary {
+      width: 100%;
+      flex-basis: auto;
+    }
+  }
+
   .blotter-submission-alert {
     padding: 1rem 1.25rem;
     color: #ffffff;

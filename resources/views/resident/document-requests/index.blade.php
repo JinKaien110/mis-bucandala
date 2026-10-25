@@ -84,9 +84,11 @@
       <div class="document-request-history">
         @foreach($requests as $request)
           @php
-            $statusClass = match($request->status) {
-              'released' => 'bg-success',
-              'cancelled' => 'bg-secondary',
+            $status = $request->statusEnum()->value;
+            $statusClass = match($status) {
+              'completed' => 'bg-success',
+              'pickup' => 'bg-info',
+              'cancelled', 'rejected' => 'bg-secondary',
               default => 'bg-warning text-dark',
             };
           @endphp
@@ -97,8 +99,16 @@
                 <h5 class="mb-1">{{ $request->documentType?->name ?? 'Document Request' }}</h5>
                 <div class="small history-label">{{ $request->control_no }}</div>
               </div>
-              <p class="opacity-75 mb-0">Please claim your document request at the barangay hall with your ID and pay accordingly </p>
-              <span class="badge {{ $statusClass }} px-3 py-2">{{ ucfirst($request->status) }}</span>
+              <p class="opacity-75 mb-0">
+                @if($status === 'pickup')
+                  Your document is ready for pickup at the barangay hall. Please bring your ID.
+                @elseif($status === 'pending')
+                  Barangay staff are processing your request.
+                @else
+                  Please contact the barangay hall if you need assistance with this request.
+                @endif
+              </p>
+              <span class="badge {{ $statusClass }} px-3 py-2">{{ $request->statusEnum()->label() }}</span>
             </div>
             <hr class="border-light opacity-25">
             <div class="row g-3">

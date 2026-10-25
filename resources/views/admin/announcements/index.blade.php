@@ -129,11 +129,11 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label fw-semibold">Publish Date</label>
-              <input type="date" name="publish_date" class="form-control border-0 shadow-sm">
+              <input type="date" name="publish_date" class="form-control border-0 shadow-sm" min="{{ now()->toDateString() }}">
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label fw-semibold">Expire Date</label>
-              <input type="date" name="expire_date" class="form-control border-0 shadow-sm">
+              <input type="date" name="expire_date" class="form-control border-0 shadow-sm" min="{{ now()->toDateString() }}">
             </div>
           </div>
           <div class="mb-3">
@@ -196,11 +196,11 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label fw-semibold">Publish Date</label>
-              <input type="date" name="publish_date" id="edit_publish_date" class="form-control border-0 shadow-sm">
+              <input type="date" name="publish_date" id="edit_publish_date" class="form-control border-0 shadow-sm" min="{{ now()->toDateString() }}">
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label fw-semibold">Expire Date</label>
-              <input type="date" name="expire_date" id="edit_expire_date" class="form-control border-0 shadow-sm">
+              <input type="date" name="expire_date" id="edit_expire_date" class="form-control border-0 shadow-sm" min="{{ now()->toDateString() }}">
             </div>
           </div>
           <div class="mb-3">
@@ -384,6 +384,18 @@ document.getElementById('createForm').addEventListener('submit', function(e) {
 let editModal;
 document.addEventListener('DOMContentLoaded', function() {
   editModal = new bootstrap.Modal(document.getElementById('editModal'));
+
+  ['edit_publish_date', 'edit_expire_date'].forEach(id => {
+    const input = document.getElementById(id);
+    input.addEventListener('focus', () => {
+      input.min = '{{ now()->toDateString() }}';
+    });
+    input.addEventListener('blur', () => {
+      if (input.value === input.dataset.originalValue && input.value < input.min) {
+        input.removeAttribute('min');
+      }
+    });
+  });
 });
 
 function openEditModal(id) {
@@ -401,6 +413,16 @@ function openEditModal(id) {
     document.getElementById('edit_published').checked = announcement.is_published;
     document.getElementById('edit_publish_date').value = announcement.publish_date || '';
     document.getElementById('edit_expire_date').value = announcement.expire_date || '';
+    ['edit_publish_date', 'edit_expire_date'].forEach(fieldId => {
+      const input = document.getElementById(fieldId);
+      input.dataset.originalValue = input.value;
+      const today = '{{ now()->toDateString() }}';
+      if (input.value && input.value < today) {
+        input.removeAttribute('min');
+      } else {
+        input.min = today;
+      }
+    });
     document.getElementById('edit_show_on_calendar').checked = !!announcement.event_id;
     document.getElementById('edit_content').value = announcement.content;
     editModal.show();

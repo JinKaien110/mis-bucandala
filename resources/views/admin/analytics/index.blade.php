@@ -486,8 +486,9 @@
                                     <select name="doc_status" class="form-select form-select-sm">
                                         <option value="">All Status</option>
                                         <option value="pending" {{ request('doc_status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="approved" {{ request('doc_status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                                        <option value="released" {{ request('doc_status') == 'released' ? 'selected' : '' }}>Released</option>
+                                        <option value="cancelled" {{ request('doc_status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                        <option value="rejected" {{ request('doc_status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                        <option value="completed" {{ request('doc_status') == 'completed' ? 'selected' : '' }}>Completed</option>
                                     </select>
                                 </div>
 
@@ -2135,4 +2136,3 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 @endsection
-

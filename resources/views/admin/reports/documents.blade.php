@@ -34,16 +34,16 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
-                    <div class="fs-2 fw-bold text-info">{{ $summary['ready'] }}</div>
-                    <div class="text-muted small">Ready</div>
+                    <div class="fs-2 fw-bold text-secondary">{{ $summary['cancelled_or_rejected'] }}</div>
+                    <div class="text-muted small">Cancelled / Rejected</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
-                    <div class="fs-2 fw-bold text-success">{{ $summary['released'] }}</div>
-                    <div class="text-muted small">Released</div>
+                    <div class="fs-2 fw-bold text-success">{{ $summary['completed'] }}</div>
+                    <div class="text-muted small">Completed</div>
                 </div>
             </div>
         </div>
@@ -56,8 +56,10 @@
                     <select name="status" class="form-select">
                         <option value="">All Status</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="ready" {{ request('status') === 'ready' ? 'selected' : '' }}>Ready</option>
-                        <option value="released" {{ request('status') === 'released' ? 'selected' : '' }}>Released</option>
+                        <option value="pickup" {{ request('status') === 'pickup' ? 'selected' : '' }}>For Pickup</option>
+                        <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                        <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -90,8 +92,11 @@
                                 <td>{{ $doc->resident?->first_name }} {{ $doc->resident?->last_name }}</td>
                                 <td>{{ $doc->documentType?->name }}</td>
                                 <td>
-                                    @php $statusColor = match($doc->status) { 'pending' => 'warning', 'ready' => 'info', 'released' => 'success', default => 'secondary' }; @endphp
-                                    <span class="badge bg-{{ $statusColor }}-subtle text-{{ $statusColor }} rounded-pill">{{ ucfirst($doc->status) }}</span>
+                                    @php
+                                        $status = $doc->statusEnum()->value;
+                                        $statusColor = match($status) { 'pending' => 'warning', 'pickup' => 'info', 'completed' => 'success', default => 'secondary' };
+                                    @endphp
+                                    <span class="badge bg-{{ $statusColor }}-subtle text-{{ $statusColor }} rounded-pill">{{ $doc->statusEnum()->label() }}</span>
                                 </td>
                                 <td>{{ $doc->created_at->format('M d, Y') }}</td>
                             </tr>

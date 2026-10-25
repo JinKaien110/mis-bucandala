@@ -160,6 +160,7 @@ Route::middleware(['auth', 'role:resident'])->group(function () {
 
      // Update household member details
      Route::put('/resident/household/member/{member}', [App\Http\Controllers\Resident\HouseholdController::class, 'updateMember'])->name('resident.household.member.update');
+     Route::delete('/resident/household/member/{member}', [App\Http\Controllers\Resident\HouseholdController::class, 'removeMember'])->name('resident.household.member.remove');
 
      // Search residents by account number
      Route::get('/resident/household/search-resident', [App\Http\Controllers\Resident\HouseholdController::class, 'searchByAccount'])->name('resident.household.search-resident');
@@ -426,6 +427,14 @@ Route::middleware([
         Route::post('/document-requests/{documentRequest}/release-download',
             [DocumentRequestPrintController::class, 'releaseAndDownload']
         )->name('document-requests.release-download');
+
+        Route::post('/document-requests/{documentRequest}/print-complete',
+            [DocumentRequestPrintController::class, 'printAndComplete']
+        )->name('document-requests.print-complete');
+
+        Route::patch('/document-requests/{documentRequest}/pickup',
+            [DocumentRequestPrintController::class, 'setForPickup']
+        )->name('document-requests.pickup');
 
          Route::get('/admin/document-requests/{documentRequest}/patawag',
              [DocumentRequestPrintController::class, 'patawagComplainant']

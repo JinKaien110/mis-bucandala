@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use PhpOffice\PhpWord\TemplateProcessor;
+use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\Process\Process;
 
 class BlotterController extends Controller
 {
@@ -30,12 +32,31 @@ class BlotterController extends Controller
         $limit = (int)($validated['limit'] ?? 10);
 
         $q = Blotter::query()
-            ->notArchived()
+            ->leftJoin('cases', 'cases.blotter_id', '=', 'blotters.id')
+            ->select('blotters.*')
+            ->whereNull('blotters.archived_at')
             ->with([
                 'complainantResident:id,first_name,last_name,middle_name',
                 'respondentResident:id,first_name,last_name,middle_name',
             ])
-            ->orderByDesc('created_at');
+            ->orderByRaw("CASE
+                WHEN cases.id IS NULL THEN 0
+                WHEN LOWER(cases.status) IN ('ongoing', 'open', 'scheduled') THEN 1
+                WHEN LOWER(cases.status) IN ('referred', 'settled', 'dismissed', 'archived') THEN 2
+                ELSE 3
+            END")
+            ->orderByRaw("CASE
+                WHEN cases.id IS NULL OR LOWER(cases.status) IN ('ongoing', 'open', 'scheduled') THEN blotters.created_at
+            END ASC")
+            ->orderByRaw("CASE
+                WHEN LOWER(cases.status) NOT IN ('ongoing', 'open', 'scheduled') AND cases.id IS NOT NULL THEN blotters.created_at
+            END DESC")
+            ->orderByRaw("CASE
+                WHEN cases.id IS NULL OR LOWER(cases.status) IN ('ongoing', 'open', 'scheduled') THEN blotters.id
+            END ASC")
+            ->orderByRaw("CASE
+                WHEN LOWER(cases.status) NOT IN ('ongoing', 'open', 'scheduled') AND cases.id IS NOT NULL THEN blotters.id
+            END DESC");
 
         if (!empty($validated['date_from'])) {
             $q->whereDate('incident_date', '>=', $validated['date_from']);
@@ -187,11 +208,97 @@ public function create()
 
         $tempDirectory = storage_path('app/temp');
         File::ensureDirectoryExists($tempDirectory);
-        $filename = 'patawag_complainant_' . Str::slug($blotter->blotter_no) . '_' . Str::random(8) . '.docx';
-        $outputPath = $tempDirectory . DIRECTORY_SEPARATOR . $filename;
-        $processor->saveAs($outputPath);
+        $fileToken = Str::uuid()->toString();
+        $filename = 'patawag_complainant_' . Str::slug($blotter->blotter_no) . '_' . $fileToken;
+        $docxPath = $tempDirectory . DIRECTORY_SEPARATOR . $filename . '.docx';
+        $pdfPath = $tempDirectory . DIRECTORY_SEPARATOR . $filename . '.pdf';
+        $profilePath = $tempDirectory . DIRECTORY_SEPARATOR . 'lo-profile-' . $fileToken;
+        $processor->saveAs($docxPath);
 
-        return response()->download($outputPath, $filename)->deleteFileAfterSend(true);
+        $configuredBinary = config('services.libreoffice.binary');
+        $binaryCandidates = array_filter([
+            is_string($configuredBinary) ? $configuredBinary : null,
+            PHP_OS_FAMILY === 'Windows' ? 'C:\\Program Files\\LibreOffice\\program\\soffice.com' : null,
+            PHP_OS_FAMILY === 'Windows' ? 'C:\\Program Files\\LibreOffice\\program\\soffice.exe' : null,
+            PHP_OS_FAMILY === 'Windows' ? 'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.com' : null,
+            PHP_OS_FAMILY === 'Windows' ? 'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe' : null,
+        ]);
+        $binary = null;
+        foreach ($binaryCandidates as $candidate) {
+            if (is_file($candidate)) {
+                $binary = $candidate;
+                break;
+            }
+
+            $binary = (new ExecutableFinder())->find($candidate);
+            if ($binary) {
+                break;
+            }
+        }
+
+        if (!$binary) {
+            @unlink($docxPath);
+
+            return redirect()
+                ->route('admin.blotters.show', $blotter)
+                ->with('error', 'LibreOffice is unavailable, so the Patawag document could not be converted to PDF. The blotter details were saved.');
+        }
+
+        $process = null;
+        try {
+            File::ensureDirectoryExists($profilePath);
+            $profileUri = PHP_OS_FAMILY === 'Windows'
+                ? 'file:///' . str_replace('\\', '/', $profilePath)
+                : 'file://' . $profilePath;
+            $process = new Process([
+                $binary,
+                '--headless',
+                '--norestore',
+                '--nolockcheck',
+                '--nodefault',
+                '--nofirststartwizard',
+                '-env:UserInstallation=' . $profileUri,
+                '--convert-to',
+                'pdf:writer_pdf_Export',
+                '--outdir',
+                $tempDirectory,
+                $docxPath,
+            ], dirname($binary), array_filter([
+                'HOME' => PHP_OS_FAMILY === 'Windows' ? null : $tempDirectory,
+                'TEMP' => PHP_OS_FAMILY === 'Windows' ? $tempDirectory : null,
+                'TMP' => PHP_OS_FAMILY === 'Windows' ? $tempDirectory : null,
+            ]));
+            $process->setTimeout(120);
+            $process->run();
+
+            if (!$process->isSuccessful() || !is_file($pdfPath) || filesize($pdfPath) === 0) {
+                throw new \RuntimeException(sprintf(
+                    'LibreOffice conversion failed (exit code: %s; stdout: %s; stderr: %s).',
+                    $process->getExitCode() ?? 'unknown',
+                    trim($process->getOutput()),
+                    trim($process->getErrorOutput())
+                ));
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Patawag Complainant PDF conversion failed.', [
+                'blotter_id' => $blotter->id,
+                'converter_binary' => $binary,
+                'exit_code' => $process?->getExitCode(),
+                'stdout' => $process?->getOutput(),
+                'stderr' => $process?->getErrorOutput(),
+                'exception' => $exception,
+            ]);
+            @unlink($pdfPath);
+
+            return redirect()
+                ->route('admin.blotters.show', $blotter)
+                ->with('error', 'The Patawag DOCX could not be converted to PDF. Check the server logs and LibreOffice installation. The blotter details were saved.');
+        } finally {
+            @unlink($docxPath);
+            File::deleteDirectory($profilePath);
+        }
+
+        return response()->download($pdfPath, $filename . '.pdf')->deleteFileAfterSend(true);
     }
 
 

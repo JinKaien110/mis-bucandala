@@ -31,6 +31,49 @@
     </div>
   </div>
 
+  @if($householdInvitations->isNotEmpty())
+  <div class="glass-card mb-4">
+    <div class="glass-card-header">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-envelope-plus me-2"></i>Household Invitations</h6>
+    </div>
+    <div class="glass-card-body">
+      <div class="table-responsive">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th>Household</th>
+              <th>Household Code</th>
+              <th>Relationship</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($householdInvitations as $invitation)
+            <tr>
+              <td class="fw-bold">{{ $invitation->household->address_line ?? 'Household invitation' }}</td>
+              <td><code class="text-info">{{ $invitation->household->household_code ?? 'Unavailable' }}</code></td>
+              <td>{{ trim(substr((string) $invitation->message, strlen('[HOUSEHOLD-INVITE]'))) ?: 'Member' }}</td>
+              <td class="text-end">
+                @if(!$resident->household_id)
+                <button type="button" class="btn btn-glass-success btn-sm me-2" onclick="respondToHouseholdInvitation({{ $invitation->id }}, 'approve')">
+                  <i class="bi bi-check-lg"></i> Accept
+                </button>
+                @else
+                <span class="small opacity-75 me-2">Leave your current household before accepting.</span>
+                @endif
+                <button type="button" class="btn btn-glass-danger btn-sm" onclick="respondToHouseholdInvitation({{ $invitation->id }}, 'reject')">
+                  <i class="bi bi-x-lg"></i> Decline
+                </button>
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  @endif
+
   <!-- Household Details View -->
   @if($household)
 
@@ -39,22 +82,19 @@
     <div class="glass-card-header d-flex justify-content-between align-items-center">
       <h6 class="mb-0 fw-bold"><i class="bi bi-people-fill me-2"></i>Household Members</h6>
       @php
-        $isHead = false;
+        $isHouseholdMember = false;
         try {
-          $isHead = $household && $resident
-            ? $household->members()
-                ->where('resident_id', $resident->id)
-                ->where('relationship', 'Head')
-                ->exists()
+          $isHouseholdMember = $household && $resident
+            ? $household->members()->where('resident_id', $resident->id)->exists()
             : false;
         } catch (\Throwable $e) {
-          $isHead = false;
+          $isHouseholdMember = false;
         }
       @endphp
-      @if($isHead)
-        <div class="d-flex flex-wrap gap-2">
+      <div class="d-flex flex-wrap gap-2">
+        @if($isHouseholdMember)
           <button type="button" class="btn btn-glass btn-sm" id="addMemberBtnModal">
-            <i class="bi bi-person-plus me-1"></i> Add Member by Account
+            <i class="bi bi-envelope-plus me-1"></i> Invite by Account
           </button>
           <button type="button" class="btn btn-glass btn-sm" id="addManualMemberBtn">
             <i class="bi bi-person-vcard me-1"></i> Add Member Manually
@@ -62,8 +102,8 @@
           <button type="button" class="btn btn-glass-primary btn-sm" onclick="openBulkEditModal()">
             <i class="bi bi-pencil-square me-1"></i> Edit Members
           </button>
-        </div>
-      @endif
+        @endif
+      </div>
     </div>
     <div class="glass-card-body">
       <div class="table-responsive">
@@ -139,6 +179,57 @@
       </div>
     </div>
   </div>
+
+  @if(count($joinRequests) > 0)
+    <div class="row g-4 mt-4">
+      <div class="col-12">
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus me-2"></i>Pending Join Requests</h6>
+          </div>
+          <div class="glass-card-body">
+            <div class="table-responsive">
+              <table class="glass-table">
+                <thead>
+                  <tr>
+                    <th style="width: 25%;">Name</th>
+                    <th style="width: 45%;">Message</th>
+                    <th style="width: 30%; text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @forelse($joinRequests as $request)
+                  <tr>
+                    <td>
+                      <div class="fw-bold">{{ $request->resident->first_name ?? 'Unknown' }} {{ $request->resident->last_name ?? '' }}</div>
+                      <small class="opacity-50 d-block">{{ $request->resident->email ?? 'No email' }}</small>
+                    </td>
+                    <td class="small text-wrap" style="max-width: 300px;"><em class="text-muted">"{{ $request->message ?? 'No message' }}"</em></td>
+                    <td class="text-end">
+                      <button type="button" class="btn btn-glass-success btn-sm me-2" onclick="approveJoinRequest({{ $request->id }})">
+                        <i class="bi bi-check-lg"></i> Approve
+                      </button>
+                      <button type="button" class="btn btn-glass-danger btn-sm" onclick="rejectJoinRequest({{ $request->id }})">
+                        <i class="bi bi-x-lg"></i> Reject
+                      </button>
+                    </td>
+                  </tr>
+                  @empty
+                  <tr>
+                    <td colspan="3" class="text-center py-4">
+                      <i class="bi bi-inbox fs-1 opacity-50 mb-2"></i>
+                      <p class="opacity-75">No pending join requests.</p>
+                    </td>
+                  </tr>
+                  @endforelse
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
 
   <div class="row g-4" id="householdView">
     <!-- Left Bento Column -->
@@ -307,56 +398,7 @@
     </div>
   </div>
 
-    @if(count($joinRequests) > 0)
-    <div class="row g-4 mt-4">
-      <div class="col-12">
-        <div class="glass-card">
-          <div class="glass-card-header">
-            <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus me-2"></i>Pending Join Requests</h6>
-          </div>
-          <div class="glass-card-body">
-            <div class="table-responsive">
-              <table class="glass-table">
-                <thead>
-                  <tr>
-                    <th style="width: 25%;">Name</th>
-                    <th style="width: 45%;">Message</th>
-                    <th style="width: 30%; text-align: right;">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @forelse($joinRequests as $request)
-                  <tr>
-                    <td>
-                      <div class="fw-bold">{{ $request->resident->first_name ?? 'Unknown' }} {{ $request->resident->last_name ?? '' }}</div>
-                      <small class="opacity-50 d-block">{{ $request->resident->email ?? 'No email' }}</small>
-                    </td>
-                    <td class="small text-wrap" style="max-width: 300px;"><em class="text-muted">"{{ $request->message ?? 'No message' }}"</em></td>
-                    <td class="text-end">
-                      <button type="button" class="btn btn-glass-success btn-sm me-2" onclick="approveJoinRequest({{ $request->id }})">
-                        <i class="bi bi-check-lg"></i> Approve
-                      </button>
-                      <button type="button" class="btn btn-glass-danger btn-sm" onclick="rejectJoinRequest({{ $request->id }})">
-                        <i class="bi bi-x-lg"></i> Reject
-                      </button>
-                    </td>
-                  </tr>
-                  @empty
-                  <tr>
-                    <td colspan="3" class="text-center py-4">
-                      <i class="bi bi-inbox fs-1 opacity-50 mb-2"></i>
-                      <p class="opacity-75">No pending join requests.</p>
-                    </td>
-                  </tr>
-                  @endforelse
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    @endif
+    
   </div>
   @else
    <div class="glass p-5 text-center">
@@ -388,6 +430,38 @@
             <div class="col-12">
               <h6 class="mb-3 mt-2 fs-6"><i class="bi bi-house me-2"></i>Basic Information</h6>
             </div>
+            @if(!$household)
+            <div class="col-12">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 mt-2">
+                <div>
+                  <h6 class="mb-1 fs-6"><i class="bi bi-people me-2"></i>Add Household Members</h6>
+                  <small class="opacity-75">Registered residents added by account number will receive an invitation and join only after accepting. Manually entered members are added immediately.</small>
+                </div>
+                <button type="button" class="btn btn-glass btn-sm" id="addCreateHouseholdMember">
+                  <i class="bi bi-person-plus me-1"></i>Add Member
+                </button>
+              </div>
+              <div id="createHouseholdMemberRows" class="d-flex flex-column gap-3"></div>
+            </div>
+            @endif
+            @if($household)
+            <div class="col-md-12">
+              <label class="form-label-glass">Address / Blk & Lot <span class="text-danger">*</span></label>
+              <input type="text" name="address_line" class="glass-input form-control" maxlength="255" value="{{ $household->address_line }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label-glass">Street</label>
+              <input type="text" name="street" class="glass-input form-control" maxlength="255" value="{{ $household->street }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label-glass">Phase</label>
+              <input type="text" name="phase" class="glass-input form-control" maxlength="50" value="{{ $household->phase }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label-glass">Contact No.</label>
+              <input type="text" name="contact_no" class="glass-input form-control" maxlength="20" value="{{ $household->contact_no }}">
+            </div>
+            @endif
             <div class="col-md-6">
               <label class="form-label-glass">Homeownership Type</label>
               <select name="homeownership_type" class="glass-select form-select">
@@ -501,12 +575,85 @@
   </div>
 </div>
 
+@if(!$household)
+<template id="createHouseholdMemberTemplate">
+  <div class="glass p-3 create-household-member-row">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label-glass">Member Type <span class="text-danger">*</span></label>
+        <select class="glass-select form-select" data-field="type" required>
+          <option value="">Choose how to add</option>
+          <option value="account">Registered resident (account number)</option>
+          <option value="manual">Not registered (enter manually)</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label-glass">Relationship <span class="text-danger">*</span></label>
+        <select class="glass-select form-select" data-field="relationship" required>
+          <option value="">Select relationship</option>
+          <option value="Member">Member</option>
+          <option value="Spouse">Spouse</option>
+          <option value="Child">Child</option>
+          <option value="Parent">Parent</option>
+          <option value="Sibling">Sibling</option>
+          <option value="Grandparent">Grandparent</option>
+          <option value="Grandchild">Grandchild</option>
+          <option value="Relative">Other Relative</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <button type="button" class="btn btn-glass btn-sm remove-create-household-member">
+          <i class="bi bi-trash me-1"></i>Remove
+        </button>
+      </div>
+      <div class="col-12 d-none" data-member-mode="account">
+        <label class="form-label-glass">Resident Account No <span class="text-danger">*</span></label>
+        <input type="text" class="glass-input form-control" data-field="account_no" placeholder="Enter registered resident account number" disabled required>
+        <small class="opacity-75">The resident must not already belong to another household.</small>
+      </div>
+      <div class="col-12 d-none" data-member-mode="manual">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label-glass">First Name <span class="text-danger">*</span></label>
+            <input type="text" class="glass-input form-control" data-field="first_name" maxlength="255" disabled required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-glass">Last Name <span class="text-danger">*</span></label>
+            <input type="text" class="glass-input form-control" data-field="last_name" maxlength="255" disabled required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-glass">Email <span class="opacity-75">(optional)</span></label>
+            <input type="email" class="glass-input form-control" data-field="email" maxlength="255" disabled>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-glass">Birth Date <span class="text-danger">*</span></label>
+            <input type="date" class="glass-input form-control" data-field="birth_date" max="{{ now()->toDateString() }}" disabled required>
+          </div>
+          <div class="col-12">
+            <div class="form-label-glass mb-2">Household Information</div>
+            <div class="row g-2">
+              <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" data-field="is_pwd" value="1" disabled><span class="form-check-label">PWD</span></label></div>
+              <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" data-field="is_4ps_beneficiary" value="1" disabled><span class="form-check-label">4Ps Beneficiary</span></label></div>
+              <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" data-field="is_indigent" value="1" disabled><span class="form-check-label">Indigent</span></label></div>
+              <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" data-field="has_pregnant_member" value="1" disabled><span class="form-check-label">Pregnant Member</span></label></div>
+              <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" data-field="has_senior_citizen" value="1" disabled><span class="form-check-label">Senior Citizen</span></label></div>
+              <div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" data-field="has_chronic_illness" value="1" disabled><span class="form-check-label">Chronic Illness</span></label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+@endif
+
 <!-- Add Member Modal -->
 <div class="modal fade" id="addMemberModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content glass-modal">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Add Member by Account</h5>
+        <h5 class="modal-title"><i class="bi bi-envelope-plus me-2"></i>Invite Resident by Account</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -514,13 +661,14 @@
           <div class="mb-3">
             <label class="form-label-glass">Resident Account No <span class="text-danger">*</span></label>
             <input type="text" class="glass-input form-control" id="accountNo" name="account_no" placeholder="Enter resident account number" required>
-            <small class="opacity-75">Enter the resident's account number to add them to your household.</small>
+            <small class="opacity-75">An invitation will be sent to the resident. They must accept before they are added to your household.</small>
           </div>
 
           <div class="mb-3">
             <label class="form-label-glass">Relationship <span class="text-danger">*</span></label>
             <select class="glass-select form-select" id="relationship" name="relationship" required>
               <option value="">Select relationship</option>
+              <option value="Member">Member</option>
               <option value="Spouse">Spouse</option>
               <option value="Child">Child</option>
               <option value="Parent">Parent</option>
@@ -535,7 +683,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-glass-primary" onclick="addMemberByAccount()">Add Member</button>
+        <button type="button" class="btn btn-glass-primary" onclick="addMemberByAccount()">Send Invitation</button>
       </div>
     </div>
   </div>
@@ -575,6 +723,7 @@
               <label for="manualMemberRelationship" class="form-label-glass">Relationship <span class="text-danger">*</span></label>
               <select id="manualMemberRelationship" name="relationship" class="glass-select form-select" required>
                 <option value="">Select relationship</option>
+                <option value="Member">Member</option>
                 <option value="Spouse">Spouse</option>
                 <option value="Child">Child</option>
                 <option value="Parent">Parent</option>
@@ -614,17 +763,19 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content glass-modal">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-people-fill me-2"></i>Edit All Household Members</h5>
+        <h5 class="modal-title"><i class="bi bi-people-fill me-2"></i>Edit Household Member Relationships</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <p class="small opacity-75">Any household member can edit relationships and remove members. Assign Head to exactly one household member before removing them.</p>
         <form id="bulkEditMembersForm">
           <div class="table-responsive">
             <table class="glass-table">
               <thead>
                 <tr>
                   <th style="width: 50%;">Name</th>
-                  <th style="width: 50%;">Relationship</th>
+                  <th style="width: 35%;">Relationship</th>
+                  <th style="width: 15%;">Remove</th>
                 </tr>
               </thead>
               <tbody id="bulkEditTableBody">
@@ -637,40 +788,6 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-glass-primary" id="saveBulkEditBtn" onclick="submitBulkEdit()">Update All Members</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Member Modal -->
-<div class="modal fade" id="editMemberModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content glass-modal">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Member Details</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editMemberForm">
-          <input type="hidden" id="editMemberId" name="member_id">
-          <div class="mb-3">
-            <label class="form-label-glass">Relationship <span class="text-danger">*</span></label>
-            <select class="glass-select form-select" id="editRelationship" name="relationship" required>
-              <option value="Spouse">Spouse</option>
-              <option value="Child">Child</option>
-              <option value="Parent">Parent</option>
-              <option value="Sibling">Sibling</option>
-              <option value="Grandparent">Grandparent</option>
-              <option value="Grandchild">Grandchild</option>
-              <option value="Relative">Other Relative</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-glass-primary" onclick="updateMemberDetails()">Update Member</button>
       </div>
     </div>
   </div>
@@ -969,6 +1086,12 @@ if (btnCreateHouseholdModal) {
     new bootstrap.Modal(document.getElementById('householdFormModal')).show();
   });
 }
+const btnCreateHouseholdNoHousehold = document.getElementById('btnCreateHouseholdNoHousehold');
+if (btnCreateHouseholdNoHousehold) {
+  btnCreateHouseholdNoHousehold.addEventListener('click', () => {
+    new bootstrap.Modal(document.getElementById('householdFormModal')).show();
+  });
+}
 
 const btnEditHousehold = document.getElementById('btnEditHousehold');
 if (btnEditHousehold) {
@@ -995,6 +1118,36 @@ const addManualMemberBtn = document.getElementById('addManualMemberBtn');
 if (addManualMemberBtn) {
   addManualMemberBtn.addEventListener('click', () => {
     new bootstrap.Modal(document.getElementById('addManualMemberModal')).show();
+  });
+}
+
+const addCreateHouseholdMemberBtn = document.getElementById('addCreateHouseholdMember');
+const createHouseholdMemberRows = document.getElementById('createHouseholdMemberRows');
+let createHouseholdMemberIndex = 0;
+
+if (addCreateHouseholdMemberBtn && createHouseholdMemberRows) {
+  addCreateHouseholdMemberBtn.addEventListener('click', () => {
+    const template = document.getElementById('createHouseholdMemberTemplate');
+    const row = template.content.firstElementChild.cloneNode(true);
+    const index = createHouseholdMemberIndex++;
+
+    row.querySelectorAll('[data-field]').forEach((control) => {
+      control.name = `household_members[${index}][${control.dataset.field}]`;
+    });
+
+    const typeSelect = row.querySelector('[data-field="type"]');
+    typeSelect.addEventListener('change', () => {
+      row.querySelectorAll('[data-member-mode]').forEach((section) => {
+        const active = section.dataset.memberMode === typeSelect.value;
+        section.classList.toggle('d-none', !active);
+        section.querySelectorAll('[data-field]').forEach((control) => {
+          control.disabled = !active;
+        });
+      });
+    });
+
+    row.querySelector('.remove-create-household-member').addEventListener('click', () => row.remove());
+    createHouseholdMemberRows.appendChild(row);
   });
 }
 
@@ -1045,32 +1198,39 @@ if (addManualMemberForm) {
 }
 
 // Add member by account
-function addMemberByAccount() {
-  const formData = new FormData(document.getElementById('addMemberForm'));
-  fetch('{{ route("resident.household.add-member") }}', {
-    method: 'POST',
-    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
-    body: formData
-   }).then(response => {
-     return response.json().catch(() => {
-       return response.text().then(text => {
-         console.error('Response is not JSON:', text);
-         throw new Error('Invalid JSON response from server: ' + text.substring(0, 200));
-       });
-     }).then(data => ({response, data}));
-   }).then(({response, data}) => {
-    if (response.ok) {
-      bootstrap.Modal.getInstance(document.getElementById('addMemberModal')).hide();
-      document.getElementById('addMemberForm').reset();
-      showToast(data.message || 'Member added successfully!');
-      setTimeout(() => { location.reload(); }, 2000);
-    } else {
-       showToast(data.message || 'Failed to add member', 'danger');
-     }
-   }).catch((error) => {
-     console.error('Fetch error:', error);
-     showToast('An error occurred: ' + error.message, 'danger');
-   });
+async function addMemberByAccount() {
+  const form = document.getElementById('addMemberForm');
+  if (!form.reportValidity()) return;
+  const button = document.querySelector('#addMemberModal .modal-footer .btn-glass-primary');
+  const originalText = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Sending...';
+
+  try {
+    const formData = new FormData(form);
+    const response = await fetch('{{ route("resident.household.add-member") }}', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json'
+      },
+      body: formData
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      const validationErrors = Object.values(data.errors || {}).flat();
+      throw new Error(validationErrors.join(' ') || data.message || 'Failed to send invitation.');
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('addMemberModal')).hide();
+    form.reset();
+    showToast(data.message || 'Household invitation sent.');
+    setTimeout(() => location.reload(), 1200);
+  } catch (error) {
+    showToast(error.message, 'danger');
+    button.disabled = false;
+    button.innerHTML = originalText;
+  }
 }
 
 // Join household request
@@ -1106,6 +1266,10 @@ if (householdForm) householdForm.addEventListener('submit', function(e) {
   const formData = new FormData(this);
   const url = this.action;
   const method = this.method;
+  const submitButton = document.querySelector('button[form="householdForm"][type="submit"]');
+  const originalButtonText = submitButton.innerHTML;
+  submitButton.disabled = true;
+  submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
 
     fetch(url, {
       method: method,
@@ -1124,14 +1288,19 @@ if (householdForm) householdForm.addEventListener('submit', function(e) {
     }).then(({response, data}) => {
       if (response.ok) {
         bootstrap.Modal.getInstance(document.getElementById('householdFormModal')).hide();
-        showToast('Household updated successfully!');
+        showToast(data.message || 'Household saved successfully!');
         setTimeout(() => { location.reload(); }, 2000);
       } else {
-        showToast(data.message || 'Failed to save household', 'danger');
+        const validationErrors = Object.values(data.errors || {}).flat();
+        showToast(validationErrors.join(' ') || data.message || 'Failed to save household', 'danger');
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
       }
     }).catch((error) => {
       console.error('Fetch error:', error);
       showToast('An error occurred: ' + error.message, 'danger');
+      submitButton.disabled = false;
+      submitButton.innerHTML = originalButtonText;
     });
 });
 
@@ -1145,27 +1314,75 @@ function openBulkEditModal() {
         row.innerHTML = `
             <td class="align-middle">
                 <input type="hidden" name="members[${index}][id]" value="${member.id}">
-                <span class="fw-bold">${member.first_name} ${member.last_name}</span>
+                <span class="fw-bold">${escapeHouseholdMemberText(member.first_name)} ${escapeHouseholdMemberText(member.last_name)}</span>
             </td>
             <td class="align-middle">
-                ${member.relationship === 'Head' ? `
-                    <input type="hidden" name="members[${index}][relationship]" value="Head">
-                    <span class="badge badge-glass-secondary" style="font-size:0.75rem; padding:6px 12px; border-radius:50px; background: rgba(13,110,253,0.25); border: 1px solid rgba(13,110,253,0.4); color: #cfe2ff;">Head</span>
-                ` : `
-                    <select class="glass-select form-select form-select-sm" style="padding-top:6px; padding-bottom:6px; height:auto;" name="members[${index}][relationship]" required>
+                <select class="glass-select form-select form-select-sm" style="padding-top:6px; padding-bottom:6px; height:auto;" name="members[${index}][relationship]" required>
+                        <option value="Head" ${member.relationship === 'Head' ? 'selected' : ''}>Head</option>
+                        <option value="Member" ${member.relationship === 'Member' ? 'selected' : ''}>Member</option>
                         <option value="Spouse" ${member.relationship === 'Spouse' ? 'selected' : ''}>Spouse</option>
                         <option value="Child" ${member.relationship === 'Child' ? 'selected' : ''}>Child</option>
                         <option value="Parent" ${member.relationship === 'Parent' ? 'selected' : ''}>Parent</option>
                         <option value="Sibling" ${member.relationship === 'Sibling' ? 'selected' : ''}>Sibling</option>
+                        <option value="Grandparent" ${member.relationship === 'Grandparent' ? 'selected' : ''}>Grandparent</option>
+                        <option value="Grandchild" ${member.relationship === 'Grandchild' ? 'selected' : ''}>Grandchild</option>
                         <option value="Relative" ${member.relationship === 'Relative' ? 'selected' : ''}>Relative</option>
                         <option value="Other" ${member.relationship === 'Other' ? 'selected' : ''}>Other</option>
-                    </select>`}
+                </select>
+            </td>
+            <td class="align-middle text-center">
+                <button type="button" class="btn btn-glass-danger btn-sm"
+                    data-member-id="${Number(member.id)}"
+                    data-member-name="${escapeHouseholdMemberText(member.first_name)} ${escapeHouseholdMemberText(member.last_name)}"
+                    ${member.relationship === 'Head' || Number(member.resident_id) === Number({{ $resident->id }}) ? 'disabled title="Transfer Head first; you cannot remove your own membership."' : ''}>
+                    <i class="bi bi-person-dash me-1"></i>Remove
+                </button>
             </td>
         `;
         tbody.appendChild(row);
     });
 
+    tbody.querySelectorAll('button[data-member-id]:not(:disabled)').forEach(button => {
+        button.addEventListener('click', () => {
+            removeHouseholdMember(Number(button.dataset.memberId), button.dataset.memberName);
+        });
+    });
+
     new bootstrap.Modal(document.getElementById('bulkEditMembersModal')).show();
+}
+
+function escapeHouseholdMemberText(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[character]));
+}
+
+async function removeHouseholdMember(memberId, memberName) {
+    if (!confirm(`Remove ${memberName} from this household?`)) return;
+
+    try {
+        const response = await fetch(`/resident/household/member/${encodeURIComponent(memberId)}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            const validationErrors = Object.values(data.errors || {}).flat();
+            throw new Error(validationErrors.join(' ') || data.message || 'Unable to remove household member.');
+        }
+
+        showToast(data.message || 'Household member removed.');
+        setTimeout(() => location.reload(), 1200);
+    } catch (error) {
+        showToast(error.message, 'danger');
+    }
 }
 
 function submitBulkEdit() {
@@ -1181,7 +1398,14 @@ function submitBulkEdit() {
             'Accept': 'application/json'
         },
         body: new URLSearchParams([...formData, ['_method', 'PUT']])
-    }).then(response => response.json()).then(data => {
+    }).then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+            const validationErrors = Object.values(data.errors || {}).flat();
+            throw new Error(validationErrors.join(' ') || data.message || 'Error updating household members.');
+        }
+        return data;
+    }).then(data => {
         if (data.success) {
             showToast(data.message);
             setTimeout(() => location.reload(), 2000);
@@ -1192,10 +1416,35 @@ function submitBulkEdit() {
         }
     }).catch(error => {
         console.error('Error:', error);
-        showToast('An error occurred', 'danger');
+        showToast(error.message || 'An error occurred', 'danger');
         btn.disabled = false;
         btn.innerHTML = 'Update All Members';
     });
+}
+
+async function respondToHouseholdInvitation(requestId, action) {
+    const actionLabel = action === 'approve' ? 'accept' : 'decline';
+    if (!confirm(`Are you sure you want to ${actionLabel} this household invitation?`)) return;
+
+    try {
+        const response = await fetch(`/resident/household/request/${encodeURIComponent(requestId)}/${action}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            const validationErrors = Object.values(data.errors || {}).flat();
+            throw new Error(validationErrors.join(' ') || data.message || `Unable to ${actionLabel} invitation.`);
+        }
+
+        showToast(data.message || `Invitation ${actionLabel}ed.`);
+        setTimeout(() => location.reload(), 1200);
+    } catch (error) {
+        showToast(error.message, 'danger');
+    }
 }
 
 // Approve or reject join request

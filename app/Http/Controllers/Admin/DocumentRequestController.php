@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DocumentRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentRequest;
 use App\Models\DocumentType;
@@ -45,7 +46,7 @@ class DocumentRequestController extends Controller
             'fee_amount' => $fee,
             'purpose' => $data['purpose'] ?? null,
             'remarks' => $data['remarks'] ?? null,
-            'status' => 'released',
+            'status' => DocumentRequestStatus::Pickup->value,
         ]);
 
 
@@ -188,7 +189,11 @@ class DocumentRequestController extends Controller
                         $qq->where('name','like',"%{$q}%");
                     });
             })
-            ->orderBy('id','desc')
+            ->orderByRaw("CASE WHEN status = 'pending' THEN 0 WHEN status = 'pickup' THEN 1 ELSE 2 END")
+            ->orderByRaw("CASE WHEN status = 'pending' THEN created_at END ASC")
+            ->orderByRaw("CASE WHEN status <> 'pending' THEN created_at END DESC")
+            ->orderByRaw("CASE WHEN status = 'pending' THEN id END ASC")
+            ->orderByRaw("CASE WHEN status <> 'pending' THEN id END DESC")
             ->paginate(15);
 
         return response()->json([

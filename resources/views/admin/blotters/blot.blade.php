@@ -164,7 +164,7 @@
 
 
         <div class="full">
-          <label class="small">Narrative</label>
+          <label class="small">Statement</label>
           <textarea id="c_narrative" placeholder="Write incident details here..."></textarea>
         </div>
 
@@ -243,7 +243,7 @@
         </div>
 
         <div class="full">
-          <label class="small">Narrative</label>
+          <label class="small">Statement</label>
           <textarea id="e_narrative"></textarea>
         </div>
 

@@ -173,11 +173,12 @@
                 </div>
               </div>
               <span class="badge-glass 
-                @if($request->status === 'released') badge-glass-success
-                @elseif($request->status === 'pending') badge-glass-warning
-                @elseif($request->status === 'cancelled') badge-glass-secondary
+                @if($request->statusEnum()->value === 'completed') badge-glass-success
+                @elseif($request->statusEnum()->value === 'pending') badge-glass-warning
+                @elseif($request->statusEnum()->value === 'pickup') badge-glass-info
+                @elseif(in_array($request->statusEnum()->value, ['cancelled', 'rejected'], true)) badge-glass-secondary
                 @else badge-glass-secondary @endif">
-                {{ ucfirst($request->status ?? 'pending') }}
+                {{ $request->statusEnum()->label() }}
               </span>
             </div>
             @endforeach
@@ -320,8 +321,10 @@ document.getElementById('saveProfileBtn').addEventListener('click', async functi
             <select class="glass-select form-select" id="docStatusFilter" onchange="filterDocs()">
               <option value="">All Status</option>
               <option value="pending">Pending</option>
-              <option value="released">Released</option>
+              <option value="completed">Completed</option>
+              <option value="pickup">For Pickup</option>
               <option value="cancelled">Cancelled</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
           <div class="col-md-2">
@@ -342,7 +345,7 @@ document.getElementById('saveProfileBtn').addEventListener('click', async functi
             </thead>
             <tbody id="docsTableBody">
               @forelse($documentRequests as $doc)
-              <tr class="doc-row" data-status="{{ $doc->status }}" data-type="{{ strtolower($doc->documentType?->name ?? '') }}">
+              <tr class="doc-row" data-status="{{ $doc->statusEnum()->value }}" data-type="{{ strtolower($doc->documentType?->name ?? '') }}">
                 <td>
                   <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-file-earmark-text text-primary"></i>
@@ -352,11 +355,12 @@ document.getElementById('saveProfileBtn').addEventListener('click', async functi
                 <td>{{ $doc->created_at->format('M d, Y') }}</td>
                 <td>
                   <span class="badge-glass 
-                    @if($doc->status === 'released') badge-glass-success
-                    @elseif($doc->status === 'pending') badge-glass-warning
-                    @elseif($doc->status === 'cancelled') badge-glass-secondary
+                    @if($doc->statusEnum()->value === 'completed') badge-glass-success
+                    @elseif($doc->statusEnum()->value === 'pending') badge-glass-warning
+                    @elseif($doc->statusEnum()->value === 'pickup') badge-glass-info
+                    @elseif(in_array($doc->statusEnum()->value, ['cancelled', 'rejected'], true)) badge-glass-secondary
                     @else badge-glass-secondary @endif">
-                    {{ ucfirst($doc->status ?? 'pending') }}
+                    {{ $doc->statusEnum()->label() }}
                   </span>
                 </td>
                 <td><code>{{ $doc->control_no ?? '-' }}</code></td>

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "deploy": {
+    "aptPackages": [
+      "...",
+      "libreoffice-writer",
+      "fonts-liberation",
+      "fonts-dejavu-core"
+    ],
+    "variables": {
+      "LIBREOFFICE_BINARY": "/usr/bin/soffice"
+    }
+  }
+}

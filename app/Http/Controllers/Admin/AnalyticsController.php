@@ -1051,7 +1051,7 @@ if (in_array('users-audit', $selectedSections, true)) {
 
 
         // Approval rate
-        $totalProcessed = (clone $baseQuery)->whereIn('status', ['approved', 'released'])->count();
+        $totalProcessed = (clone $baseQuery)->whereIn('status', ['approved', 'completed', 'released'])->count();
         $totalRequests = (clone $baseQuery)->count();
         $approvalRate = $totalRequests > 0 ? round(($totalProcessed / $totalRequests) * 100) : 0;
 

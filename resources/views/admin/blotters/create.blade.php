@@ -57,7 +57,7 @@
                       </div>
                     </div>
                     <div class="col-12">
-                      <label class="form-label small text-muted fw-bold">Narrative <span class="text-danger">*</span></label>
+                      <label class="form-label small text-muted fw-bold">Statement <span class="text-danger">*</span></label>
                       <textarea name="narrative" rows="6" class="form-control" placeholder="Describe the incident..." required></textarea>
                     </div>
                     <div class="col-12">

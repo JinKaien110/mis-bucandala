@@ -40,7 +40,7 @@
       </a>
       @if($status === 'referred')
         <a class="btn btn-outline-dark" href="{{ route('admin.cases.cert_to_file_action.docx', $case) }}">
-          <i class="bi bi-file-earmark-word me-1"></i> Download Certification
+          <i class="bi bi-file-earmark-pdf me-1"></i> Download Certification PDF
         </a>
       @endif
     </div>

@@ -211,7 +211,7 @@
                                     <i class="bi bi-save me-1"></i>Save Details
                                 </button>
                                 <button type="submit" name="_action" value="download_patawag" class="btn btn-warning">
-                                    <i class="bi bi-file-earmark-word me-1"></i>Save &amp; Download Patawag
+                                    <i class="bi bi-file-earmark-pdf me-1"></i>Save &amp; Download Patawag PDF
                                 </button>
                             </div>
                         </div>
@@ -236,7 +236,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="small text-muted text-uppercase fw-bold d-block mb-2">Narrative</label>
+                    <label class="small text-muted text-uppercase fw-bold d-block mb-2">Statement</label>
                     <div class="p-3 bg-light rounded border">
                         {{ $blotter->narrative }}
                     </div>

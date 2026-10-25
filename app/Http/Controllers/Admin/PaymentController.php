@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DocumentRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\DocumentRequest;
@@ -146,10 +147,24 @@ class PaymentController extends Controller
 
     public function markAsPaid(Payment $payment)
     {
-        $payment->update([
-            'status' => 'success',
-            'paid_at' => now(),
-        ]);
+        DB::transaction(function () use ($payment) {
+            $lockedPayment = Payment::query()
+                ->lockForUpdate()
+                ->findOrFail($payment->id);
+
+            $lockedPayment->update([
+                'status' => 'success',
+                'paid_at' => now(),
+            ]);
+
+            if ($lockedPayment->document_request_id) {
+                $documentRequest = DocumentRequest::query()
+                    ->lockForUpdate()
+                    ->find($lockedPayment->document_request_id);
+
+                $documentRequest?->update(['status' => DocumentRequestStatus::Completed->value]);
+            }
+        });
 
         return redirect()
             ->route('admin.payments.show', $payment)

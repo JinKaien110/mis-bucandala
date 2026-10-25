@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CaseFile;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use PhpOffice\PhpWord\TemplateProcessor;
+use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\Process\Process;
 
 class CasePrintController extends Controller
 {
@@ -74,16 +78,94 @@ class CasePrintController extends Controller
         $processor->setValue('barangay_captain', 'HON. JUAN DELA CRUZ');
         $processor->setValue('barangay_secretary', 'MARIA SANTOS');
 
-        // 3) save temp & download
-        $filename = 'CERT-TO-FILE-ACTION-' . ($case->case_no ?? Str::random(8)) . '.docx';
-        $outPath = storage_path('app/temp/' . $filename);
+        $tempDirectory = storage_path('app/temp');
+        File::ensureDirectoryExists($tempDirectory);
+        $fileToken = Str::uuid()->toString();
+        $filename = 'CERT-TO-FILE-ACTION-' . Str::slug($case->case_no ?? Str::random(8)) . '-' . $fileToken;
+        $docxPath = $tempDirectory . DIRECTORY_SEPARATOR . $filename . '.docx';
+        $pdfPath = $tempDirectory . DIRECTORY_SEPARATOR . $filename . '.pdf';
+        $profilePath = $tempDirectory . DIRECTORY_SEPARATOR . 'lo-profile-' . $fileToken;
+        $processor->saveAs($docxPath);
 
-        if (!is_dir(storage_path('app/temp'))) {
-            mkdir(storage_path('app/temp'), 0777, true);
+        $configuredBinary = config('services.libreoffice.binary');
+        $binaryCandidates = array_filter([
+            is_string($configuredBinary) ? $configuredBinary : null,
+            PHP_OS_FAMILY === 'Windows' ? 'C:\\Program Files\\LibreOffice\\program\\soffice.com' : null,
+            PHP_OS_FAMILY === 'Windows' ? 'C:\\Program Files\\LibreOffice\\program\\soffice.exe' : null,
+            PHP_OS_FAMILY === 'Windows' ? 'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.com' : null,
+            PHP_OS_FAMILY === 'Windows' ? 'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe' : null,
+        ]);
+        $binary = null;
+        foreach ($binaryCandidates as $candidate) {
+            if (is_file($candidate)) {
+                $binary = $candidate;
+                break;
+            }
+
+            $binary = (new ExecutableFinder())->find($candidate);
+            if ($binary) {
+                break;
+            }
         }
 
-        $processor->saveAs($outPath);
+        if (!$binary) {
+            File::delete($docxPath);
 
-        return response()->download($outPath)->deleteFileAfterSend(true);
+            return back()->with('error', 'LibreOffice is unavailable, so the certification could not be converted to PDF.');
+        }
+
+        $process = null;
+        try {
+            File::ensureDirectoryExists($profilePath);
+            $profileUri = PHP_OS_FAMILY === 'Windows'
+                ? 'file:///' . str_replace('\\', '/', $profilePath)
+                : 'file://' . $profilePath;
+            $process = new Process([
+                $binary,
+                '--headless',
+                '--norestore',
+                '--nolockcheck',
+                '--nodefault',
+                '--nofirststartwizard',
+                '-env:UserInstallation=' . $profileUri,
+                '--convert-to',
+                'pdf:writer_pdf_Export',
+                '--outdir',
+                $tempDirectory,
+                $docxPath,
+            ], dirname($binary), array_filter([
+                'HOME' => PHP_OS_FAMILY === 'Windows' ? null : $tempDirectory,
+                'TEMP' => PHP_OS_FAMILY === 'Windows' ? $tempDirectory : null,
+                'TMP' => PHP_OS_FAMILY === 'Windows' ? $tempDirectory : null,
+            ]));
+            $process->setTimeout(120);
+            $process->run();
+
+            if (!$process->isSuccessful() || !is_file($pdfPath) || filesize($pdfPath) === 0) {
+                throw new \RuntimeException(sprintf(
+                    'LibreOffice conversion failed (exit code: %s; stdout: %s; stderr: %s).',
+                    $process->getExitCode() ?? 'unknown',
+                    trim($process->getOutput()),
+                    trim($process->getErrorOutput())
+                ));
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Case certification PDF conversion failed.', [
+                'case_id' => $case->id,
+                'converter_binary' => $binary,
+                'exit_code' => $process?->getExitCode(),
+                'stdout' => $process?->getOutput(),
+                'stderr' => $process?->getErrorOutput(),
+                'exception' => $exception,
+            ]);
+            File::delete($pdfPath);
+
+            return back()->with('error', 'The case certification could not be converted to PDF. Check the server logs and LibreOffice installation.');
+        } finally {
+            File::delete($docxPath);
+            File::deleteDirectory($profilePath);
+        }
+
+        return response()->download($pdfPath, $filename . '.pdf')->deleteFileAfterSend(true);
     }
 }
