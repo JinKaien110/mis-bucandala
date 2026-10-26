@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Resident;
 
 use App\Http\Controllers\Controller;
+use App\Enums\DocumentRequestStatus;
 use App\Models\Blotter;
 use App\Models\DocumentRequest;
 use App\Models\DocumentType;
@@ -193,6 +194,64 @@ class PortalController extends Controller
         return redirect()
             ->route('resident.document-requests')
             ->with('success', "Your request was submitted. Control No: {$documentRequest->control_no} | Fee: {$feeLabel} | Please claim your document request at the barangay hall with your ID and pay accordingly");
+    }
+
+    public function confirmDocumentRequestReceived(Request $request, DocumentRequest $documentRequest)
+    {
+        $resident = $this->residentFor($request);
+
+        DB::transaction(function () use ($documentRequest, $resident) {
+            $lockedRequest = DocumentRequest::query()
+                ->where('resident_id', $resident->id)
+                ->lockForUpdate()
+                ->findOrFail($documentRequest->id);
+
+            abort_unless(
+                $lockedRequest->statusEnum() === DocumentRequestStatus::ForPickup,
+                409,
+                'This document request is not awaiting pickup confirmation.'
+            );
+
+            $lockedRequest->update([
+                'status' => DocumentRequestStatus::Completed->value,
+            ]);
+        });
+
+        return redirect()
+            ->route('resident.document-requests')
+            ->with('success', 'Receipt confirmed. Your document request is now completed.');
+    }
+
+    public function cancelDocumentRequest(Request $request, DocumentRequest $documentRequest)
+    {
+        $resident = $this->residentFor($request);
+
+        DB::transaction(function () use ($documentRequest, $resident) {
+            $lockedRequest = DocumentRequest::query()
+                ->where('resident_id', $resident->id)
+                ->lockForUpdate()
+                ->findOrFail($documentRequest->id);
+
+            abort_unless(
+                $lockedRequest->statusEnum() === DocumentRequestStatus::Pending,
+                409,
+                'Only pending document requests can be cancelled.'
+            );
+
+            $lockedRequest->update([
+                'status' => DocumentRequestStatus::Cancelled->value,
+            ]);
+
+            $lockedRequest->payment()
+                ->where('status', 'pending')
+                ->lockForUpdate()
+                ->first()
+                ?->update(['status' => 'cancelled']);
+        });
+
+        return redirect()
+            ->route('resident.document-requests')
+            ->with('success', 'Your document request was cancelled.');
     }
 
     private function residentFor(Request $request): Resident

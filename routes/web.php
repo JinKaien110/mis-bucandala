@@ -133,6 +133,8 @@ Route::middleware(['auth', 'role:resident'])->group(function () {
     Route::get('/resident/cases', [PortalController::class, 'cases'])->name('resident.cases');
     Route::get('/resident/document-requests', [PortalController::class, 'documentRequests'])->name('resident.document-requests');
     Route::post('/resident/document-requests', [PortalController::class, 'storeDocumentRequest'])->name('resident.document-requests.store');
+    Route::post('/resident/document-requests/{documentRequest}/received', [PortalController::class, 'confirmDocumentRequestReceived'])->name('resident.document-requests.received');
+    Route::post('/resident/document-requests/{documentRequest}/cancel', [PortalController::class, 'cancelDocumentRequest'])->name('resident.document-requests.cancel');
 
     // Pets
     Route::get('/resident/pets', [App\Http\Controllers\Resident\PetController::class, 'index'])->name('resident.pets');

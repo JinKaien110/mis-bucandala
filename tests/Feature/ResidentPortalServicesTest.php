@@ -145,6 +145,73 @@ class ResidentPortalServicesTest extends TestCase
         $this->assertSame('pending', Payment::query()->firstOrFail()->status);
     }
 
+    public function test_resident_can_cancel_their_pending_document_request_and_pending_payment(): void
+    {
+        [$user, $resident] = $this->createResident('cancel-document-request@example.test');
+        $documentType = DocumentType::create([
+            'name' => 'Barangay Clearance',
+            'fee' => 125,
+            'status' => 'active',
+        ]);
+        $documentRequest = DocumentRequest::create([
+            'control_no' => 'BRGY-2026-009001',
+            'resident_id' => $resident->id,
+            'document_type_id' => $documentType->id,
+            'purpose' => 'Employment',
+            'fee_amount' => 125,
+            'status' => 'pending',
+            'requested_via' => 'resident',
+        ]);
+        $payment = Payment::create([
+            'document_request_id' => $documentRequest->id,
+            'amount' => 125,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('resident.document-requests.cancel', $documentRequest))
+            ->assertRedirect(route('resident.document-requests'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('document_requests', [
+            'id' => $documentRequest->id,
+            'status' => 'cancelled',
+        ]);
+        $this->assertDatabaseHas('payments', [
+            'id' => $payment->id,
+            'status' => 'cancelled',
+        ]);
+    }
+
+    public function test_resident_cannot_cancel_another_residents_document_request(): void
+    {
+        [$user] = $this->createResident('non-owner-cancel@example.test');
+        [, $owner] = $this->createResident('document-request-owner@example.test');
+        $documentType = DocumentType::create([
+            'name' => 'Barangay Clearance',
+            'fee' => 0,
+            'status' => 'active',
+        ]);
+        $documentRequest = DocumentRequest::create([
+            'control_no' => 'BRGY-2026-009002',
+            'resident_id' => $owner->id,
+            'document_type_id' => $documentType->id,
+            'purpose' => 'Employment',
+            'fee_amount' => 0,
+            'status' => 'pending',
+            'requested_via' => 'resident',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('resident.document-requests.cancel', $documentRequest))
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('document_requests', [
+            'id' => $documentRequest->id,
+            'status' => 'pending',
+        ]);
+    }
+
     public function test_document_request_page_limits_types_and_accepts_each_supported_purpose(): void
     {
         [$user] = $this->createResident('purpose-options@example.test');

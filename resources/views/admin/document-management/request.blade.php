@@ -59,6 +59,34 @@
 
   <!-- Table -->
   <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-0 px-4 pt-4 pb-0">
+      <ul class="nav nav-pills nav-fill flex-wrap gap-2" id="documentRequestStatusTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active rounded-pill px-3 py-2" type="button" data-status="pending">
+            <i class="bi bi-hourglass-split me-1"></i>Pending
+            <span class="badge bg-warning text-dark ms-1" data-status-count="pending">0</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link rounded-pill px-3 py-2" type="button" data-status="pickup">
+            <i class="bi bi-bag-check me-1"></i>For Pickup
+            <span class="badge bg-info ms-1" data-status-count="pickup">0</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link rounded-pill px-3 py-2" type="button" data-status="completed">
+            <i class="bi bi-check-circle me-1"></i>Completed
+            <span class="badge bg-success ms-1" data-status-count="completed">0</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link rounded-pill px-3 py-2" type="button" data-status="cancelled">
+            <i class="bi bi-x-circle me-1"></i>Cancelled
+            <span class="badge bg-secondary ms-1" data-status-count="cancelled">0</span>
+          </button>
+        </li>
+      </ul>
+    </div>
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -141,6 +169,8 @@
   const tbody = document.getElementById('tbody');
   const msgBox = document.getElementById('message');
   const pagination = document.getElementById('document-requests-pagination');
+  const statusTabs = document.getElementById('documentRequestStatusTabs');
+  let activeStatus = 'pending';
 
   // Initialize Bootstrap Modal
   const createModal = new bootstrap.Modal(document.getElementById('createModal'));
@@ -309,7 +339,7 @@
     tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><div class="spinner-border text-primary mb-2" role="status"></div><div class="small">Loading...</div></td></tr>`;
 
     const q = document.getElementById('search').value.trim();
-    const params = new URLSearchParams({ page });
+    const params = new URLSearchParams({ page, status: activeStatus });
     if (q) params.set('q', q);
     const url = `/api/v1/document-requests?${params}`;
 
@@ -322,6 +352,10 @@
     }
 
     const items = data.document_requests || [];
+    Object.entries(data.status_counts || {}).forEach(([status, count]) => {
+      const badge = statusTabs.querySelector(`[data-status-count="${status}"]`);
+      if (badge) badge.textContent = count;
+    });
     renderPagination(data.pagination);
     if (!items.length) {
       tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-file-earmark-x fs-1 d-block mb-2 opacity-25"></i>No requests found.</td></tr>`;
@@ -351,10 +385,7 @@
       const downloadAction = status === 'pending' || status === 'pickup'
         ? `<button class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center print-pdf-button" style="width: 32px; height: 32px;" type="button" data-url="/admin/document-requests/${encodeURIComponent(x.id)}/print-complete" title="Download and print PDF" aria-label="Download and print PDF">
              <i class="bi bi-file-earmark-pdf"></i>
-           </button>
-           ${status === 'pending' ? `<button class="btn btn-sm btn-outline-primary rounded-circle d-flex align-items-center justify-content-center set-pickup-button" style="width: 32px; height: 32px;" type="button" data-url="/admin/document-requests/${encodeURIComponent(x.id)}/pickup" title="Set for pickup" aria-label="Set for pickup">
-             <i class="bi bi-bag-check"></i>
-           </button>` : ''}`
+           </button>`
         : status === 'completed'
           ? `<a class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="/admin/document-requests/${encodeURIComponent(x.id)}/download" title="Download DOCX">
              <i class="bi bi-file-earmark-word"></i>
@@ -394,6 +425,17 @@
     if (!link) return;
     event.preventDefault();
     loadRequests(Number(link.dataset.page));
+  });
+
+  statusTabs.addEventListener('click', event => {
+    const button = event.target.closest('button[data-status]');
+    if (!button) return;
+
+    activeStatus = button.dataset.status;
+    statusTabs.querySelectorAll('button[data-status]').forEach(tab => {
+      tab.classList.toggle('active', tab === button);
+    });
+    loadRequests(1);
   });
 
   // Archive form handling
@@ -438,25 +480,23 @@
 
   tbody.addEventListener('click', async (event) => {
     const printButton = event.target.closest('.print-pdf-button');
-    const pickupButton = event.target.closest('.set-pickup-button');
-    if (!printButton && !pickupButton) return;
+    if (!printButton) return;
 
-    const button = printButton || pickupButton;
-    if (printButton && !confirm('Generate, download, and print the PDF? This will set the request for pickup and create a pending payment entry.')) return;
-    if (pickupButton && !confirm('Set this document request for pickup?')) return;
+    const button = printButton;
+    if (!confirm('Generate, download, and print the PDF? This will set the request for pickup and create a pending payment entry.')) return;
 
-    const printWindow = printButton ? window.open('', '_blank') : null;
-    if (printButton && !printWindow) {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
       showMsg({ success: false, message: 'Allow pop-ups to open the PDF print window, then try again.' });
       return;
     }
     button.disabled = true;
     try {
       const response = await fetch(button.dataset.url, {
-        method: printButton ? 'POST' : 'PATCH',
+        method: 'POST',
         headers: {
           'X-CSRF-TOKEN': '{{ csrf_token() }}',
-          'Accept': printButton ? 'application/pdf' : 'application/json'
+          'Accept': 'application/pdf'
         },
         credentials: 'same-origin'
       });
@@ -472,40 +512,33 @@
         throw new Error(errorMessage || `The requested action failed (HTTP ${response.status}).`);
       }
 
-      if (printButton) {
-        const contentType = response.headers.get('Content-Type') || '';
-        if (!contentType.includes('application/pdf')) {
-          throw new Error('The generated document was not a PDF.');
-        }
-        const blob = await response.blob();
-        const pdfUrl = URL.createObjectURL(blob);
-        const disposition = response.headers.get('Content-Disposition') || '';
-        const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] || 'document-request.pdf';
-        const downloadLink = document.createElement('a');
-        downloadLink.href = pdfUrl;
-        downloadLink.download = filename;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        downloadLink.remove();
-
-        if (printWindow) {
-          const iframe = printWindow.document.createElement('iframe');
-          iframe.title = 'Document PDF';
-          iframe.src = pdfUrl;
-          iframe.style.cssText = 'width:100%;height:100%;border:0';
-          printWindow.document.body.style.margin = '0';
-          printWindow.document.body.appendChild(iframe);
-          iframe.addEventListener('load', () => {
-            printWindow.focus();
-            setTimeout(() => printWindow.print(), 500);
-          }, { once: true });
-          printWindow.addEventListener('afterprint', () => URL.revokeObjectURL(pdfUrl), { once: true });
-        }
-        showMsg({ success: true, message: 'PDF downloaded; the print dialog was opened. Request marked completed.' });
-      } else {
-        const data = await response.json();
-        showMsg({ success: true, message: data.message || 'Document request set for pickup.' });
+      const contentType = response.headers.get('Content-Type') || '';
+      if (!contentType.includes('application/pdf')) {
+        throw new Error('The generated document was not a PDF.');
       }
+      const blob = await response.blob();
+      const pdfUrl = URL.createObjectURL(blob);
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] || 'document-request.pdf';
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pdfUrl;
+      downloadLink.download = filename;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+
+      const iframe = printWindow.document.createElement('iframe');
+      iframe.title = 'Document PDF';
+      iframe.src = pdfUrl;
+      iframe.style.cssText = 'width:100%;height:100%;border:0';
+      printWindow.document.body.style.margin = '0';
+      printWindow.document.body.appendChild(iframe);
+      iframe.addEventListener('load', () => {
+        printWindow.focus();
+        setTimeout(() => printWindow.print(), 500);
+      }, { once: true });
+      printWindow.addEventListener('afterprint', () => URL.revokeObjectURL(pdfUrl), { once: true });
+      showMsg({ success: true, message: 'PDF downloaded; the print dialog was opened. Request marked completed.' });
 
       await loadRequests();
       setTimeout(hideMsg, 3500);

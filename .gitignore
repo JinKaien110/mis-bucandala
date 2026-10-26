@@ -29,3 +29,6 @@ Thumbs.db
 /storage/framework/testing/*
 /storage/framework/views/*
 /storage/logs/*
+# Uploaded files
+/storage/app/public/*
+!/storage/app/public/.gitignore

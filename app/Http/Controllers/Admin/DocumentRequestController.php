@@ -170,12 +170,17 @@ class DocumentRequestController extends Controller
 
      public function apiIndex(Request $request)
     {
-        $q = $request->query('q');
+         $validated = $request->validate([
+             'q' => ['nullable', 'string', 'max:255'],
+             'status' => ['nullable', 'in:all,pending,pickup,completed,cancelled,rejected'],
+             'page' => ['nullable', 'integer', 'min:1'],
+         ]);
+         $q = $validated['q'] ?? null;
 
-        $items = DocumentRequest::query()
-            ->notArchived()
-            ->with([
-                'resident:id,first_name,middle_name,last_name,address_line',
+         $query = DocumentRequest::query()
+             ->notArchived()
+             ->with([
+                 'resident:id,first_name,middle_name,last_name,address_line',
                 'documentType:id,name,fee'
             ])
             ->when($q, function ($query) use ($q) {
@@ -188,7 +193,21 @@ class DocumentRequestController extends Controller
                     ->orWhereHas('documentType', function ($qq) use ($q) {
                         $qq->where('name','like',"%{$q}%");
                     });
-            })
+            });
+
+        $statusCounts = (clone $query)
+            ->selectRaw("CASE WHEN status = 'released' THEN 'completed' ELSE status END AS normalized_status, COUNT(*) AS aggregate")
+            ->groupBy('normalized_status')
+            ->pluck('aggregate', 'normalized_status');
+
+        $status = $validated['status'] ?? 'all';
+        if ($status === 'completed') {
+            $query->whereIn('status', ['completed', 'released']);
+        } elseif ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $items = $query
             ->orderByRaw("CASE WHEN status = 'pending' THEN 0 WHEN status = 'pickup' THEN 1 ELSE 2 END")
             ->orderByRaw("CASE WHEN status = 'pending' THEN created_at END ASC")
             ->orderByRaw("CASE WHEN status <> 'pending' THEN created_at END DESC")
@@ -198,6 +217,14 @@ class DocumentRequestController extends Controller
 
         return response()->json([
             'document_requests' => $items->items(),
+            'status_counts' => [
+                'all' => $statusCounts->sum(),
+                'pending' => (int) $statusCounts->get('pending', 0),
+                'pickup' => (int) $statusCounts->get('pickup', 0),
+                'completed' => (int) $statusCounts->get('completed', 0),
+                'cancelled' => (int) $statusCounts->get('cancelled', 0),
+                'rejected' => (int) $statusCounts->get('rejected', 0),
+            ],
             'pagination' => [
                 'current_page' => $items->currentPage(),
                 'last_page' => $items->lastPage(),
